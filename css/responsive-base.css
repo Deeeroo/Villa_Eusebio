@@ -1,0 +1,322 @@
+﻿/*
+  Responsive base
+  ------------------------------------------------------------
+  Global mobile and zoom stabilization rules.
+*/
+
+
+
+/* Global overflow, media, grid, table, modal, and breakpoint stabilization rules. */
+
+/* Safe responsive stabilization patch */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+img, video, iframe, canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+* {
+    min-width: 0;
+}
+
+.container,
+.contact-container,
+.footer-container,
+.main-content,
+.admin-dashboard,
+.booking-wrapper,
+.reviews-container,
+.gallery-modal-content,
+.booking-modal-box,
+.modal-content,
+.modal-card {
+    max-width: 100%;
+}
+
+nav,
+.main-nav,
+.nav-links {
+    flex-wrap: wrap;
+}
+
+.nav-links {
+    display: flex;
+    gap: 14px;
+}
+
+.hero-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.map-card,
+.contact-card,
+.admin-calendar-wrapper,
+.appointments-panel,
+.table-container,
+.owner-login-card,
+.booking-container,
+.calendar-panel,
+.details-panel,
+.gallery-modal-content,
+.booking-modal-box,
+.modal-content,
+.modal-card {
+    width: 100%;
+    max-width: 100%;
+}
+
+.amenities-grid,
+.grid,
+.amenities-grid-modern {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.footer-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.booking-wrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+}
+
+.calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-day,
+.calendar-day-header {
+    min-width: 0;
+}
+
+.option-card,
+.summary-line,
+.booking-modal-row,
+.admin-topbar,
+.admin-userbar,
+.admin-brand,
+.footer-brand,
+.contact-cards,
+.contact-socials,
+.hero-buttons {
+    min-width: 0;
+}
+
+.review-card {
+    width: min(800px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+}
+
+.reviews-container {
+    width: 100%;
+    min-height: calc(100vh - 90px);
+}
+
+.chatbot-box {
+    width: min(600px, calc(100vw - 24px));
+    height: min(820px, calc(100vh - 24px));
+    right: 12px;
+    bottom: 12px;
+}
+
+.booking-modal-box,
+.gallery-modal-content,
+.modal-content,
+.modal-card {
+    width: min(900px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+}
+
+.table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-table,
+.sales-table,
+.reservation-table,
+table {
+    width: 100%;
+}
+
+@media (max-width: 1200px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    nav,
+    .main-nav {
+        padding: 16px 20px;
+    }
+    .amenities-grid,
+    .grid,
+    .amenities-grid-modern {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .booking-wrapper {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin: 120px auto 60px;
+    }
+    .admin-topbar {
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .admin-userbar {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    nav,
+    .main-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+    .nav-links {
+        width: 100%;
+        gap: 10px 14px;
+    }
+    .hero {
+        min-height: auto;
+        padding: 120px 16px 72px;
+    }
+    .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .hero-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+    .amenities-grid,
+    .grid,
+    .amenities-grid-modern,
+    .gallery-grid,
+    .contact-cards,
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+    .contact-cards {
+        display: grid;
+    }
+    .calendar-panel,
+    .details-panel,
+    .booking-container,
+    .owner-login-card,
+    .table-container {
+        padding: 20px;
+    }
+    .calendar-grid {
+        gap: 6px;
+    }
+    .calendar-day,
+    .calendar-day-header {
+        font-size: 0.82rem;
+    }
+    .calendar-day {
+        min-height: 44px;
+    }
+    .option-card,
+    .booking-modal-row,
+    .summary-line,
+    .admin-topbar,
+    .admin-brand,
+    .admin-userbar,
+    .footer-brand,
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .review-card {
+        width: calc(100vw - 24px);
+        padding: 24px 18px;
+    }
+    .reviews-container {
+        min-height: calc(100vh - 76px);
+    }
+    .chatbot-box {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        height: min(760px, calc(100vh - 24px));
+    }
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .filter-bar,
+    .reservation-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 600px) {
+    .container,
+    .contact-container,
+    .footer-container,
+    .main-content,
+    .admin-dashboard,
+    .booking-wrapper {
+        width: calc(100% - 24px);
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .contact-title,
+    .booking-modal-title,
+    .owner-login-card-header h2 {
+        word-break: break-word;
+    }
+    .sales-table,
+    .reservation-table,
+    .admin-table,
+    table {
+        font-size: 12px;
+    }
+    .sales-table th,
+    .sales-table td,
+    .reservation-table th,
+    .reservation-table td,
+    .admin-table th,
+    .admin-table td,
+    table th,
+    table td {
+        white-space: nowrap;
+    }
+    .footer-socials {
+        flex-wrap: wrap;
+    }
+}
+
+

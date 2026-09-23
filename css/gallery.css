@@ -1,0 +1,133 @@
+﻿/*
+  Customer gallery
+  ------------------------------------------------------------
+  Gallery page cards, image effects, and gallery viewing styles.
+*/
+
+
+
+/* Gallery card and image modal styles. */
+
+.polaroid {
+    background: #fffdf8;
+    padding: 0;
+    border: 1px solid rgba(117,132,92,.25);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 26px rgba(48,43,36,0.10);
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.gallery-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    overflow: hidden;
+}
+
+.gallery-modal-content {
+    position: relative;
+    background: #f8f6f1;
+    padding: 24px;
+    max-width: 780px;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+}
+
+.gallery-modal-content img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 16px;
+}
+
+.gallery-modal-content p {
+    font-family: "Brush Script MT", cursive;
+    font-size: 2rem;
+    color: #4a4a4a;
+    margin: 0;
+}
+
+.gallery-close {
+    display: none !important;
+}
+
+
+
+/* Camera flash effect and animated gallery modal entrance and exit. */
+
+/* FLASH EFFECT */
+#cameraFlash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* FLASH ACTIVE */
+.flash-active {
+    animation: flashEffect 0.6s ease;
+}
+
+@keyframes flashEffect {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* MODAL ANIMATION (DROP LIKE POLAROID) */
+.gallery-modal-content {
+    transform: translateY(-200px) scale(0.9);
+    opacity: 0;
+}
+
+/* ACTIVE STATE */
+.gallery-modal.show .gallery-modal-content {
+    animation: polaroidDrop 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes polaroidDrop {
+    0% {
+        transform: translateY(-200px) rotate(-5deg) scale(0.8);
+        opacity: 0;
+    }
+    60% {
+        transform: translateY(20px) rotate(2deg) scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* CLOSE ANIMATION */
+.gallery-modal.closing .gallery-modal-content {
+    animation: polaroidExit 0.5s ease forwards;
+}
+
+@keyframes polaroidExit {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(200px) rotate(5deg);
+        opacity: 0;
+    }
+}
+
+

@@ -1,0 +1,25 @@
+﻿/*
+  Admin button shapes
+  ------------------------------------------------------------
+  Keeps admin buttons square/box-shaped without changing customer buttons.
+*/
+
+body.admin-shell-page .menu-btn,
+body.admin-shell-page .refresh-btn,
+body.admin-shell-page .logout-btn,
+body.admin-shell-page .admin-export-btn,
+body.admin-shell-page .panel-link-btn,
+body.admin-shell-page .modal-btn,
+body.admin-shell-page .filter-toggle-btn,
+body.admin-shell-page .filter-btn,
+body.admin-shell-page .calendar-block-help-btn,
+body.admin-shell-page .calendar-context-menu button,
+body.admin-shell-page .archive-context-menu button,
+body.admin-shell-page .settings-undo-btn,
+body.admin-shell-page .announcement-history-toggle,
+body.admin-shell-page .sales-pay-btn,
+body.admin-shell-page .sales-paid-lock,
+body.admin-shell-page .booking-modal-btn {
+    border-radius: 7px !important;
+}
+

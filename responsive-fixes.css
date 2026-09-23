@@ -1,0 +1,9 @@
+/* Responsive stylesheet entry point.
+   Keep final fixes imported last. */
+
+@import url('./css/responsive-base.css?v=20260606-reschedule2');
+@import url('./css/responsive-customer.css?v=20260606-reschedule2');
+@import url('./css/responsive-chatbot-payment.css?v=20260606-reschedule2');
+@import url('./css/responsive-admin.css?v=20260923-admin-archive-block1');
+@import url('./css/responsive-final-fixes.css?v=20260606-reschedule2');
+@import url('./css/admin-buttons.css?v=20260606-reschedule2');

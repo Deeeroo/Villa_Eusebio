@@ -1,0 +1,572 @@
+﻿/*
+  Customer calendar and booking
+  ------------------------------------------------------------
+  Booking calendar, booking summary, status messages, and booking validation.
+*/
+
+
+
+/* Customer booking form, appointment calendar, stay options, and booking summary styles. */
+
+/* BOOKING PAGE */
+
+.booking-container {
+    max-width: 500px;
+    margin: 80px auto;
+    background: white;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.booking-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.booking-wrapper {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 140px auto 80px;
+    padding: 0 24px;
+    align-items: start;
+}
+
+/* CALENDAR */
+
+.calendar-day {
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FDFBF7;
+    border: 1px solid #EAE6DD;
+    color: var(--charcoal);
+    cursor: pointer;
+}
+
+/* ADMIN TABLE */
+
+table {
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: var(--sage);
+    color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+}
+
+/* FOOTER */
+
+.site-footer {
+    padding: 24px 0;
+    text-align: center;
+    color: var(--gray-text);
+    border-top: 1px solid rgba(138, 154, 127, 0.15);
+    background: var(--off-white);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px)
+{
+    .amenities-grid,
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 768px)
+{
+    .nav-wrap,
+    nav {
+        padding: 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .nav {
+        gap: 12px;
+    }
+    .hero {
+        min-height: auto;
+        padding: 140px 20px 80px;
+    }
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    .amenities-grid,
+    .grid,
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+    .booking-wrapper {
+        grid-template-columns: 1fr;
+        margin: 120px auto 50px;
+        padding: 0 16px;
+    }
+    .calendar-panel,
+    .details-panel {
+        padding: 22px;
+    }
+    .calendar-grid {
+        gap: 6px;
+    }
+    .calendar-day {
+        min-height: 46px;
+        font-size: 0.9rem;
+    }
+    .option-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .option-card .price {
+        margin-left: 28px;
+    }
+}
+
+/* APPOINTMENT PAGE */
+.calendar-panel,
+.details-panel {
+    background: #fff;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid rgba(138,154,127,0.15);
+}
+
+.calendar-panel h2,
+.details-panel h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: var(--charcoal);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header h3 {
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    color: var(--charcoal);
+}
+
+.calendar-header button {
+    width: 42px;
+    height: 42px;
+    border: none;
+    background: var(--sage);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.2s ease;
+}
+
+.calendar-header button:hover {
+    background: var(--sage-dark);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gray-text);
+    padding: 12px 0;
+    letter-spacing: 0.08em;
+}
+
+.calendar-day {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FDFBF7;
+    border: 1px solid #EAE6DD;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-weight: 500;
+}
+
+.calendar-day:hover:not(.booked):not(.empty) {
+    background: rgba(138,154,127,0.12);
+}
+
+.calendar-day.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.calendar-day.selected {
+    background-color: var(--sage);
+    color: white;
+    background: var(--sage);
+    border-color: var(--sage);
+}
+
+.calendar-day.booked {
+    background-color: #D1D1D1;
+    text-decoration: line-through;
+    cursor: not-allowed;
+    background: #D8D8D8;
+    color: #666;
+}
+
+.calendar-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    font-size: 0.9rem;
+    color: var(--gray-text);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.box {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    border: 1px solid #ccc;
+}
+
+.box.available {
+    background: #FDFBF7;
+}
+
+.box.booked {
+    background: #D8D8D8;
+}
+
+.box.selected {
+    background: var(--sage);
+}
+
+.stay-options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.option-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 1px solid rgba(138,154,127,0.18);
+    background: #fff;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.option-card:hover {
+    border-color: var(--sage);
+    background: rgba(138,154,127,0.05);
+}
+
+.option-card input[type="radio"] {
+    accent-color: var(--sage);
+    transform: scale(1.1);
+}
+
+.option-card .info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.option-card .title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--charcoal);
+}
+
+.option-card .time {
+    font-size: 0.8rem;
+    color: var(--gray-text);
+    margin-top: 4px;
+}
+
+.option-card .price {
+    font-weight: 700;
+    color: var(--sage-dark);
+    white-space: nowrap;
+}
+
+.booking-summary {
+    margin: 24px 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    font-size: 0.95rem;
+}
+
+.border-bottom {
+    border-top: 1px solid #eee;
+}
+
+.btn-complete {
+    width: 100%;
+    background: var(--charcoal);
+    color: white;
+    border: none;
+    padding: 16px;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    transition: 0.2s ease;
+}
+
+.btn-complete:hover {
+    background: #222;
+}
+
+.booking-form .form-group {
+    margin-bottom: 18px;
+}
+
+.booking-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    letter-spacing: 0.04em;
+}
+
+.booking-form input,
+.booking-form select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+}
+
+.booking-form input:focus,
+.booking-form select:focus {
+    outline: none;
+    border-color: var(--sage);
+}
+
+.booking-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+}
+
+.booking-form textarea:focus {
+    outline: none;
+    border-color: var(--sage);
+}
+
+.calendar-day.past {
+    background: #dcdcdc;
+    color: #777;
+    cursor: not-allowed;
+}
+
+
+
+/* Shared booking summary row styling. */
+
+.booking-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #e5e0d6;
+    font-size: 0.95rem;
+}
+
+
+
+/* Success and error page layouts used after form actions. */
+
+.success-page, .error-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #F5F3EF;
+    font-family: 'Inter', sans-serif;
+}
+
+.success-container, .error-container {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.error-container h2 {
+    color: #c62828;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: black;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.success-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f3ef;
+    padding: 20px;
+}
+
+.success-container {
+    width: 100%;
+    max-width: 520px;
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.success-container h2 {
+    color: #222;
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.success-container p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 24px;
+}
+
+.success-container .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #111;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: 0.3s ease;
+}
+
+.success-container .btn:hover {
+    background: #333;
+}
+
+
+
+/* Owner login error box, input shake animation, and focus-state upgrades. */
+
+/* ===== ERROR BOX ===== */
+.login-error {
+    background: #ffecec;
+    color: #b30000;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    text-align: center;
+    animation: fadeSlide 0.4s ease;
+}
+
+/* ===== INPUT ERROR SHAKE ===== */
+.input-error {
+    animation: shake 0.4s;
+    border-color: #b30000 !important;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== INPUT FOCUS UPGRADE ===== */
+.owner-password-wrap input {
+    transition: 0.2s;
+}
+
+.owner-password-wrap input:focus {
+    border-color: #6B8E6B;
+    box-shadow: 0 0 0 3px rgba(107,142,107,0.15);
+}
+
+

@@ -1,0 +1,107 @@
+﻿/*
+  Customer amenities
+  ------------------------------------------------------------
+  Amenities page and amenities-specific customer styles.
+*/
+
+
+
+/* Standalone amenities page grid, modern amenity cards, and responsive rules. */
+
+.amenities-page {
+    background: #f7f5ef;
+    min-height: 100vh;
+    padding: 130px 20px 80px;
+}
+
+.amenities-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+    margin-top: 50px;
+}
+
+.amenity-card-modern {
+    background: #fcfcfa;
+    border: 1px solid #ddd8cf;
+    min-height: 130px;
+    padding: 22px 14px;
+    text-align: center;
+    transition: 0.3s ease;
+}
+
+.amenity-card-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.amenity-icon-modern {
+    width: 38px;
+    height: 38px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    border: 1px solid #d6d1c7;
+    background: #f2f1ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.amenity-card-modern h3 {
+    font-size: 11px;
+    letter-spacing: 1.6px;
+    color: #505b50;
+    margin: 0 0 8px;
+    font-weight: 600;
+}
+
+.amenity-card-modern p {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #7b857d;
+    margin: 0;
+}
+
+.amenity-card-highlight {
+    background: #d2c090;
+    border-color: #c5b17d;
+}
+
+.amenity-card-highlight .amenity-icon-modern {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(80,91,80,0.25);
+}
+
+.amenity-card-highlight h3,
+.amenity-card-highlight p {
+    color: #505b50;
+}
+
+.section-script {
+    margin-top: 46px;
+    text-align: center;
+    font-family: "Brush Script MT", cursive;
+    font-size: 2rem;
+    color: #b0ab8a;
+}
+
+@media (max-width: 1100px) {
+    .amenities-grid-modern {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .amenities-grid-modern {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .amenities-grid-modern {
+        grid-template-columns: 1fr;
+    }
+}
+
+

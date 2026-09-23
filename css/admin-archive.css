@@ -1,0 +1,106 @@
+﻿/*
+  Admin archive
+  ------------------------------------------------------------
+  Archive hub cards, archived-row hover states, and archive context menu styles.
+*/
+
+/* ===== Archive context menu ===== */
+.archive-context-menu {
+    display: none;
+    position: absolute;
+    z-index: 99999;
+    background: #fffdf9;
+    border: 1px solid #dacdbd;
+    border-radius: 12px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.16);
+    padding: 8px;
+}
+.archive-context-menu.show { display: block; }
+.archive-context-menu button {
+    border: 0;
+    background: #7b8f6a;
+    color: #fff;
+    border-radius: 9px;
+    padding: 9px 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.archive-context-menu {
+    min-width: 180px;
+}
+
+.archive-context-menu button {
+    background: #9b3d32;
+}
+
+/* ===== Archive rows ===== */
+.archive-row {
+    cursor: pointer;
+}
+
+.archive-row:hover {
+    background: #fff7eb !important;
+}
+
+/* ===== Archive category cards ===== */
+body.admin-shell-page .archive-category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    grid-auto-rows: minmax(180px, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+    min-height: clamp(380px, 58vh, 620px);
+}
+
+body.admin-shell-page .archive-category-card {
+    min-height: 100%;
+    padding: clamp(20px, 2.4vw, 30px);
+    border: 1px solid #e7dac3;
+    border-radius: 8px;
+    background:
+        linear-gradient(145deg, rgba(255,252,245,.96), rgba(247,241,230,.9));
+    box-shadow: 0 14px 30px rgba(62,54,42,.08);
+    display: grid;
+    align-content: center;
+    gap: 12px;
+    color: #2f3f2a;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+body.admin-shell-page .archive-category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 38px rgba(62,54,42,.12);
+}
+
+body.admin-shell-page .archive-category-card span {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e4efd9;
+    color: #41643b;
+    font-weight: 900;
+}
+
+body.admin-shell-page .archive-category-card strong {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+body.admin-shell-page .archive-category-card small {
+    color: #7a6f5d;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    body.admin-shell-page .archive-category-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: minmax(145px, auto);
+        min-height: auto;
+    }
+}
+
+

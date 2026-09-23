@@ -1,0 +1,849 @@
+﻿/*
+  Responsive admin pages
+  ------------------------------------------------------------
+  Mobile and tablet fixes for admin calendar, reservation/sales tables, nav badges, and settings.
+*/
+
+
+
+/* Admin calendar day colors and FullCalendar sizing fixes across breakpoints. */
+
+/* Admin calendar split colors */
+#adminCalendar .fc-daygrid-day {
+    transition: background 0.2s ease;
+}
+#adminCalendar .fc-daygrid-day.fc-day-today {
+    box-shadow: inset 0 0 0 2px rgba(61,61,61,0.12);
+}
+
+/* Booking, reservation, and sales refinements */
+body {
+    font-size: 15px;
+}
+
+.main-content {
+    padding-bottom: 28px;
+}
+
+.admin-dashboard,
+.main-content,
+.table-container,
+.admin-stat-card,
+.admin-calendar-wrapper,
+.reservation-table,
+.sales-table,
+.reservation-modal-content,
+.sales-modal-content,
+.reservation-confirm-content {
+    box-sizing: border-box;
+}
+
+.admin-dashboard {
+    padding: 28px 28px 36px;
+}
+
+.admin-topbar {
+    margin-bottom: 20px;
+}
+
+.admin-topbar h1 {
+    font-size: 20px;
+}
+
+.admin-topbar p,
+.reservation-helper-text,
+.booking-modal-subtext {
+    font-size: 14px;
+}
+
+.menu-btn,
+.logout-btn,
+.refresh-btn,
+.modal-btn,
+.sales-pay-btn,
+.sales-paid-lock,
+.booking-modal-btn {
+    font-size: 14px;
+}
+
+.admin-stat-card {
+    padding: 18px;
+}
+
+.stat-value {
+    font-size: 26px;
+}
+
+.table-container {
+    padding: 0;
+}
+
+.reservation-table th,
+.reservation-table td,
+.sales-table th,
+.sales-table td {
+    font-size: 13px;
+    padding: 10px 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.reservation-row,
+.sales-row {
+    cursor: pointer;
+}
+
+.sales-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.stay-value-cell {
+    font-weight: 700;
+    color: #7a552f;
+}
+
+.sales-pay-btn,
+.sales-paid-lock {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 88px;
+}
+
+.sales-pay-btn {
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+}
+
+.sales-paid-lock {
+    background: #16a34a;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.95;
+}
+
+.refresh-btn {
+    border: 1px solid #d8d2c6;
+    background: #ffffff;
+    color: #3d3d3d;
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+}
+
+.refresh-btn:hover {
+    background: #f5f3ef;
+}
+
+.status-paid-text {
+    color: #15803d;
+    font-weight: 800;
+}
+
+.status-unpaid-text {
+    color: #dc2626;
+    font-weight: 800;
+}
+
+.tooltip-payment-row {
+    margin-top: 4px;
+}
+
+.sales-rejected-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #b91c1c;
+    font-weight: 800;
+    background: #fff1f1;
+    border: 1px solid #f3b5b5;
+}
+
+.sales-pay-btn.disabled-payment,
+.sales-pay-btn:disabled {
+    background: #c9c3b8;
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+.reservation-modal-content,
+.sales-modal-content,
+.reservation-confirm-content {
+    width: min(780px, calc(100vw - 32px));
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding-bottom: 86px;
+}
+
+.reservation-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.reservation-detail-item {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #faf7f1;
+    border: 1px solid #eee0cc;
+}
+
+.reservation-detail-item span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #8a7b68;
+}
+
+.reservation-detail-item strong {
+    display: block;
+    color: #2f2a24;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.reservation-proof-preview {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #fcfaf6;
+    border: 1px solid #eadcc9;
+}
+
+.reservation-proof-preview p {
+    margin: 0 0 10px;
+    font-weight: 700;
+}
+
+.reservation-proof-preview img {
+    width: 100%;
+    max-width: 320px;
+    display: block;
+    border-radius: 12px;
+    border: 1px solid #e4d6c1;
+    margin-bottom: 10px;
+}
+
+.modal-footer,
+.reservation-confirm-actions {
+    position: sticky;
+    bottom: 0;
+    background: #f5f3ef;
+    padding-top: 16px;
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-top: 1px solid #eadfce;
+}
+
+.booking-wrapper {
+    max-width: 1140px;
+    gap: 28px;
+}
+
+.details-panel {
+    padding: 28px;
+}
+
+.booking-form input,
+.booking-form select,
+.booking-form textarea {
+    font-size: 14px;
+    padding: 12px 14px;
+}
+
+.booking-modal-box {
+    width: min(820px, calc(100vw - 28px));
+    max-height: calc(100vh - 28px);
+    overflow-y: auto;
+}
+
+.booking-modal-card h3,
+.details-panel h2,
+.success-title {
+    font-size: 24px;
+}
+
+.booking-modal-row {
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.booking-modal-row span:last-child {
+    text-align: right;
+    word-break: break-word;
+}
+
+.payment-preview img,
+.proof-preview img,
+#modalProofPreview {
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+.final-confirm-card {
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 992px) {
+    .sales-summary-grid,
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .admin-dashboard {
+        padding: 24px 20px 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    .admin-dashboard {
+        padding: 18px 14px 26px;
+    }
+    .admin-topbar h1 {
+        font-size: 22px;
+    }
+    .reservation-detail-grid,
+    .sales-summary-grid,
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .reservation-modal-content,
+    .sales-modal-content,
+    .reservation-confirm-content,
+    .booking-modal-box {
+        width: calc(100vw - 16px);
+        max-height: calc(100vh - 16px);
+        padding: 18px 16px 82px;
+    }
+    .modal-footer,
+    .reservation-confirm-actions,
+    .booking-modal-actions {
+        justify-content: stretch;
+    }
+    .modal-footer .modal-btn,
+    .reservation-confirm-actions .modal-btn,
+    .booking-modal-actions .booking-modal-btn {
+        width: 100%;
+        text-align: center;
+    }
+    .details-panel {
+        padding: 20px;
+    }
+    .booking-modal-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .booking-modal-row span:last-child {
+        text-align: left;
+    }
+    .final-confirm-card {
+        flex-wrap: wrap;
+    }
+}
+
+.admin-notice-bar {
+    cursor: pointer;
+}
+
+.reservation-new-highlight {
+    animation: reservationBounceOnce 0.65s ease-out 1;
+    box-shadow: inset 4px 0 0 #d4af37;
+    background: linear-gradient(90deg, rgba(212,175,55,0.18), rgba(255,255,255,0.97));
+}
+
+@keyframes reservationBounceOnce {
+    0% { transform: translateY(0); }
+    35% { transform: translateY(-4px); }
+    65% { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+}
+
+.reservation-guests-cell.guest-count-warning {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.reservation-checkin-cell small,
+.reservation-checkout-cell small {
+    display: inline-block;
+    margin-top: 4px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.reservation-table td,
+.reservation-table th {
+    vertical-align: middle;
+}
+
+.admin-calendar-wrapper {
+    overflow: visible;
+    max-width: min(100%, 1180px);
+}
+
+#adminCalendar {
+    width: 100%;
+    min-width: 0;
+}
+
+#adminCalendar .fc {
+    font-size: 0.96rem;
+    width: 100%;
+    min-width: 0;
+    padding: 14px;
+}
+
+#adminCalendar .fc-header-toolbar {
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#adminCalendar .fc-view-harness,
+#adminCalendar .fc-view-harness-active {
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+#adminCalendar .fc-toolbar-title {
+    font-size: 1.2rem;
+}
+
+#adminCalendar .fc-col-header-cell-cushion,
+#adminCalendar .fc-daygrid-day-number {
+    padding: 6px 4px;
+    font-size: 0.9rem;
+}
+
+#adminCalendar .fc-daygrid-day-frame {
+    min-height: 96px;
+}
+
+#adminCalendar .fc-scroller-harness,
+#adminCalendar .fc-scroller {
+    overflow: visible !important;
+}
+
+@media (max-width: 1100px) {
+    #adminCalendar .fc {
+        font-size: 0.9rem;
+    }
+    #adminCalendar .fc-toolbar-title {
+        font-size: 1.05rem;
+    }
+    #adminCalendar .fc-col-header-cell-cushion,
+    #adminCalendar .fc-daygrid-day-number {
+        font-size: 0.82rem;
+        padding: 4px 2px;
+    }
+}
+
+@media (max-width: 768px) {
+    #adminCalendar .fc-daygrid-day-frame {
+        min-height: 78px;
+    }
+}
+
+
+
+/* Reservation and sales details modal fit, scroll, and compact action button fixes. */
+
+/* Reservation and sales details modal fit fix only */
+.reservation-modal {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    overflow: hidden !important;
+}
+
+.reservation-modal-content,
+.sales-modal-content {
+    width: min(920px, calc(100vw - 28px)) !important;
+    max-height: calc(100vh - 28px) !important;
+    margin: 0 auto !important;
+    padding: 18px 20px 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border-radius: 16px !important;
+}
+
+.reservation-modal-header {
+    flex: 0 0 auto !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.reservation-modal-header h3 {
+    font-size: 18px !important;
+    margin: 0 !important;
+}
+
+.reservation-modal-kicker {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+}
+
+#modalDetails,
+#salesModalDetails {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    margin-top: 0 !important;
+}
+
+.reservation-detail-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+}
+
+.reservation-detail-item {
+    min-height: 0 !important;
+    padding: 9px 11px !important;
+    border-radius: 10px !important;
+}
+
+.reservation-detail-item span {
+    font-size: 10px !important;
+    letter-spacing: .08em !important;
+    margin-bottom: 4px !important;
+}
+
+.reservation-detail-item strong {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+}
+
+.reservation-proof-preview {
+    margin-top: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+}
+
+.reservation-proof-preview p {
+    margin-bottom: 6px !important;
+    font-size: 13px !important;
+}
+
+.reservation-proof-preview img {
+    max-width: 220px !important;
+    max-height: 120px !important;
+    object-fit: contain !important;
+    margin-bottom: 6px !important;
+}
+
+#modalActions,
+#salesModalActions,
+.reservation-modal .modal-footer,
+.reservation-confirm-actions {
+    flex: 0 0 auto !important;
+    position: static !important;
+    bottom: auto !important;
+    margin-top: 10px !important;
+    padding: 10px 0 16px !important;
+    background: #fffdf9 !important;
+    border-top: 1px solid #eadfce !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+}
+
+.modal-footer .modal-btn,
+.reservation-confirm-actions .modal-btn,
+#modalActions .modal-btn,
+#salesModalActions .modal-btn {
+    padding: 8px 14px !important;
+    min-width: 92px !important;
+    margin-left: 0 !important;
+    font-size: 13px !important;
+}
+
+@media (max-width: 900px) {
+    .reservation-detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .reservation-modal-content,
+    .sales-modal-content {
+        width: calc(100vw - 16px) !important;
+        max-height: calc(100vh - 16px) !important;
+        padding: 14px 14px 0 !important;
+    }
+    .reservation-detail-grid {
+        grid-template-columns: 1fr !important;
+    }
+    #modalActions .modal-btn,
+    #salesModalActions .modal-btn,
+    .reservation-confirm-actions .modal-btn {
+        width: 100% !important;
+    }
+}
+
+
+
+/* Admin sidebar branding, refresh button, stay/payment/detail badges, and status text colors. */
+
+/* admin nav and detail badges */
+.sidebar-title.sidebar-brand-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-decoration: none !important;
+    color: #2f2f2f !important;
+    font-weight: 800 !important;
+    font-size: 22px !important;
+    margin-bottom: 28px !important;
+}
+
+.sidebar .nav-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.sidebar .nav-icon {
+    width: 22px !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    font-weight: 800 !important;
+}
+
+.refresh-btn {
+    border: 1px solid #d8dfd0 !important;
+    background: #f6faf2 !important;
+    color: #59705a !important;
+    border-radius: 8px !important;
+    padding: 8px 14px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.refresh-btn:hover {
+    background: #6f8b6b !important;
+    color: #ffffff !important;
+}
+
+.stay-badge,
+.payment-badge,
+.detail-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+}
+
+.stay-day {
+    background: #fff3cf !important;
+    color: #b36b00 !important;
+    border: 1px solid #f1d38a !important;
+}
+
+.stay-overnight {
+    background: #e7edff !important;
+    color: #1f3f91 !important;
+    border: 1px solid #b9c7f5 !important;
+}
+
+.stay-22hour {
+    background: #fff0b8 !important;
+    color: #9a6500 !important;
+    border: 1px solid #e3b326 !important;
+}
+
+.payment-gcash {
+    background: #eaf2ff !important;
+    color: #1d5fd1 !important;
+    border: 1px solid #b8d0ff !important;
+}
+
+.payment-bdo {
+    background: #eef3ff !important;
+    color: #224aa6 !important;
+    border: 1px solid #c4d2ff !important;
+}
+
+.payment-unionbank {
+    background: #fff4dc !important;
+    color: #b85c00 !important;
+    border: 1px solid #ffd18a !important;
+}
+
+.payment-cash {
+    background: #edf7ed !important;
+    color: #2f7d32 !important;
+    border: 1px solid #b8deb8 !important;
+}
+
+.special-request-text {
+    color: #777777 !important;
+    font-weight: 700 !important;
+}
+
+.status-approved-text,
+.status-paid-text {
+    color: #15803d !important;
+    font-weight: 800 !important;
+}
+
+.status-rejected-text,
+.status-unpaid-text {
+    color: #dc2626 !important;
+    font-weight: 800 !important;
+}
+
+.status-pending-text {
+    color: #b7791f !important;
+    font-weight: 800 !important;
+}
+
+#salesModalActions .btn-cancel-action[disabled] {
+    opacity: .75 !important;
+    cursor: not-allowed !important;
+}
+
+
+
+/* Admin polish for calendar block controls, filters, context menus, settings cards, and quick chat controls. */
+
+/* capstone 2 admin polish */
+.calendar-helper-text {
+    margin: 4px 0 0;
+    color: #7b7065;
+    font-size: 13px;
+}
+.calendar-block-help-btn,
+.filter-toggle-btn {
+    border: 1px solid #d8cdbf;
+    border-radius: 999px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #fffdf8, #f4eadc);
+    color: #4d3f31;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(0,0,0,.06);
+}
+.filter-toggle-btn.active {
+    background: #6f8d6b;
+    color: #fff;
+    border-color: #6f8d6b;
+}
+.filter-dropdown-wrap {
+    position: relative;
+    margin: 16px 0;
+}
+.filter-panel {
+    display: none !important;
+    padding: 14px;
+    background: #fffdf9;
+    border: 1px solid #e4d8c8;
+    border-radius: 16px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.08);
+}
+.filter-panel.show {
+    display: flex !important;
+}
+.calendar-context-menu {
+    display: none;
+    position: absolute;
+    z-index: 99999;
+    background: #fffdf9;
+    border: 1px solid #dacdbd;
+    border-radius: 14px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.18);
+    padding: 8px;
+}
+.calendar-context-menu.show { display: block; }
+.calendar-context-menu button {
+    border: 0;
+    border-radius: 10px;
+    background: #6f8d6b;
+    color: #fff;
+    padding: 10px 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.block-date-modal-content {
+    max-width: 520px;
+}
+.block-date-form {
+    padding: 18px;
+}
+.block-date-form label {
+    display: block;
+    margin: 14px 0 6px;
+    color: #827466;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+.block-date-form select,
+.block-date-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d8cdbf;
+    border-radius: 12px;
+    background: #fffdf9;
+    padding: 11px 12px;
+    font: inherit;
+}
+.block-date-selected {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    background: #f7efe5;
+    border: 1px solid #eadcc9;
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: #6c5b49;
+}
+.badge-blocked {
+    background: #777 !important;
+    color: #fff !important;
+    border-color: #777 !important;
+}
+.quick-minimize-btn {
+    float: right;
+    border: 0;
+    background: #e7dfd4;
+    color: #4d3f31;
+    border-radius: 999px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-weight: 900;
+}
+.chat-quick-grid.quick-hidden { display: none !important; }
+.admin-chat-box {
+    box-shadow: 0 18px 45px rgba(52, 44, 35, .08);
+}
+.admin-chat-msg.customer strong::after { content: ' Customer'; font-weight: 500; color:#777; }
+.admin-chat-msg.admin strong::after { content: ' Admin'; font-weight: 500; color:#456b45; }
+@media (max-width: 900px) {
+    .filter-panel.show { display: grid !important; grid-template-columns: 1fr; }
+}
+
+

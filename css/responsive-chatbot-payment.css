@@ -1,0 +1,106 @@
+﻿/*
+  Responsive chatbot and payment
+  ------------------------------------------------------------
+  Mobile sizing for the customer chatbot, payment proof, and related compact panels.
+*/
+
+
+
+/* Admin shell z-index, compact chatbot sizing, and payment QR/payment preview responsiveness. */
+
+/* admin pages */
+.sidebar {
+    z-index: 1100;
+}
+
+.admin-dashboard {
+    padding-top: 28px;
+}
+
+/* customer concierge chatbot sizing */
+.chatbot-toggle {
+    width: 70px;
+    height: 70px;
+    right: 24px;
+    bottom: 24px;
+}
+
+.chatbot-box {
+    width: min(372px, calc(100vw - 24px));
+    height: min(540px, calc(100vh - 24px));
+    right: 14px;
+    bottom: 14px;
+}
+
+.chatbot-brand h3 {
+    font-size: 15px;
+}
+
+.chat-quick-title {
+    font-size: 11px;
+}
+
+.chat-quick-grid button,
+.chatbot-contact-box,
+.chatbot-input-wrap input {
+    font-size: 12px;
+}
+
+.chatbot-contact-box {
+    line-height: 1.25;
+}
+
+@media (max-width: 768px) {
+    .chatbot-box {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        height: min(540px, calc(100vh - 24px));
+    }
+}
+
+/* payment preview */
+.payment-preview {
+    display: none;
+    margin-top: 14px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #ddd7cc;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.payment-preview.show {
+    display: block;
+}
+
+.payment-preview-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2e2e2e;
+}
+
+.payment-preview-note {
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.payment-preview img {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    border-radius: 12px;
+    border: 1px solid #e7e1d7;
+    background: #faf8f3;
+}
+
+@media (max-width: 600px) {
+    .payment-preview img {
+        max-width: 100%;
+    }
+}
+
+

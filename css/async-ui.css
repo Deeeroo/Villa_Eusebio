@@ -1,0 +1,143 @@
+/*
+  Async UI
+  ------------------------------------------------------------
+  Shared skeleton placeholders, cached-load states, and optimistic mutation states.
+*/
+
+.ve-skeleton-bars {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+}
+
+.ve-skeleton-line,
+.ve-skeleton-cell {
+    display: block;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, #dedede 0%, #eeeeee 42%, #d7d7d7 70%, #dedede 100%);
+    background-size: 220% 100%;
+    animation: veSkeletonShimmer 1.2s ease-in-out infinite;
+}
+
+.ve-skeleton-line {
+    height: 10px;
+}
+
+.ve-skeleton-line:nth-child(2) {
+    width: 86%;
+}
+
+.ve-skeleton-line:nth-child(3) {
+    width: 64%;
+}
+
+.ve-skeleton-cell {
+    min-height: 54px;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+}
+
+.calendar-grid.is-loading,
+.reschedule-calendar-grid.is-loading {
+    align-items: stretch;
+}
+
+.typing-bubble.ve-placeholder-bubble {
+    min-width: 126px;
+}
+
+.typing-bubble.ve-placeholder-bubble .ve-skeleton-line {
+    height: 8px;
+}
+
+.ve-async-submitting button[type="submit"],
+.ve-async-submitting input[type="submit"] {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.ve-async-submitting button[type="submit"]::after,
+.ve-async-submitting input[type="submit"]::after {
+    content: "";
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    top: 50%;
+    height: 8px;
+    border-radius: 999px;
+    transform: translateY(-50%);
+    background:
+        linear-gradient(90deg, #d4d4d4 0%, #eeeeee 46%, #cccccc 100%);
+    background-size: 220% 100%;
+    animation: veSkeletonShimmer 1.1s ease-in-out infinite;
+}
+
+.ve-optimistic-pending {
+    position: relative;
+    opacity: .68;
+    transition: opacity .18s ease, transform .18s ease, filter .18s ease;
+}
+
+.ve-optimistic-pending::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgba(245, 245, 245, .3);
+}
+
+tr.ve-optimistic-pending::after {
+    display: none;
+}
+
+.ve-optimistic-removed {
+    transform: translateX(8px);
+    filter: grayscale(.45);
+    pointer-events: none;
+}
+
+.table-container .ve-optimistic-removed td,
+.announcement-admin-item.ve-optimistic-removed,
+.gallery-admin-item.ve-optimistic-removed {
+    background:
+        linear-gradient(90deg, rgba(229, 229, 229, .62), rgba(245, 245, 245, .82));
+}
+
+#adminCalendar.is-loading {
+    position: relative;
+}
+
+#adminCalendar.is-loading::after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 86px;
+    height: 12px;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, #dddddd 0%, #f0f0f0 44%, #d6d6d6 100%);
+    background-size: 220% 100%;
+    animation: veSkeletonShimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes veSkeletonShimmer {
+    from {
+        background-position: 120% 0;
+    }
+    to {
+        background-position: -120% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ve-skeleton-line,
+    .ve-skeleton-cell,
+    .ve-async-submitting button[type="submit"]::after,
+    .ve-async-submitting input[type="submit"]::after,
+    #adminCalendar.is-loading::after {
+        animation: none;
+    }
+}

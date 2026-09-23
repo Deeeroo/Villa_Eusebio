@@ -1,0 +1,237 @@
+<?php
+include "../includes/db.php";
+include "../includes/booking_repository.php";
+ve_ensure_capstone2_schema($conn);
+
+function respondError($message) {
+    http_response_code(400);
+    echo $message;
+    exit;
+}
+
+function getRequiredSlots($timeType) {
+    if ($timeType === 'day') return ['day'];
+    if ($timeType === 'overnight') return ['overnight'];
+    if ($timeType === '22hour') return ['day', 'overnight'];
+    return [];
+}
+
+function getExpectedCheckout($checkin, $timeType) {
+    if ($timeType === 'day') return $checkin;
+    if ($timeType === 'overnight' || $timeType === '22hour') {
+        return date('Y-m-d', strtotime($checkin . ' +1 day'));
+    }
+    return '';
+}
+
+function uploadProofFile($fieldName, $paymentMethod) {
+    $label = $paymentMethod === 'cash' ? 'valid ID' : 'payment proof';
+
+    if (!isset($_FILES[$fieldName]) || $_FILES[$fieldName]['name'] === '') {
+        respondError('Please upload your ' . $label . '.');
+    }
+
+    if ($_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
+        respondError(ucfirst($label) . ' upload failed.');
+    }
+
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'webp'];
+    $originalName = $_FILES[$fieldName]['name'];
+    $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+    if (!in_array($extension, $allowedExtensions, true)) {
+        respondError('Invalid uploaded file. Only JPG, JPEG, PNG, WEBP, and PDF are allowed.');
+    }
+
+    if ($_FILES[$fieldName]['size'] > 5 * 1024 * 1024) {
+        respondError('Uploaded file is too large. Maximum size is 5MB.');
+    }
+
+    $uploadDir = '../uploads';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    $safeBaseName = preg_replace('/[^A-Za-z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+    $fileName = time() . '_' . $safeBaseName . '.' . $extension;
+    $targetFile = $uploadDir . '/' . $fileName;
+
+    if (!move_uploaded_file($_FILES[$fieldName]['tmp_name'], $targetFile)) {
+        respondError('Unable to save the uploaded file.');
+    }
+
+    return $fileName;
+}
+
+$name = trim($_POST['guest_name'] ?? '');
+$email = trim($_POST['email'] ?? '');
+$mobile = trim($_POST['mobile'] ?? '');
+$address = trim($_POST['address'] ?? '');
+$guests = trim($_POST['guests'] ?? '');
+$paymentMethod = trim($_POST['payment_method'] ?? '');
+$specialRequests = trim($_POST['special_requests'] ?? '');
+$checkin = trim($_POST['check_in_date'] ?? '');
+$checkout = trim($_POST['check_out_date'] ?? '');
+$timeType = trim($_POST['time_type'] ?? '');
+
+if ($name === '' || $email === '' || $mobile === '' || $address === '' || $guests === '' || $paymentMethod === '' || $checkin === '' || $checkout === '' || $timeType === '') {
+    respondError('Please complete all required fields.');
+}
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) respondError('Invalid email address.');
+if (!preg_match('/^(09\d{9}|\+639\d{9})$/', $mobile)) respondError('Invalid Philippine mobile number.');
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkin) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkout)) respondError('Invalid date format.');
+
+$allowedPayments = ['gcash', 'bdo', 'unionbank', 'cash'];
+if (!in_array($paymentMethod, $allowedPayments, true)) respondError('Invalid payment method.');
+
+$requiredSlots = getRequiredSlots($timeType);
+if (empty($requiredSlots)) respondError('Invalid stay type.');
+
+$today = date('Y-m-d');
+if ($checkin < $today) respondError('Past dates are not allowed.');
+
+$expectedCheckout = getExpectedCheckout($checkin, $timeType);
+if ($checkout !== $expectedCheckout) respondError('Selected check-out date does not match the chosen stay type.');
+
+$guestsInt = (int) $guests;
+if ($guestsInt <= 0) respondError('Number of guests must be at least 1.');
+if ($guestsInt > 50) respondError('50 above is impossible for the resort capacity.');
+
+$slotDate = $checkin;
+$conflictStmt = mysqli_prepare($conn, "SELECT time_type FROM booked_dates WHERE booked_date = ?");
+if (!$conflictStmt) respondError('Database error: ' . mysqli_error($conn));
+mysqli_stmt_bind_param($conflictStmt, "s", $slotDate);
+mysqli_stmt_execute($conflictStmt);
+$conflictResult = mysqli_stmt_get_result($conflictStmt);
+$existingSlots = [];
+while ($row = mysqli_fetch_assoc($conflictResult)) {
+    $existingSlots[] = $row['time_type'];
+}
+mysqli_stmt_close($conflictStmt);
+
+$blockStmt = mysqli_prepare($conn, "SELECT stay_type FROM admin_blocks WHERE blocked_date = ?");
+if ($blockStmt) {
+    mysqli_stmt_bind_param($blockStmt, 's', $slotDate);
+    mysqli_stmt_execute($blockStmt);
+    $blockResult = mysqli_stmt_get_result($blockStmt);
+    while ($block = mysqli_fetch_assoc($blockResult)) {
+        if ($block['stay_type'] === '22hour' || $block['stay_type'] === 'whole') {
+            $existingSlots[] = 'day';
+            $existingSlots[] = 'overnight';
+        } else {
+            $existingSlots[] = $block['stay_type'];
+        }
+    }
+    mysqli_stmt_close($blockStmt);
+}
+$existingSlots = array_values(array_unique($existingSlots));
+
+if ($timeType === '22hour' && !empty($existingSlots)) {
+    respondError('Selected date is not available for a 22-hour stay.');
+}
+if (in_array('day', $existingSlots, true) && in_array('overnight', $existingSlots, true)) {
+    respondError('Selected date is already fully booked.');
+}
+foreach ($requiredSlots as $slot) {
+    if (in_array($slot, $existingSlots, true)) {
+        respondError('Selected date is not available for the chosen stay type.');
+    }
+}
+
+$proofOfPayment = uploadProofFile('proof_of_payment', $paymentMethod);
+$reservationFeeAmount = 2000.00;
+$reservationFeeStatus = 'unpaid';
+$paymentStatus = 'unpaid';
+$status = 'pending';
+$baseStayValue = ve_get_base_price($timeType);
+$extraGuestCount = max($guestsInt - 30, 0);
+$extraGuestFee = $extraGuestCount * 150.0;
+$totalStayValue = $baseStayValue + $extraGuestFee;
+$remainingBalance = max($totalStayValue - $reservationFeeAmount, 0);
+
+mysqli_begin_transaction($conn);
+try {
+    $guestStmt = mysqli_prepare($conn, "INSERT INTO guests (guest_name, email, mobile, address) VALUES (?, ?, ?, ?)");
+    if (!$guestStmt) {
+        throw new Exception(mysqli_error($conn));
+    }
+    mysqli_stmt_bind_param($guestStmt, 'ssss', $name, $email, $mobile, $address);
+    if (!mysqli_stmt_execute($guestStmt)) {
+        throw new Exception(mysqli_stmt_error($guestStmt));
+    }
+    $guestId = mysqli_insert_id($conn);
+    mysqli_stmt_close($guestStmt);
+
+    $bookingStmt = mysqli_prepare($conn, "INSERT INTO bookings (guest_id, check_in_date, check_out_date, guests, time_type, special_requests, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    if (!$bookingStmt) {
+        throw new Exception(mysqli_error($conn));
+    }
+    mysqli_stmt_bind_param($bookingStmt, 'ississs', $guestId, $checkin, $checkout, $guestsInt, $timeType, $specialRequests, $status);
+    if (!mysqli_stmt_execute($bookingStmt)) {
+        throw new Exception(mysqli_stmt_error($bookingStmt));
+    }
+    $bookingId = mysqli_insert_id($conn);
+    mysqli_stmt_close($bookingStmt);
+
+    $paymentStmt = mysqli_prepare($conn, "INSERT INTO payments (booking_id, payment_method, proof_of_payment, reservation_fee_amount, reservation_fee_status, remaining_balance, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    if (!$paymentStmt) {
+        throw new Exception(mysqli_error($conn));
+    }
+    mysqli_stmt_bind_param($paymentStmt, 'issdsds', $bookingId, $paymentMethod, $proofOfPayment, $reservationFeeAmount, $reservationFeeStatus, $remainingBalance, $paymentStatus);
+    if (!mysqli_stmt_execute($paymentStmt)) {
+        throw new Exception(mysqli_stmt_error($paymentStmt));
+    }
+    mysqli_stmt_close($paymentStmt);
+
+    $chargesStmt = mysqli_prepare($conn, "INSERT INTO charges (booking_id, base_stay_value, extra_guest_count, extra_guest_fee, total_stay_value) VALUES (?, ?, ?, ?, ?)");
+    if (!$chargesStmt) {
+        throw new Exception(mysqli_error($conn));
+    }
+    mysqli_stmt_bind_param($chargesStmt, 'ididd', $bookingId, $baseStayValue, $extraGuestCount, $extraGuestFee, $totalStayValue);
+    if (!mysqli_stmt_execute($chargesStmt)) {
+        throw new Exception(mysqli_stmt_error($chargesStmt));
+    }
+    mysqli_stmt_close($chargesStmt);
+
+    mysqli_commit($conn);
+} catch (Throwable $e) {
+    mysqli_rollback($conn);
+    respondError('Error saving booking: ' . $e->getMessage());
+}
+
+$proofLabel = $proofOfPayment !== '' ? htmlspecialchars($proofOfPayment) : 'No payment proof uploaded';
+$proofUrl = $proofOfPayment !== '' ? '../uploads/' . rawurlencode($proofOfPayment) : '';
+$proofExt = strtolower(pathinfo($proofOfPayment, PATHINFO_EXTENSION));
+$isImageProof = in_array($proofExt, ['jpg', 'jpeg', 'png', 'webp'], true);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Submitted</title>
+    <link rel="stylesheet" href="../responsive-fixes.css">
+    <style>
+        body {margin:0;font-family:Arial,sans-serif;background:#F5F3EF;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#2E2E2E;padding:20px;box-sizing:border-box;}
+        .success-box {width:100%;max-width:760px;background:#fff;border:1px solid #ddd;border-radius:14px;padding:36px 28px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.08);} 
+        .success-box h1 {margin-top:0;color:#2f6f4f;} .proof-preview{margin-top:18px;padding:14px;border:1px solid #e6e0d8;border-radius:12px;background:#faf7f2;} .proof-preview img{max-width:100%;height:auto;border-radius:10px;border:1px solid #ddd;} .back-link{display:inline-block;margin-top:18px;padding:12px 18px;border-radius:10px;background:#2f6f4f;color:#fff;text-decoration:none;}
+    </style>
+</head>
+<body>
+<div class="success-box">
+    <h1>Booking submitted successfully</h1>
+    <p>Your reservation request is now pending admin review.</p>
+    <p><strong>Reservation Fee:</strong> ₱<?php echo number_format($reservationFeeAmount, 2); ?></p>
+    <p><strong>Remaining Balance:</strong> ₱<?php echo number_format($remainingBalance, 2); ?></p>
+    <div class="proof-preview">
+        <p><strong>Uploaded File:</strong> <?php echo $proofLabel; ?></p>
+        <?php if ($proofUrl && $isImageProof): ?>
+            <img src="<?php echo $proofUrl; ?>" alt="Uploaded proof">
+        <?php elseif ($proofUrl): ?>
+            <p><a href="<?php echo $proofUrl; ?>" target="_blank" rel="noopener">Open uploaded file</a></p>
+        <?php endif; ?>
+    </div>
+    <a class="back-link" href="../pages/appointment.php">Back to Calendar</a>
+</div>
+</body>
+</html>

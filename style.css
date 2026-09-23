@@ -1,0 +1,28 @@
+/* Main stylesheet entry point.
+   Keep imports grouped by purpose so styles are easy to find. */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Inter:wght@300;400;500;700&family=Parisienne&display=swap');
+
+@import url('./css/theme.css');
+@import url('./css/components.css');
+@import url('./css/async-ui.css');
+
+/* Customer/public pages */
+@import url('./css/customer-layout.css?v=20260923-footer-email1');
+@import url('./css/homepage.css');
+@import url('./css/customer-calendar.css');
+@import url('./css/gallery.css');
+@import url('./css/amenities.css');
+@import url('./css/reviews.css');
+@import url('./css/contact.css');
+@import url('./css/chatbot.css');
+
+/* Admin pages */
+@import url('./css/admin-login.css');
+@import url('./css/admin-layout.css');
+@import url('./css/admin-calendar.css');
+@import url('./css/admin-reservations-sales.css?v=20260606-reschedule2');
+@import url('./css/admin-dashboard.css?v=20260923-admin-subscribers1');
+@import url('./css/admin-announcements.css');
+@import url('./css/admin-archive.css');
+@import url('./css/admin-settings.css?v=20260923-admin-subscribers2');

@@ -1,0 +1,162 @@
+﻿/*
+  Admin calendar
+  ------------------------------------------------------------
+  FullCalendar and admin booking-calendar display styles.
+*/
+
+
+
+/* Admin calendar wrapper, modal, and FullCalendar theme overrides. */
+
+/* ADMIN CALENDAR */
+.admin-calendar-wrapper {
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+#adminCalendar {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+}
+
+/* match your theme */
+.fc-button {
+    background: #6B8E6B !important;
+    border: none !important;
+}
+
+.fc-button:hover {
+    background: #5a7c5a !important;
+}
+
+.fc-toolbar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+}
+.calendar-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.calendar-modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 350px;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.calendar-close {
+    float: right;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* ===== FULLCALENDAR VILLA EUSEBIO THEME ===== */
+
+.fc {
+    font-family: 'Inter', sans-serif;
+    background: #F5F3EF;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+/* HEADER (April 2026 + buttons) */
+.fc-toolbar-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: #3D3D3D;
+}
+
+/* BUTTONS */
+.fc-button {
+    background: transparent !important;
+    border: 1px solid #d6d3cd !important;
+    color: #3D3D3D !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    font-size: 13px;
+}
+
+.fc-button:hover {
+    background: #eae7e2 !important;
+}
+
+.fc-button-active {
+    background: #6B8E6B !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* CALENDAR GRID */
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border: 1px solid #e5e2dc;
+}
+
+.fc-col-header-cell {
+    background: #6B8E6B;
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* DAY CELLS */
+.fc-daygrid-day {
+    background: #FAF9F6;
+}
+
+/* TODAY HIGHLIGHT */
+.fc-day-today {
+    background: #efe9dc !important;
+}
+
+/* EVENTS */
+.fc-event {
+    border: none !important;
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 2px 6px;
+}
+
+/* SOFT COLORS (match your brand) */
+.fc-event[style*="#3b82f6"] {
+    background: #7FA7C6 !important; /* soft blue */
+}
+
+.fc-event[style*="#22c55e"] {
+    background: #6B8E6B !important; /* main green */
+}
+
+.fc-event[style*="#f59e0b"] {
+    background: #C6A96B !important; /* gold tone */
+}
+
+/* REMOVE HARSH SHADOW */
+.fc-scrollgrid {
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+}
+
+/* CALENDAR CONTAINER */
+#calendar {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+

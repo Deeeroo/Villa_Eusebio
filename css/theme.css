@@ -1,0 +1,93 @@
+﻿/*
+  Theme and global rules
+  ------------------------------------------------------------
+  Variables, reset, body styles, paper texture, scrollbars, and shared helpers.
+*/
+
+
+
+/* Theme variables, reset rules, page body defaults, typography helpers, and container sizing. */
+
+:root {
+    --sage: #8A9A7F;
+    --sage-dark: #6B7A62;
+    --off-white: #F5F3EF;
+    --beige: #EAE6DD;
+    --charcoal: #3D3D3D;
+    --gray-text: #5A5A5A;
+    --gold: #D4C5A0;
+    --gold-dark: #C9B88A;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: #8c8c8c #f1eee8;
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #f1eee8;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #8c8c8c;
+    border: 0;
+    border-radius: 0;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #6f6f6f;
+}
+
+*::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--off-white);
+    background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+    color: var(--charcoal);
+    line-height: 1.6;
+    opacity: 1;
+    transition: none;
+    overflow-x: hidden;
+}
+body.page-loaded {
+    opacity: 1;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.font-script {
+    font-family: 'Parisienne', cursive;
+    font-style: normal;
+}
+
+.container {
+    width: min(1200px, 92%);
+    margin: 0 auto;
+}
+
+

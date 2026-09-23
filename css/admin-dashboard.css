@@ -1,0 +1,621 @@
+﻿/*
+  Admin dashboard
+  ------------------------------------------------------------
+  Modern admin dashboard cards, side panels, statistics, and dashboard visual system.
+*/
+
+
+
+/* Modern Villa Eusebio admin dashboard shell and dashboard panels. */
+
+body.admin-shell-page {
+    background: #f7f2e8;
+}
+
+body.admin-shell-page .sidebar {
+    left: 0;
+    width: 190px;
+    padding: 12px 10px 132px;
+    background: linear-gradient(180deg, #fffaf0 0%, #f4ecd9 100%);
+    border-right: 1px solid #e4d7bd;
+    box-shadow: 8px 0 28px rgba(62, 54, 42, .08);
+}
+
+body.admin-shell-page .sidebar.active {
+    left: -202px;
+}
+
+body.admin-shell-page .sidebar::after {
+    content: "Villa Eusebio\aRelax, unwind, enjoy.";
+    white-space: pre-line;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 12px;
+    min-height: 92px;
+    padding: 56px 8px 8px;
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255,250,240,.25), rgba(43,67,39,.82)),
+        url('/capstone_system/assets/icon.jpg') center 8px / 44px 44px no-repeat,
+        #496b42;
+    color: #fff;
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    line-height: 1.25;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 14px 28px rgba(43,67,39,.18);
+}
+
+body.admin-shell-page .sidebar-title {
+    min-height: 66px;
+    margin: 0 0 10px;
+    padding: 46px 6px 6px !important;
+    color: #2e4b2a !important;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px !important;
+    line-height: 1.1;
+    background: url('/capstone_system/assets/icon.jpg') top center / 40px 40px no-repeat;
+}
+
+body.admin-shell-page .sidebar .nav-link,
+body.admin-shell-page .sidebar a:not(.sidebar-title) {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 32px;
+    margin-bottom: 4px;
+    padding: 7px 9px !important;
+    color: #514936;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 11.5px;
+}
+
+body.admin-shell-page .sidebar .nav-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(77, 112, 68, .1);
+    color: #41643b;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sidebar a.active {
+    background: #3f6b37 !important;
+    color: #fff !important;
+    box-shadow: 0 10px 20px rgba(63,107,55,.22);
+}
+
+body.admin-shell-page .sidebar a.active .nav-icon {
+    background: rgba(255,255,255,.18);
+    color: #fff;
+}
+
+body.admin-shell-page .sidebar a.has-sidebar-alert::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #22c55e;
+    border: 2px solid #fffaf0;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, .14);
+    transform: translateY(-50%);
+}
+
+body.admin-shell-page .admin-dashboard {
+    margin-left: 190px;
+    min-height: 100vh;
+    height: auto !important;
+    max-height: none !important;
+    padding: 8px 10px 20px;
+    background: #f7f2e8;
+    overflow: visible !important;
+}
+
+body.admin-shell-page .admin-dashboard.shift {
+    margin-left: 0;
+}
+
+body.admin-shell-page .admin-topbar {
+    background: rgba(255, 252, 245, .92);
+    border: 1px solid #e7dac3;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 10px 24px rgba(62,54,42,.06);
+    padding: 8px 12px;
+    margin-bottom: 10px;
+}
+
+body.admin-shell-page .admin-topbar,
+body.admin-shell-page .admin-brand,
+body.admin-shell-page .admin-userbar {
+    min-width: 0;
+}
+
+body.admin-shell-page .admin-brand h1 {
+    font-family: 'Playfair Display', serif;
+    color: #2e4b2a;
+    font-size: 19px;
+}
+
+body.admin-shell-page .admin-logo {
+    display: none !important;
+}
+
+.admin-page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.admin-page-heading h2,
+.admin-page-heading p {
+    margin-top: 0;
+}
+
+.admin-export-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: #3f6b37;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 900;
+    box-shadow: 0 10px 20px rgba(63,107,55,.22);
+}
+
+body.admin-shell-page .main-content,
+body.admin-shell-page .settings-page,
+body.admin-shell-page .announcements-page,
+body.admin-shell-page .subscribers-page {
+    background: #fffdf8;
+    border: 1px solid #e5d8bf;
+    border-radius: 14px;
+    box-shadow: 0 12px 24px rgba(62,54,42,.06);
+    padding: 12px;
+    overflow: visible !important;
+}
+
+body.admin-shell-page .table-container,
+body.admin-shell-page .settings-card,
+body.admin-shell-page .filter-dropdown-wrap {
+    border-color: #e5d8bf;
+    box-shadow: 0 10px 22px rgba(62,54,42,.05);
+}
+
+body.admin-shell-page .menu-btn {
+    background: #fff;
+    color: #3f6b37;
+    border: 1px solid #d9cbb2;
+}
+
+body.admin-shell-page .menu-btn::before {
+    content: "";
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+    box-shadow: 0 5px 0 currentColor, 0 -5px 0 currentColor;
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+body.admin-shell-page .admin-userbar {
+    gap: 10px;
+}
+
+body.admin-shell-page .admin-userbar::before {
+    content: "";
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: url('/capstone_system/assets/icon.jpg') center / cover;
+    border: 2px solid #d4af37;
+    box-shadow: 0 8px 18px rgba(62,54,42,.14);
+}
+
+body.admin-shell-page .admin-userbar strong {
+    color: #2e4b2a;
+}
+
+
+body.admin-shell-page .admin-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+body.admin-shell-page .admin-stat-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e5d8bf;
+    border-radius: 10px;
+    border-top: 0;
+    padding: 10px 10px 10px 50px;
+    background: #fffdf8;
+    box-shadow: 0 12px 24px rgba(62,54,42,.08);
+}
+
+body.admin-shell-page .admin-stat-card::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: #e7efdc;
+}
+
+body.admin-shell-page .pending-card::before { background: #f8e8c8; }
+body.admin-shell-page .confirmed-card::before { background: #dcebd3; }
+body.admin-shell-page .revenue-card::before { background: #dfebd7; }
+
+body.admin-shell-page .stat-label {
+    color: #6d624f;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+body.admin-shell-page .stat-value {
+    color: #263f24;
+    font-size: 19px;
+    margin-top: 3px;
+}
+
+.stat-trend {
+    margin-top: 3px;
+    color: #67855e;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.dashboard-workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 285px);
+    gap: 8px;
+    align-items: start;
+    overflow: visible !important;
+}
+
+.dashboard-primary-column,
+.dashboard-side-column {
+    display: grid;
+    gap: 8px;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+body.admin-shell-page .admin-calendar-wrapper,
+.dashboard-panel {
+    max-width: none;
+    margin: 0;
+    background: #fffdf8;
+    border: 1px solid #e5d8bf;
+    border-radius: 10px;
+    box-shadow: 0 12px 24px rgba(62,54,42,.07);
+    padding: 8px;
+    overflow: visible !important;
+}
+
+body.admin-shell-page .admin-calendar-wrapper {
+    padding: 0;
+    overflow: hidden !important;
+}
+
+body.admin-shell-page .calendar-admin-head {
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #fffdf8, #f4ecdd);
+    border-bottom: 1px solid #e7dac3;
+    align-items: center;
+}
+
+body.admin-shell-page .calendar-admin-head h2 {
+    margin: 0 0 4px;
+    font-size: 19px;
+    color: #2f432b;
+}
+
+body.admin-shell-page .calendar-admin-head .calendar-helper-text {
+    margin: 0;
+    color: #6a604f;
+}
+
+body.admin-shell-page .calendar-block-help-btn {
+    min-height: 36px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #fffaf0;
+    border-color: #dfcfb4;
+    color: #4b3f30;
+    box-shadow: none;
+}
+
+.dashboard-panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.dashboard-panel-head h2 {
+    margin: 0;
+    color: #2f432b;
+    font-size: 15px;
+}
+
+.panel-link-btn {
+    color: #3f6b37;
+    background: #eef5e8;
+    border: 1px solid #d7e5cd;
+    border-radius: 999px;
+    padding: 6px 10px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.reservation-detail-link {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.recent-table-wrap {
+    overflow-x: auto;
+}
+
+.recent-reservations-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.recent-reservations-table th,
+.recent-reservations-table td {
+    padding: 6px 7px;
+    border-bottom: 1px solid #eee3d1;
+    text-align: left;
+    font-size: 11px;
+}
+
+.recent-reservations-table th {
+    color: #6d624f;
+    font-weight: 900;
+}
+
+.dashboard-announcement-card {
+    border-left: 5px solid #d4af37;
+}
+
+.announcement-status-dot {
+    display: inline-flex;
+    border-radius: 999px;
+    background: #e7f1df;
+    color: #41643b;
+    padding: 6px 10px;
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.announcement-status-dot.muted {
+    background: #f1eee8;
+    color: #7d7469;
+}
+
+.dashboard-announcement-card h3 {
+    margin: 12px 0 8px;
+    color: #2f432b;
+}
+
+.dashboard-announcement-card p {
+    color: #64594b;
+    line-height: 1.6;
+}
+
+.detail-mini-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee3d1;
+    font-size: 12px;
+}
+
+.detail-mini-row span {
+    color: #7d7160;
+}
+
+.detail-mini-row strong {
+    color: #2f432b;
+    text-align: right;
+}
+
+body.admin-shell-page #adminCalendar .fc {
+    padding: 18px !important;
+    font-size: 0.9rem !important;
+    background: #fffdf8 !important;
+    border-radius: 0 !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-header-toolbar {
+    margin-bottom: 14px !important;
+    gap: 10px !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-view-harness,
+body.admin-shell-page #adminCalendar .fc-view-harness-active {
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-toolbar-title {
+    font-size: 1.18rem !important;
+    color: #2f2a24 !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-col-header-cell-cushion,
+body.admin-shell-page #adminCalendar .fc-daygrid-day-number {
+    padding: 5px 4px !important;
+    font-size: 0.82rem !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-daygrid-day-frame {
+    min-height: 74px !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-col-header-cell {
+    background: #6f8f6b !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-theme-standard td,
+body.admin-shell-page #adminCalendar .fc-theme-standard th {
+    border-color: #e8decd !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-daygrid-day {
+    background: #fbfaf6;
+}
+
+body.admin-shell-page #adminCalendar .fc-day-today {
+    background: #eee7d8 !important;
+    box-shadow: inset 0 0 0 2px rgba(111,143,107,.28);
+}
+
+body.admin-shell-page #adminCalendar .fc-event {
+    padding: 2px 4px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgba(47,42,36,.82) !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+    text-align: center;
+}
+
+body.admin-shell-page #adminCalendar .fc-event-title,
+body.admin-shell-page #adminCalendar .fc-event-time {
+    white-space: normal !important;
+}
+
+body.admin-shell-page #adminCalendar .fc-scroller-harness,
+body.admin-shell-page #adminCalendar .fc-scroller {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+@media (max-width: 1120px) {
+    body.admin-shell-page .admin-stats-grid,
+    .dashboard-workspace-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .dashboard-side-column {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 780px) {
+    body.admin-shell-page {
+        overflow-x: hidden;
+    }
+    body.admin-shell-page .sidebar {
+        left: -240px;
+        width: min(230px, 82vw);
+        padding-bottom: 170px;
+    }
+    body.admin-shell-page .sidebar.active {
+        left: 0;
+    }
+    body.admin-shell-page .admin-dashboard,
+    body.admin-shell-page .admin-dashboard.shift {
+        margin-left: 0;
+        padding: 10px 10px 24px;
+        width: 100%;
+    }
+    body.admin-shell-page .admin-topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px;
+    }
+    body.admin-shell-page .admin-brand,
+    body.admin-shell-page .admin-userbar {
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    body.admin-shell-page .admin-brand h1 {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+    body.admin-shell-page .admin-userbar::before {
+        width: 36px;
+        height: 36px;
+    }
+    body.admin-shell-page .main-content,
+    body.admin-shell-page .settings-page,
+    body.admin-shell-page .announcements-page,
+    body.admin-shell-page .subscribers-page {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    body.admin-shell-page .admin-stats-grid,
+    .dashboard-workspace-grid,
+    .dashboard-side-column {
+        grid-template-columns: 1fr;
+    }
+    body.admin-shell-page .admin-stat-card {
+        padding: 12px 12px 12px 54px;
+    }
+    .table-container,
+    .recent-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .reservation-table,
+    .sales-table,
+    .recent-reservations-table {
+        min-width: 720px;
+    }
+    }
+    .admin-page-heading {
+        flex-direction: column;
+    }
+    .admin-export-btn {
+        width: 100%;
+    }
+@media (max-width: 480px) {
+    body.admin-shell-page .admin-userbar {
+        gap: 8px;
+    }
+    body.admin-shell-page .logout-btn,
+    body.admin-shell-page .refresh-btn,
+    body.admin-shell-page .menu-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    body.admin-shell-page .sidebar::after {
+        display: none;
+    }
+    body.admin-shell-page .sidebar {
+        padding-bottom: 18px;
+    }
+}
+
+
