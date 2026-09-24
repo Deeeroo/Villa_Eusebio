@@ -338,15 +338,51 @@ body.admin-shell-page #rescheduleModal .reschedule-calendar-day.selected {
     display: grid !important;
 }
 
+.filter-panel.always-visible-filter-panel {
+    display: grid !important;
+}
+
 .filter-panel input,
-.filter-panel select {
+.filter-panel select,
+.filter-search-wrap input {
     width: 100% !important;
     min-width: 0 !important;
 }
 
+.filter-search-wrap {
+    position: relative;
+    min-width: 190px;
+}
+
+.filter-search-wrap input {
+    padding-right: 42px !important;
+}
+
+.filter-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 999px;
+    background: #e9dfd0;
+    color: #5f4a37;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.filter-search-clear:hover,
+.filter-search-clear:focus-visible {
+    background: #6f8d6b;
+    color: #fff;
+    outline: none;
+}
+
 .filter-btn.active,
-#clearReservationFilters,
-#clearSalesFilters,
 #clearArchiveFilters {
     background: #6f8d6b !important;
     color: #fff !important;
@@ -375,6 +411,35 @@ body.admin-shell-page #rescheduleModal .reschedule-calendar-day.selected {
 .muted-text {
     color: #8b8277;
     font-style: italic;
+}
+
+body.admin-shell-page .sidebar .nav-icon {
+    display: none !important;
+}
+
+body.admin-shell-page .sidebar .nav-link,
+body.admin-shell-page .sidebar a:not(.sidebar-title) {
+    gap: 0 !important;
+    padding-left: 12px !important;
+}
+
+.reservation-table tr.reservation-calendar-highlight,
+.reservation-table tr.booking-completed-row.reservation-calendar-highlight {
+    background: linear-gradient(90deg, rgba(212, 175, 55, .34), rgba(255, 252, 239, .98)) !important;
+    color: #342b17 !important;
+    box-shadow: inset 5px 0 0 #d4af37;
+}
+
+.reservation-table tr.reservation-calendar-highlight:hover,
+.reservation-table tr.booking-completed-row.reservation-calendar-highlight:hover {
+    background: linear-gradient(90deg, rgba(212, 175, 55, .42), rgba(255, 252, 239, 1)) !important;
+}
+
+.reservation-table tr.reservation-calendar-highlight .stay-badge,
+.reservation-table tr.reservation-calendar-highlight .payment-badge,
+.reservation-table tr.reservation-calendar-highlight .status {
+    filter: none !important;
+    opacity: 1 !important;
 }
 
 

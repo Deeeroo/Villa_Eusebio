@@ -48,16 +48,19 @@ if ($currentAnnouncementResult) {
         <div class="admin-page-heading">
             <div>
                 <h2>Announcements</h2>
-                <p class="reservation-helper-text">Choose which announcement is visible to customers on the homepage.</p>
+                <p class="reservation-helper-text">Create or edit announcements, then use Show or Hide to control what customers see.</p>
             </div>
             <a href="announcements.php" class="admin-export-btn">New Announcement</a>
         </div>
         <?php if(isset($_GET['success'])): ?><div class="admin-alert success-alert"><?php echo htmlspecialchars($_GET['success']); ?></div><?php endif; ?>
 
         <div class="announcement-admin-grid">
-            <form class="settings-card announcement-editor" method="POST" action="../api/update_announcement.php" enctype="multipart/form-data">
+            <form id="announcementEditor" class="settings-card announcement-editor <?php echo $editing ? 'is-editing' : ''; ?>" method="POST" action="../api/update_announcement.php" enctype="multipart/form-data">
                 <input type="hidden" name="announcement_id" value="<?php echo (int)($editing['announcement_id'] ?? 0); ?>">
                 <h3><?php echo $editing ? 'Edit Announcement' : 'Create Announcement'; ?></h3>
+                <?php if ($editing): ?>
+                    <p class="announcement-editing-note">You are editing an existing announcement. Its current customer visibility will stay the same unless you use the Show or Hide button below.</p>
+                <?php endif; ?>
                 <label>Title</label>
                 <input name="title" maxlength="160" value="<?php echo htmlspecialchars($editing['title'] ?? ''); ?>" placeholder="Example: Pool maintenance notice" required>
                 <label>Message</label>
@@ -68,11 +71,10 @@ if ($currentAnnouncementResult) {
                 <?php endif; ?>
                 <input type="file" name="announcement_image" accept="image/*">
                 <p class="settings-note">Optional. Leave blank if this announcement does not need an image.</p>
-                <label class="announcement-visibility-check">
-                    <input type="checkbox" name="show_to_customers" value="1" <?php echo (!$editing || !empty($editing['is_active'])) ? 'checked' : ''; ?>>
-                    <span>Show this announcement to customers</span>
-                </label>
-                <button type="submit" class="modal-btn btn-approve">Save Announcement</button>
+                <div class="announcement-editor-actions">
+                    <button type="submit" class="modal-btn btn-approve">Save Announcement</button>
+                    <?php if ($editing): ?><a href="announcements.php" class="modal-btn btn-cancel-action">Cancel Edit</a><?php endif; ?>
+                </div>
             </form>
 
             <div class="announcement-preview-panel">
@@ -104,7 +106,7 @@ if ($currentAnnouncementResult) {
                         <small>Updated <?php echo htmlspecialchars(date('M d, Y h:i A', strtotime($row['updated_at']))); ?></small>
                     </div>
                     <div class="announcement-actions">
-                        <a class="modal-btn btn-approve" href="announcements.php?edit=<?php echo (int)$row['announcement_id']; ?>">Edit</a>
+                        <a class="modal-btn btn-approve announcement-edit-btn" href="announcements.php?edit=<?php echo (int)$row['announcement_id']; ?>#announcementEditor">Edit</a>
                         <form method="POST" action="../api/update_announcement.php">
                             <input type="hidden" name="action" value="<?php echo !empty($row['is_active']) ? 'hide' : 'show'; ?>">
                             <input type="hidden" name="announcement_id" value="<?php echo (int)$row['announcement_id']; ?>">

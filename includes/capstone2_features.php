@@ -26,6 +26,27 @@ function ve_ensure_capstone2_schema(mysqli $conn): void {
         }
     }
 
+    if (ve_table_exists($conn, 'payments')) {
+        if (!ve_column_exists($conn, 'payments', 'ocr_text')) {
+            @mysqli_query($conn, "ALTER TABLE payments ADD COLUMN ocr_text LONGTEXT NULL AFTER proof_of_payment");
+        }
+        if (!ve_column_exists($conn, 'payments', 'ocr_reference')) {
+            @mysqli_query($conn, "ALTER TABLE payments ADD COLUMN ocr_reference VARCHAR(120) NULL AFTER ocr_text");
+        }
+        if (!ve_column_exists($conn, 'payments', 'ocr_amount')) {
+            @mysqli_query($conn, "ALTER TABLE payments ADD COLUMN ocr_amount DECIMAL(10,2) NULL AFTER ocr_reference");
+        }
+        if (!ve_column_exists($conn, 'payments', 'ocr_status')) {
+            @mysqli_query($conn, "ALTER TABLE payments ADD COLUMN ocr_status VARCHAR(40) NOT NULL DEFAULT 'not_scanned' AFTER ocr_amount");
+        }
+        if (!ve_column_exists($conn, 'payments', 'ocr_notes')) {
+            @mysqli_query($conn, "ALTER TABLE payments ADD COLUMN ocr_notes TEXT NULL AFTER ocr_status");
+        }
+        if (!ve_column_exists($conn, 'payments', 'ocr_scanned_at')) {
+            @mysqli_query($conn, "ALTER TABLE payments ADD COLUMN ocr_scanned_at DATETIME NULL AFTER ocr_notes");
+        }
+    }
+
     @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS admin_blocks (
         block_id INT AUTO_INCREMENT PRIMARY KEY,
         blocked_date DATE NOT NULL,

@@ -241,7 +241,16 @@ $basePrice = getBasePrice($timeType);
 
             <div class="form-group">
                 <label for="guest_name">Full Name</label>
-                <input type="text" id="guest_name" name="guest_name" required>
+                <input
+                    type="text"
+                    id="guest_name"
+                    name="guest_name"
+                    pattern="[A-Za-z ]+"
+                    title="Use letters and spaces only."
+                    autocomplete="name"
+                    required
+                >
+                <small class="field-help">Letters and spaces only.</small>
             </div>
 
             <div class="form-group">
@@ -517,6 +526,8 @@ const proofInput = document.getElementById("proof_of_payment");
 const proofPreview = document.getElementById("proofPreview");
 const proofLabel = document.getElementById("proofLabel");
 const proofHelpText = document.getElementById("proofHelpText");
+const guestNameInput = document.getElementById("guest_name");
+const guestNamePattern = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
 
 const paymentMeta = {
     gcash: {
@@ -594,6 +605,10 @@ paymentMethodSelect.addEventListener("change", function() {
 proofInput.addEventListener('change', updateProofPreview);
 updateProofRequirement();
 
+guestNameInput.addEventListener("input", function() {
+    this.value = this.value.replace(/[^A-Za-z ]/g, "").replace(/\s{2,}/g, " ");
+});
+
 finalBookingForm.addEventListener("submit", function(e) {
     e.preventDefault();
 
@@ -605,6 +620,12 @@ finalBookingForm.addEventListener("submit", function(e) {
     const paymentMethod = document.getElementById("payment_method").value;
     const specialRequests = document.getElementById("special_requests").value.trim();
     const proofFile = proofInput.files && proofInput.files[0] ? proofInput.files[0] : null;
+
+    if (!guestNamePattern.test(guestName)) {
+        alert("Full name must contain letters and spaces only.");
+        document.getElementById("guest_name").focus();
+        return;
+    }
 
     if (guests < 1 || isNaN(guests)) {
         alert("Please enter valid number of guests.");

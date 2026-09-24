@@ -83,6 +83,7 @@ let bookedDates = {};
 let bookedMeta = {};
 const slotLabels = { day: 'Day Tour', overnight: 'Overnight Stay', '22hour': '22-Hour Stay', whole: 'Whole Day Blocked', blocked: 'Blocked' };
 const slotTimes = { day: '9:00 AM - 5:00 PM', overnight: '7:00 PM - 7:00 AM', '22hour': '9:00 AM - 7:00 AM', whole: 'Whole day unavailable', blocked: 'Unavailable' };
+const stayStartMinutes = { day: 9 * 60, overnight: 19 * 60, '22hour': 9 * 60 };
 let selectedCheckIn = '';
 let selectedCheckOut = '';
 
@@ -136,12 +137,31 @@ function isPastDate(dateString) {
     return checkDate < today;
 }
 
+function isToday(dateString) {
+    return dateString === formatDate(new Date());
+}
+
+function hasStayStartPassedToday(dateString, timeType) {
+    if (!isToday(dateString) || !stayStartMinutes.hasOwnProperty(timeType)) return false;
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return nowMinutes >= stayStartMinutes[timeType];
+}
+
+function getSameDayUnavailableMessage(timeType) {
+    if (timeType === 'day') return 'Day Tour can no longer be booked today because its 9:00 AM start time has passed.';
+    if (timeType === 'overnight') return 'Overnight Stay can no longer be booked today because its 7:00 PM start time has passed.';
+    if (timeType === '22hour') return '22-Hour Stay can no longer be booked today because its 9:00 AM start time has passed.';
+    return 'Selected stay type can no longer be booked today.';
+}
+
 function getSlotsForDate(dateString) {
     return bookedDates[dateString] || [];
 }
 
 function isDateUnavailable(dateString, timeType) {
     if (isPastDate(dateString)) return true;
+    if (hasStayStartPassedToday(dateString, timeType)) return true;
 
     const slots = getSlotsForDate(dateString);
 
@@ -217,6 +237,10 @@ function renderCalendar() {
             dayCell.classList.add('admin-blocked-day');
         }
 
+        if (selectedType && hasStayStartPassedToday(dateString, selectedType)) {
+            dayCell.title = (dayCell.title ? dayCell.title + '\n' : '') + getSameDayUnavailableMessage(selectedType);
+        }
+
         if (unavailable) {
             dayCell.classList.add('booked');
         } else {
@@ -241,6 +265,11 @@ function handleDateSelect(dateString) {
 
     if (isPastDate(dateString)) {
         showPopup('Past dates are not allowed.');
+        return;
+    }
+
+    if (hasStayStartPassedToday(dateString, timeType)) {
+        showPopup(getSameDayUnavailableMessage(timeType));
         return;
     }
 
@@ -341,6 +370,13 @@ reservationForm.addEventListener('submit', function(e) {
     if (!inputCheckIn.value || !inputCheckOut.value) {
         e.preventDefault();
         showPopup('Please select your stay type and date first.');
+        return;
+    }
+
+    const timeType = getSelectedTimeType();
+    if (hasStayStartPassedToday(inputCheckIn.value, timeType)) {
+        e.preventDefault();
+        showPopup(getSameDayUnavailableMessage(timeType));
     }
 });
 

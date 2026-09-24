@@ -162,10 +162,12 @@ if (isset($conn)) {
         <div class="chat-quick-wrap">
             <div class="chat-quick-title"><span></span><button type="button" class="quick-minimize-btn" onclick="toggleQuickQuestions()">+</button></div>
             <div class="chat-quick-grid quick-hidden" id="chatQuickGrid">
+                <button type="button" onclick="sendQuickReply('Booking procedure')"><span>&#10003;</span> Booking steps</button>
                 <button type="button" onclick="sendQuickReply('Check availability')"><span>&#128197;</span> Check availability</button>
-                <button type="button" onclick="sendQuickReply('Pricing information')"><span>&#9671;</span> Pricing information</button>
+                <button type="button" onclick="sendQuickReply('Rates and packages')"><span>&#9671;</span> Rates</button>
+                <button type="button" onclick="sendQuickReply('Payment methods')"><span>&#8369;</span> Payment</button>
                 <button type="button" onclick="sendQuickReply('Amenities')"><span>&#9962;</span> Amenities</button>
-                <button type="button" onclick="sendQuickReply('Contact details')"><span>&#9906;</span> Contact details</button>
+                <button type="button" onclick="sendQuickReply('House rules')"><span>&#8505;</span> House rules</button>
             </div>
         </div>
 
@@ -323,10 +325,17 @@ function addMessage(sender, text) {
     wrapper.className = 'chat-message ' + sender;
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble';
-    bubble.innerHTML = text + '<small>' + getCurrentTime() + '</small>';
+    const safeText = sender === 'user' ? escapeChatHtml(text) : text;
+    bubble.innerHTML = safeText + '<small>' + getCurrentTime() + '</small>';
     wrapper.appendChild(bubble);
     messages.appendChild(wrapper);
     scrollChatToBottom();
+}
+
+function escapeChatHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = String(text || '');
+    return div.innerHTML;
 }
 
 function showTypingIndicator() {
@@ -347,30 +356,127 @@ function removeTypingIndicator() {
     if (typing) typing.remove();
 }
 
+const villaChatbotInfo = {
+    phone: <?php echo json_encode(htmlspecialchars($footerPhone, ENT_QUOTES, 'UTF-8')); ?>,
+    email: <?php echo json_encode(htmlspecialchars($footerEmail, ENT_QUOTES, 'UTF-8')); ?>,
+    address: <?php echo json_encode(htmlspecialchars($footerAddress, ENT_QUOTES, 'UTF-8')); ?>
+};
+
+const botLinkStyle = 'color:#6B8E6B; text-decoration:underline; font-weight:700;';
+
+function botLink(href, label) {
+    return '<a href="' + href + '" style="' + botLinkStyle + '">' + label + '</a>';
+}
+
+function normalizeBotText(message) {
+    return String(message || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function escapeBotRegex(text) {
+    return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function botMessageHasAny(message, terms) {
+    return terms.some(function(term) {
+        if (term.length <= 3 && !term.includes(' ') && !term.includes('-')) {
+            return new RegExp('(^|\\s)' + escapeBotRegex(term) + '(?=\\s|$)').test(message);
+        }
+        return message.includes(term);
+    });
+}
+
 function getBotReply(message) {
-    const msg = message.toLowerCase();
-    if (msg.includes('price') || msg.includes('pricing') || msg.includes('rate') || msg.includes('cost')) {
-        return 'Our rates are:<br>&bull; Day Tour (9AM-5PM): PHP 7,000<br>&bull; Overnight Stay (7PM-7AM): PHP 10,000<br>&bull; 22-Hour Stay (9AM-7AM): PHP 13,000';
+    const msg = normalizeBotText(message);
+    const calendarLink = botLink('/capstone_system/pages/appointment.php', 'Calendar page');
+    const contactLink = botLink('/capstone_system/pages/contact.php', 'Contact page');
+    const galleryLink = botLink('/capstone_system/pages/gallery.php', 'Gallery page');
+    const reviewsLink = botLink('/capstone_system/pages/reviews.php', 'Reviews page');
+
+    if (msg === '') {
+        return 'You can ask me about booking steps, available dates, rates, payment methods, amenities, guest count, house rules, location, or contact details.';
     }
-    if (msg.includes('availability') || msg.includes('available') || msg.includes('book') || msg.includes('reservation')) {
-        return 'You can check available dates on our <a href="/capstone_system/pages/appointment.php" style="color:#6B8E6B; text-decoration:underline;">Calendar page</a>.<br><br>Open the calendar, choose your stay type, then select an available date to continue booking.';
+
+    if (botMessageHasAny(msg, ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'kumusta', 'kamusta'])) {
+        return 'Hello! Welcome to Villa Eusebio. I can help you check dates, understand the booking process, view rates, payment options, amenities, house rules, and contact details.';
     }
-    if (msg.includes('amenities') || msg.includes('karaoke') || msg.includes('wifi') || msg.includes('pool')) {
-        return 'We offer Karaoke, Parking Slot, Gas Stove/Char-Grill, Wifi Connection, Outdoor Shower, Kitchen Wares, Pet-friendly, Chiller, Water Dispenser, and Suraya Room.';
+
+    if (botMessageHasAny(msg, ['thank', 'thanks', 'salamat', 'appreciate'])) {
+        return 'You are welcome! I am happy to help with anything about Villa Eusebio or your reservation.';
     }
-    if (msg.includes('contact') || msg.includes('phone') || msg.includes('email') || msg.includes('number')) {
-        return <?php echo json_encode('You can contact us at:<br>Phone: ' . $footerPhone . '<br>Email: ' . $footerEmail); ?>;
+
+    if (botMessageHasAny(msg, ['bye', 'goodbye', 'see you'])) {
+        return 'Thank you for visiting Villa Eusebio online. We hope to welcome you soon!';
     }
-    if (msg.includes('location') || msg.includes('address') || msg.includes('where') || msg.includes('map')) {
-        return <?php echo json_encode('We are located at ' . $footerAddress); ?>;
+
+    if (botMessageHasAny(msg, ['staff', 'owner', 'agent', 'human', 'person', 'talk to someone', 'message you', 'call you'])) {
+        return 'For direct assistance, you may contact us here:<br>&bull; Phone: ' + villaChatbotInfo.phone + '<br>&bull; Email: ' + villaChatbotInfo.email + '<br><br>You can also use the ' + contactLink + ' for more contact details.';
     }
-    if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
-        return 'Hello! I can help you with pricing, availability, amenities, contact details, location, and booking steps.';
+
+    if (botMessageHasAny(msg, ['procedure', 'process', 'steps', 'how to book', 'how can i book', 'how do i book', 'book online', 'make a booking', 'reserve a date', 'reservation process'])) {
+        return 'Here is the booking procedure:<br>1. Go to the ' + calendarLink + '.<br>2. Choose your stay type: Day Tour, Overnight Stay, or 22-Hour Stay.<br>3. Select an available date.<br>4. Fill in your guest information and special requests.<br>5. Choose a payment method and upload the required proof or valid ID.<br>6. Submit the booking request and wait for admin approval.';
     }
-    if (msg.includes('thank')) {
-        return 'You are welcome! Let me know if you need anything else.';
+
+    if (botMessageHasAny(msg, ['today', 'same day', 'same-day', 'book today', 'walk in', 'walk-in', 'right now'])) {
+        return 'Same-day booking depends on the current time:<br>&bull; Day Tour starts at 9:00 AM, so it cannot be booked today after 9:00 AM.<br>&bull; Overnight Stay starts at 7:00 PM, so it cannot be booked today after 7:00 PM.<br>&bull; 22-Hour Stay starts at 9:00 AM, so it cannot be booked today after 9:00 AM.<br><br>The calendar will automatically disable same-day options once their start time has passed.';
     }
-    return 'I can help you with availability, pricing, amenities, contact details, location, and booking steps. Try typing a keyword like pricing, booking, amenities, contact, or location.';
+
+    if (botMessageHasAny(msg, ['price', 'pricing', 'rate', 'rates', 'cost', 'how much', 'package', 'packages', 'fee'])) {
+        return 'Our rates are:<br>&bull; Day Tour: PHP 7,000 (9:00 AM - 5:00 PM)<br>&bull; Overnight Stay: PHP 10,000 (7:00 PM - 7:00 AM next day)<br>&bull; 22-Hour Stay: PHP 13,000 (9:00 AM - 7:00 AM next day)<br><br>A PHP 2,000 reservation fee is required. Guests above 30 have an additional PHP 150 per extra guest.';
+    }
+
+    if (botMessageHasAny(msg, ['payment', 'pay', 'gcash', 'bdo', 'unionbank', 'bank', 'cash', 'proof', 'receipt', 'valid id', 'reservation fee', 'down payment', 'downpayment'])) {
+        return 'Available payment methods are GCash, BDO Bank Transfer, UnionBank, and Cash Payment.<br><br>A PHP 2,000 reservation fee is required to reserve the selected date. For online payments, upload payment proof. For cash payment, upload a valid legal ID before submitting the booking request.';
+    }
+
+    if (botMessageHasAny(msg, ['guest', 'guests', 'pax', 'head', 'heads', 'capacity', 'people', 'person', 'room', 'extra'])) {
+        return 'Guest guide:<br>&bull; Each room can fit around 10 to 15 people.<br>&bull; The resort booking limit is up to 50 guests.<br>&bull; Guests above 30 have an added fee of PHP 150 per extra guest.';
+    }
+
+    if (botMessageHasAny(msg, ['check in', 'check-in', 'checkout', 'check out', 'time', 'duration', 'day tour', 'overnight', '22 hour', '22-hour'])) {
+        return 'Stay schedules:<br>&bull; Day Tour: 9:00 AM - 5:00 PM<br>&bull; Overnight Stay: 7:00 PM - 7:00 AM next day<br>&bull; 22-Hour Stay: 9:00 AM - 7:00 AM next day';
+    }
+
+    if (botMessageHasAny(msg, ['available', 'availability', 'calendar', 'date', 'dates', 'schedule', 'slot', 'vacant', 'book', 'booking', 'reservation'])) {
+        return 'You can check available dates on our ' + calendarLink + '.<br><br>Choose your stay type first, then the calendar will show which dates are available, booked, blocked, or no longer available for same-day booking.';
+    }
+
+    if (botMessageHasAny(msg, ['cancel', 'cancellation', 'refund', 'refundable', 'reschedule', 'change date', 'move date'])) {
+        return 'Please review your details carefully before submitting. The booking page warns that once a booking request is submitted and confirmed, it is not eligible for cancellation or refund. For date changes or special cases, contact the resort directly so the admin can assist you.';
+    }
+
+    if (botMessageHasAny(msg, ['rules', 'policy', 'policies', 'allowed', 'not allowed', 'reminder', 'note'])) {
+        return 'Important reminders:<br>&bull; Bookings are subject to admin approval.<br>&bull; A PHP 2,000 reservation fee is required.<br>&bull; Once confirmed, bookings are not eligible for cancellation or refund.<br>&bull; Use the special request field if you need to tell the owner about add-ons or other concerns.';
+    }
+
+    if (botMessageHasAny(msg, ['special request', 'request', 'add on', 'add-on', 'addons', 'notes', 'pillow', 'blanket'])) {
+        return 'You can type special requests in the Notes or Special Requests field on the booking form. The admin will see it together with your reservation details.';
+    }
+
+    if (botMessageHasAny(msg, ['amenities', 'amenity', 'karaoke', 'wifi', 'wi-fi', 'pool', 'parking', 'kitchen', 'stove', 'grill', 'pet', 'pets', 'chiller', 'shower', 'water dispenser'])) {
+        return 'Amenities include Karaoke, parking slot, gas stove or char-grill, WiFi connection, outdoor shower, kitchen wares, pet-friendly accommodation, chiller, water dispenser, and Suraya Room.';
+    }
+
+    if (botMessageHasAny(msg, ['location', 'address', 'where', 'map', 'direction', 'directions', 'antipolo'])) {
+        return 'Villa Eusebio is located at ' + villaChatbotInfo.address + '.<br><br>You can also visit the ' + contactLink + ' for map and contact details.';
+    }
+
+    if (botMessageHasAny(msg, ['contact', 'phone', 'email', 'number', 'facebook', 'fb', 'instagram', 'ig', 'social'])) {
+        return 'You can contact Villa Eusebio here:<br>&bull; Phone: ' + villaChatbotInfo.phone + '<br>&bull; Email: ' + villaChatbotInfo.email + '<br>&bull; Facebook: @VillaEusebio<br><br>More details are available on the ' + contactLink + '.';
+    }
+
+    if (botMessageHasAny(msg, ['review', 'reviews', 'rating', 'ratings', 'feedback'])) {
+        return 'You can read guest feedback on our ' + reviewsLink + '. Reviews help future guests know what to expect before booking.';
+    }
+
+    if (botMessageHasAny(msg, ['photo', 'photos', 'picture', 'pictures', 'gallery', 'image', 'images'])) {
+        return 'You can view resort photos on our ' + galleryLink + '. It is a good place to check the rooms, amenities, and overall resort feel before booking.';
+    }
+
+    return 'I can help with booking procedures, available dates, rates, payment methods, same-day booking rules, guest capacity, amenities, house rules, location, contact details, gallery, and reviews. Try asking something like "How do I book?", "How much is overnight?", or "Can I book today?"';
 }
 
 function sendChatMessage() {

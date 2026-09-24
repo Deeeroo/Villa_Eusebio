@@ -1,7 +1,9 @@
 <?php
 include "../includes/db.php";
 include "../includes/booking_repository.php";
+require_once "../includes/ocr_helper.php";
 ve_ensure_capstone2_schema($conn);
+date_default_timezone_set('Asia/Manila');
 
 function respondError($message) {
     http_response_code(400);
@@ -22,6 +24,27 @@ function getExpectedCheckout($checkin, $timeType) {
         return date('Y-m-d', strtotime($checkin . ' +1 day'));
     }
     return '';
+}
+
+function hasStayStartPassed($checkin, $timeType) {
+    $startTimes = [
+        'day' => '09:00:00',
+        'overnight' => '19:00:00',
+        '22hour' => '09:00:00',
+    ];
+
+    if (!isset($startTimes[$timeType]) || $checkin !== date('Y-m-d')) {
+        return false;
+    }
+
+    return time() >= strtotime($checkin . ' ' . $startTimes[$timeType]);
+}
+
+function stayStartPassedMessage($timeType) {
+    if ($timeType === 'day') return 'Day Tour can no longer be booked today because its 9:00 AM start time has passed.';
+    if ($timeType === 'overnight') return 'Overnight Stay can no longer be booked today because its 7:00 PM start time has passed.';
+    if ($timeType === '22hour') return '22-Hour Stay can no longer be booked today because its 9:00 AM start time has passed.';
+    return 'Selected stay type can no longer be booked today.';
 }
 
 function uploadProofFile($fieldName, $paymentMethod) {
@@ -77,6 +100,7 @@ $timeType = trim($_POST['time_type'] ?? '');
 if ($name === '' || $email === '' || $mobile === '' || $address === '' || $guests === '' || $paymentMethod === '' || $checkin === '' || $checkout === '' || $timeType === '') {
     respondError('Please complete all required fields.');
 }
+if (!preg_match('/^[A-Za-z]+(?: [A-Za-z]+)*$/', $name)) respondError('Full name must contain letters and spaces only.');
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) respondError('Invalid email address.');
 if (!preg_match('/^(09\d{9}|\+639\d{9})$/', $mobile)) respondError('Invalid Philippine mobile number.');
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkin) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkout)) respondError('Invalid date format.');
@@ -89,6 +113,7 @@ if (empty($requiredSlots)) respondError('Invalid stay type.');
 
 $today = date('Y-m-d');
 if ($checkin < $today) respondError('Past dates are not allowed.');
+if (hasStayStartPassed($checkin, $timeType)) respondError(stayStartPassedMessage($timeType));
 
 $expectedCheckout = getExpectedCheckout($checkin, $timeType);
 if ($checkout !== $expectedCheckout) respondError('Selected check-out date does not match the chosen stay type.');
@@ -138,8 +163,10 @@ foreach ($requiredSlots as $slot) {
     }
 }
 
-$proofOfPayment = uploadProofFile('proof_of_payment', $paymentMethod);
 $reservationFeeAmount = 2000.00;
+$proofOfPayment = uploadProofFile('proof_of_payment', $paymentMethod);
+$proofPath = realpath(__DIR__ . '/../uploads/' . $proofOfPayment) ?: (__DIR__ . '/../uploads/' . $proofOfPayment);
+$ocrResult = ve_scan_payment_proof_ocr($proofPath, $paymentMethod, $reservationFeeAmount);
 $reservationFeeStatus = 'unpaid';
 $paymentStatus = 'unpaid';
 $status = 'pending';
@@ -173,11 +200,17 @@ try {
     $bookingId = mysqli_insert_id($conn);
     mysqli_stmt_close($bookingStmt);
 
-    $paymentStmt = mysqli_prepare($conn, "INSERT INTO payments (booking_id, payment_method, proof_of_payment, reservation_fee_amount, reservation_fee_status, remaining_balance, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $paymentStmt = mysqli_prepare($conn, "INSERT INTO payments (booking_id, payment_method, proof_of_payment, reservation_fee_amount, reservation_fee_status, remaining_balance, payment_status, ocr_status, ocr_text, ocr_reference, ocr_amount, ocr_notes, ocr_scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     if (!$paymentStmt) {
         throw new Exception(mysqli_error($conn));
     }
-    mysqli_stmt_bind_param($paymentStmt, 'issdsds', $bookingId, $paymentMethod, $proofOfPayment, $reservationFeeAmount, $reservationFeeStatus, $remainingBalance, $paymentStatus);
+    $ocrStatus = $ocrResult['status'];
+    $ocrText = $ocrResult['text'];
+    $ocrReference = $ocrResult['reference'];
+    $ocrAmount = $ocrResult['amount'];
+    $ocrNotes = $ocrResult['notes'];
+    $ocrScannedAt = $ocrResult['scanned_at'];
+    mysqli_stmt_bind_param($paymentStmt, 'issdsdssssdss', $bookingId, $paymentMethod, $proofOfPayment, $reservationFeeAmount, $reservationFeeStatus, $remainingBalance, $paymentStatus, $ocrStatus, $ocrText, $ocrReference, $ocrAmount, $ocrNotes, $ocrScannedAt);
     if (!mysqli_stmt_execute($paymentStmt)) {
         throw new Exception(mysqli_stmt_error($paymentStmt));
     }

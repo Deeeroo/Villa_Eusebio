@@ -124,13 +124,14 @@ foreach ($rows as $countRow) {
     </div>
 
     <div class="filter-dropdown-wrap">
-        <button type="button" class="filter-toggle-btn" id="reservationFilterToggle">Filters</button>
-        <div class="reservation-filters smart-filters filter-panel" id="reservationFilterPanel">
-            <input type="text" id="reservationSearch" placeholder="Search name or ID">
+        <div class="reservation-filters smart-filters filter-panel always-visible-filter-panel" id="reservationFilterPanel">
+            <div class="filter-search-wrap">
+                <input type="text" id="reservationSearch" placeholder="Search name or ID">
+                <button type="button" class="filter-search-clear" id="clearReservationSearch" aria-label="Clear reservation search">&times;</button>
+            </div>
             <select id="reservationStayFilter"><option value="all">All stay types</option><option value="day">Day Tour</option><option value="overnight">Overnight</option><option value="22hour">22-Hour</option></select>
             <select id="reservationStatusFilter"><option value="all">All status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
             <select id="reservationPaymentFilter"><option value="all">All payment types</option><option value="gcash">GCash</option><option value="bdo">BDO</option><option value="unionbank">UnionBank</option><option value="cash">Cash</option></select>
-            <button type="button" class="filter-btn active" id="clearReservationFilters">Clear</button>
         </div>
     </div>
 
@@ -179,6 +180,12 @@ foreach ($rows as $countRow) {
                     data-special_requests="<?php echo htmlspecialchars($row['special_requests'] ?: 'None'); ?>"
                     data-rejection_reason="<?php echo htmlspecialchars($row['rejection_reason'] ?? ''); ?>"
                     data-proof_of_payment="<?php echo htmlspecialchars($row['proof_of_payment'] ?? ''); ?>"
+                    data-ocr_status="<?php echo htmlspecialchars($row['ocr_status'] ?? 'not_scanned'); ?>"
+                    data-ocr_text="<?php echo htmlspecialchars($row['ocr_text'] ?? ''); ?>"
+                    data-ocr_reference="<?php echo htmlspecialchars($row['ocr_reference'] ?? ''); ?>"
+                    data-ocr_amount="<?php echo htmlspecialchars(isset($row['ocr_amount']) && $row['ocr_amount'] !== null ? number_format((float)$row['ocr_amount'], 2, '.', '') : ''); ?>"
+                    data-ocr_notes="<?php echo htmlspecialchars($row['ocr_notes'] ?? ''); ?>"
+                    data-ocr_scanned_at="<?php echo htmlspecialchars(!empty($row['ocr_scanned_at']) ? date('F d, Y h:i A', strtotime($row['ocr_scanned_at'])) : ''); ?>"
                 >
                     <td><?php echo htmlspecialchars($row['guest_name']); ?></td>
                     <td><?php echo htmlspecialchars($row['mobile']); ?></td>
@@ -399,6 +406,39 @@ document.addEventListener("DOMContentLoaded", function () {
         return '<div class="reservation-detail-item"><span>' + label + '</span><strong class="special-request-text">' + escapeHtml(value || 'N/A') + '</strong></div>';
     }
 
+    function formatOcrStatus(status) {
+        const labels = {
+            scanned: 'Scanned',
+            no_text: 'No text detected',
+            unavailable: 'OCR unavailable',
+            unsupported_file: 'Unsupported file',
+            failed: 'Scan failed',
+            not_applicable: 'Not applicable',
+            not_scanned: 'Not scanned'
+        };
+        return labels[String(status || 'not_scanned').toLowerCase()] || 'Not scanned';
+    }
+
+    function buildOcrPanel(data) {
+        const status = String(data.ocr_status || 'not_scanned').toLowerCase();
+        const amount = data.ocr_amount ? 'PHP ' + Number(data.ocr_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Not detected';
+        const reference = data.ocr_reference || 'Not detected';
+        const scannedAt = data.ocr_scanned_at || 'Not available';
+        const notes = data.ocr_notes || 'No OCR notes available.';
+        const rawText = data.ocr_text || '';
+
+        return '<div class="ocr-review-card ocr-status-' + escapeHtml(status) + '">' +
+            '<div class="ocr-review-header"><span>OCR Payment Verification</span><strong>' + escapeHtml(formatOcrStatus(status)) + '</strong></div>' +
+            '<div class="ocr-review-grid">' +
+            '<div><span>Detected Amount</span><strong>' + escapeHtml(amount) + '</strong></div>' +
+            '<div><span>Reference Number</span><strong>' + escapeHtml(reference) + '</strong></div>' +
+            '<div><span>Scanned At</span><strong>' + escapeHtml(scannedAt) + '</strong></div>' +
+            '</div>' +
+            '<p>' + escapeHtml(notes) + '</p>' +
+            (rawText ? '<details><summary>View OCR extracted text</summary><pre>' + escapeHtml(rawText) + '</pre></details>' : '') +
+            '</div>';
+    }
+
 
     function getProofUrl(proofValue) {
         if (!proofValue) return '';
@@ -570,6 +610,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1800);
     }
 
+    function applyCalendarRecordHighlight(row) {
+        row.classList.add('reservation-calendar-highlight');
+    }
+
     const highlightIdsRaw = sessionStorage.getItem('reservationHighlightIds');
     if (highlightIdsRaw) {
         try {
@@ -601,7 +645,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const checkInRaw = row.dataset.check_in_raw || '';
             const checkOutRaw = row.dataset.check_out_raw || '';
             if (highlightDate >= checkInRaw && highlightDate <= checkOutRaw) {
-                applyTemporaryHighlight(row);
+                applyCalendarRecordHighlight(row);
                 if (!firstDateMatch) firstDateMatch = row;
             }
         });
@@ -658,6 +702,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     modalDetails.innerHTML += '<div class="reservation-proof-preview"><p>Uploaded Payment Proof</p><a href="' + proofUrl + '" target="_blank">Open payment proof file</a></div>';
                 }
             }
+            modalDetails.innerHTML += buildOcrPanel(data);
 
             if (data.status === 'pending') {
                 modalActions.innerHTML =
@@ -702,15 +747,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    const reservationFilterToggle = document.getElementById('reservationFilterToggle');
-    const reservationFilterPanel = document.getElementById('reservationFilterPanel');
-    if (reservationFilterToggle && reservationFilterPanel) {
-        reservationFilterToggle.addEventListener('click', function() {
-            reservationFilterPanel.classList.toggle('show');
-            reservationFilterToggle.classList.toggle('active');
-        });
-    }
-
     function applyReservationFilters() {
         const search = (document.getElementById('reservationSearch').value || '').toLowerCase();
         const stay = document.getElementById('reservationStayFilter').value;
@@ -729,11 +765,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (el) el.addEventListener('input', applyReservationFilters);
         if (el) el.addEventListener('change', applyReservationFilters);
     });
-    document.getElementById('clearReservationFilters').addEventListener('click', function(){
-        document.getElementById('reservationSearch').value = '';
-        document.getElementById('reservationStayFilter').value = 'all';
-        document.getElementById('reservationStatusFilter').value = 'all';
-        document.getElementById('reservationPaymentFilter').value = 'all';
+    document.getElementById('clearReservationSearch').addEventListener('click', function(){
+        const searchInput = document.getElementById('reservationSearch');
+        searchInput.value = '';
+        searchInput.focus();
         applyReservationFilters();
     });
 

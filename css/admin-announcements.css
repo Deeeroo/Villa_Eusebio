@@ -135,25 +135,42 @@
     min-height: 180px;
 }
 
-.announcement-visibility-check {
-    display: flex !important;
-    align-items: center;
-    gap: 10px;
-    margin: 14px 0;
-    padding: 12px 14px;
-    border: 1px solid #ded2be;
-    border-radius: 10px;
-    background: #fffaf0;
-    color: #3f4d36;
-    font-weight: 800;
-    cursor: pointer;
+.announcement-editor {
+    scroll-margin-top: 24px;
 }
 
-.announcement-visibility-check input {
-    width: 18px !important;
-    height: 18px;
-    margin: 0;
-    accent-color: #3f6b37;
+.announcement-editor.is-editing {
+    border-color: #cdb073 !important;
+    box-shadow: 0 14px 30px rgba(136, 104, 34, .12) !important;
+}
+
+.announcement-editing-note {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #f7efe0;
+    color: #5f4a2f;
+    font-size: 13px;
+    line-height: 1.6;
+    font-weight: 700;
+}
+
+.announcement-editor-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.announcement-editor-actions .modal-btn {
+    margin-left: 0;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 900;
 }
 
 .announcement-check {
@@ -280,6 +297,11 @@
     background: #fffdf9;
 }
 
+.announcement-admin-item > div:first-child {
+    flex: 1;
+    min-width: 0;
+}
+
 .announcement-admin-item.active {
     border-left: 5px solid #d4af37;
 }
@@ -305,6 +327,21 @@
 
 .announcement-actions form {
     margin: 0;
+    display: flex;
+}
+
+.announcement-actions .modal-btn {
+    margin-left: 0;
+    min-width: 74px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 900;
+    box-sizing: border-box;
 }
 
 @media (max-width: 860px) {

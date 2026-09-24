@@ -48,11 +48,11 @@ if ($action === 'archive' && $id > 0) {
 
 $title = trim($_POST['title'] ?? '');
 $message = trim($_POST['message'] ?? '');
-$isActive = isset($_POST['show_to_customers']) ? 1 : 0;
+$isActive = 0;
 $imagePath = null;
 
 if ($id > 0) {
-    $stmt = mysqli_prepare($conn, "SELECT image_path FROM announcements WHERE announcement_id = ? LIMIT 1");
+    $stmt = mysqli_prepare($conn, "SELECT image_path, is_active FROM announcements WHERE announcement_id = ? LIMIT 1");
     if ($stmt) {
         mysqli_stmt_bind_param($stmt, 'i', $id);
         mysqli_stmt_execute($stmt);
@@ -60,16 +60,13 @@ if ($id > 0) {
         $existing = $result ? mysqli_fetch_assoc($result) : null;
         mysqli_stmt_close($stmt);
         $imagePath = $existing['image_path'] ?? null;
+        $isActive = !empty($existing['is_active']) ? 1 : 0;
     }
 }
 
 if ($title === '' || $message === '') {
     header('Location: ../pages/announcements.php?success=' . urlencode('Please add both a title and message.'));
     exit;
-}
-
-if ($isActive) {
-    mysqli_query($conn, "UPDATE announcements SET is_active = 0 WHERE archived_at IS NULL");
 }
 
 if (isset($_FILES['announcement_image']) && $_FILES['announcement_image']['error'] === UPLOAD_ERR_OK) {

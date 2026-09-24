@@ -1,5 +1,8 @@
 <?php
 include "../includes/db.php";
+require_once "../includes/capstone2_features.php";
+require_once "../includes/ocr_helper.php";
+ve_ensure_capstone2_schema($conn);
 
 $bookingId = isset($_POST['booking_id']) ? (int) $_POST['booking_id'] : 0;
 if ($bookingId <= 0) die('Invalid booking.');
@@ -18,9 +21,28 @@ $fileName = time() . '_' . $safeBaseName . '.' . $extension;
 $targetFile = '../uploads/' . $fileName;
 if (!move_uploaded_file($_FILES['proof']['tmp_name'], $targetFile)) die('File upload failed.');
 
-$stmt = mysqli_prepare($conn, "UPDATE payments SET proof_of_payment = ? WHERE booking_id = ?");
+$paymentMethod = '';
+$methodStmt = mysqli_prepare($conn, "SELECT payment_method FROM payments WHERE booking_id = ? LIMIT 1");
+if ($methodStmt) {
+    mysqli_stmt_bind_param($methodStmt, 'i', $bookingId);
+    mysqli_stmt_execute($methodStmt);
+    $methodResult = mysqli_stmt_get_result($methodStmt);
+    $methodRow = $methodResult ? mysqli_fetch_assoc($methodResult) : null;
+    $paymentMethod = $methodRow['payment_method'] ?? '';
+    mysqli_stmt_close($methodStmt);
+}
+
+$ocrResult = ve_scan_payment_proof_ocr(realpath($targetFile) ?: (__DIR__ . '/../uploads/' . $fileName), $paymentMethod, 2000.00);
+
+$stmt = mysqli_prepare($conn, "UPDATE payments SET proof_of_payment = ?, ocr_status = ?, ocr_text = ?, ocr_reference = ?, ocr_amount = ?, ocr_notes = ?, ocr_scanned_at = ? WHERE booking_id = ?");
 if (!$stmt) die('Database update failed.');
-mysqli_stmt_bind_param($stmt, 'si', $fileName, $bookingId);
+$ocrStatus = $ocrResult['status'];
+$ocrText = $ocrResult['text'];
+$ocrReference = $ocrResult['reference'];
+$ocrAmount = $ocrResult['amount'];
+$ocrNotes = $ocrResult['notes'];
+$ocrScannedAt = $ocrResult['scanned_at'];
+mysqli_stmt_bind_param($stmt, 'ssssdssi', $fileName, $ocrStatus, $ocrText, $ocrReference, $ocrAmount, $ocrNotes, $ocrScannedAt, $bookingId);
 if (mysqli_stmt_execute($stmt)) {
     echo 'Payment submitted successfully.';
 } else {

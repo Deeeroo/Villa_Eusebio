@@ -152,15 +152,16 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
     </div>
 
     <div class="filter-dropdown-wrap">
-        <button type="button" class="filter-toggle-btn" id="salesFilterToggle">Filters</button>
-        <div class="reservation-filters smart-filters filter-panel" id="salesFilterPanel">
-            <input type="text" id="salesSearch" placeholder="Search name or ID">
+        <div class="reservation-filters smart-filters filter-panel always-visible-filter-panel" id="salesFilterPanel">
+            <div class="filter-search-wrap">
+                <input type="text" id="salesSearch" placeholder="Search name or ID">
+                <button type="button" class="filter-search-clear" id="clearSalesSearch" aria-label="Clear sales search">&times;</button>
+            </div>
             <select id="salesStayFilter"><option value="all">All stay types</option><option value="day">Day Tour</option><option value="overnight">Overnight</option><option value="22hour">22-Hour</option></select>
             <select id="salesStatusFilter"><option value="all">All booking status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
             <select id="salesResFeeFilter"><option value="all">All reservation fee</option><option value="paid">Reservation Fee Paid</option><option value="unpaid">Reservation Fee Unpaid</option></select>
             <select id="salesPaymentStatusFilter"><option value="all">All payment status</option><option value="paid">Balance Paid</option><option value="unpaid">Balance Unpaid</option></select>
             <select id="salesPaymentTypeFilter"><option value="all">All payment types</option><option value="gcash">GCash</option><option value="bdo">BDO</option><option value="unionbank">UnionBank</option><option value="cash">Cash</option></select>
-            <button type="button" class="filter-btn active" id="clearSalesFilters">Clear</button>
         </div>
     </div>
 
@@ -213,6 +214,12 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
                     data-additional_guest_fee="₱<?php echo number_format($row['additional_guest_fee']); ?>"
                     data-remaining_balance="₱<?php echo number_format($row['remaining_balance']); ?>"
                     data-proof_of_payment="<?php echo htmlspecialchars($row['proof_of_payment'] ?? ''); ?>"
+                    data-ocr_status="<?php echo htmlspecialchars($row['ocr_status'] ?? 'not_scanned'); ?>"
+                    data-ocr_text="<?php echo htmlspecialchars($row['ocr_text'] ?? ''); ?>"
+                    data-ocr_reference="<?php echo htmlspecialchars($row['ocr_reference'] ?? ''); ?>"
+                    data-ocr_amount="<?php echo htmlspecialchars(isset($row['ocr_amount']) && $row['ocr_amount'] !== null ? number_format((float)$row['ocr_amount'], 2, '.', '') : ''); ?>"
+                    data-ocr_notes="<?php echo htmlspecialchars($row['ocr_notes'] ?? ''); ?>"
+                    data-ocr_scanned_at="<?php echo htmlspecialchars(!empty($row['ocr_scanned_at']) ? date('F d, Y h:i A', strtotime($row['ocr_scanned_at'])) : ''); ?>"
                 >
                     <td><?php echo $row['id']; ?></td>
                     <td><?php echo htmlspecialchars($row['guest_name']); ?></td>
@@ -400,6 +407,39 @@ document.addEventListener("DOMContentLoaded", function () {
         return '<div class="reservation-detail-item"><span>' + label + '</span><strong class="' + statusClass + '">' + displayValue + '</strong></div>';
     }
 
+    function formatOcrStatus(status) {
+        const labels = {
+            scanned: 'Scanned',
+            no_text: 'No text detected',
+            unavailable: 'OCR unavailable',
+            unsupported_file: 'Unsupported file',
+            failed: 'Scan failed',
+            not_applicable: 'Not applicable',
+            not_scanned: 'Not scanned'
+        };
+        return labels[String(status || 'not_scanned').toLowerCase()] || 'Not scanned';
+    }
+
+    function buildOcrPanel(data) {
+        const status = String(data.ocr_status || 'not_scanned').toLowerCase();
+        const amount = data.ocr_amount ? 'PHP ' + Number(data.ocr_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Not detected';
+        const reference = data.ocr_reference || 'Not detected';
+        const scannedAt = data.ocr_scanned_at || 'Not available';
+        const notes = data.ocr_notes || 'No OCR notes available.';
+        const rawText = data.ocr_text || '';
+
+        return '<div class="ocr-review-card ocr-status-' + escapeHtml(status) + '">' +
+            '<div class="ocr-review-header"><span>OCR Payment Verification</span><strong>' + escapeHtml(formatOcrStatus(status)) + '</strong></div>' +
+            '<div class="ocr-review-grid">' +
+            '<div><span>Detected Amount</span><strong>' + escapeHtml(amount) + '</strong></div>' +
+            '<div><span>Reference Number</span><strong>' + escapeHtml(reference) + '</strong></div>' +
+            '<div><span>Scanned At</span><strong>' + escapeHtml(scannedAt) + '</strong></div>' +
+            '</div>' +
+            '<p>' + escapeHtml(notes) + '</p>' +
+            (rawText ? '<details><summary>View OCR extracted text</summary><pre>' + escapeHtml(rawText) + '</pre></details>' : '') +
+            '</div>';
+    }
+
 
     function getProofUrl(proofValue) {
         if (!proofValue) return '';
@@ -511,6 +551,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     salesDetails.innerHTML += '<div class="reservation-proof-preview"><p>Uploaded Proof File</p><a href="' + proofUrl + '" target="_blank">Open uploaded file</a></div>';
                 }
             }
+            salesDetails.innerHTML += buildOcrPanel(data);
 
             if (String(data.status || '').toLowerCase() === 'rejected') {
                 salesActions.innerHTML = '<button type="button" class="modal-btn btn-cancel-action close-sales-only">Close</button>';
@@ -598,15 +639,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    const salesFilterToggle = document.getElementById('salesFilterToggle');
-    const salesFilterPanel = document.getElementById('salesFilterPanel');
-    if (salesFilterToggle && salesFilterPanel) {
-        salesFilterToggle.addEventListener('click', function() {
-            salesFilterPanel.classList.toggle('show');
-            salesFilterToggle.classList.toggle('active');
-        });
-    }
-
     function applySalesFilters() {
         const search = (document.getElementById('salesSearch').value || '').toLowerCase();
         const stay = document.getElementById('salesStayFilter').value;
@@ -629,9 +661,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (el) el.addEventListener('input', applySalesFilters);
         if (el) el.addEventListener('change', applySalesFilters);
     });
-    document.getElementById('clearSalesFilters').addEventListener('click', function(){
-        ['salesSearch'].forEach(id => document.getElementById(id).value = '');
-        ['salesStayFilter','salesStatusFilter','salesResFeeFilter','salesPaymentStatusFilter','salesPaymentTypeFilter'].forEach(id => document.getElementById(id).value = 'all');
+    document.getElementById('clearSalesSearch').addEventListener('click', function(){
+        const searchInput = document.getElementById('salesSearch');
+        searchInput.value = '';
+        searchInput.focus();
         applySalesFilters();
     });
 

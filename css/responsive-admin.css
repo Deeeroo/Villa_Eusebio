@@ -232,6 +232,109 @@ body {
     margin-bottom: 10px;
 }
 
+.ocr-review-card {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #ded4c5;
+    border-radius: 12px;
+    background: #fffaf0;
+}
+
+.ocr-review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.ocr-review-header span {
+    color: #6b5b45;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.ocr-review-header strong {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #e8dece;
+    color: #4d4034;
+    font-size: 12px;
+}
+
+.ocr-status-scanned .ocr-review-header strong {
+    background: #dcefdc;
+    color: #256c37;
+}
+
+.ocr-status-unavailable .ocr-review-header strong,
+.ocr-status-failed .ocr-review-header strong,
+.ocr-status-no_text .ocr-review-header strong {
+    background: #f4ddd9;
+    color: #a13f34;
+}
+
+.ocr-review-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ocr-review-grid div {
+    padding: 10px;
+    border: 1px solid #eadfcc;
+    border-radius: 10px;
+    background: #fffdf8;
+}
+
+.ocr-review-grid span {
+    display: block;
+    margin-bottom: 5px;
+    color: #8a7b64;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.ocr-review-grid strong {
+    color: #2f2a24;
+    font-size: 14px;
+}
+
+.ocr-review-card p {
+    margin: 12px 0 0;
+    color: #5f554b;
+    line-height: 1.6;
+}
+
+.ocr-review-card details {
+    margin-top: 12px;
+}
+
+.ocr-review-card summary {
+    cursor: pointer;
+    color: #356c3b;
+    font-weight: 900;
+}
+
+.ocr-review-card pre {
+    max-height: 220px;
+    overflow: auto;
+    white-space: pre-wrap;
+    margin: 10px 0 0;
+    padding: 12px;
+    border: 1px solid #e1d6c7;
+    border-radius: 10px;
+    background: #fff;
+    color: #3f372f;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 .modal-footer,
 .reservation-confirm-actions {
     position: sticky;
@@ -543,6 +646,23 @@ body {
     max-height: 120px !important;
     object-fit: contain !important;
     margin-bottom: 6px !important;
+}
+
+.ocr-review-card {
+    margin-top: 10px !important;
+    padding: 12px !important;
+}
+
+.ocr-review-grid {
+    gap: 8px !important;
+}
+
+.ocr-review-grid div {
+    padding: 8px !important;
+}
+
+.ocr-review-card pre {
+    max-height: 160px !important;
 }
 
 #modalActions,

@@ -24,8 +24,8 @@ $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     
     <link rel="icon" href="<?php echo htmlspecialchars($siteIconHref); ?>">
     
-    <link rel="stylesheet" href="/capstone_system/style.css?v=20260923-admin-subscribers2">
-    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260923-admin-archive-block1">
+    <link rel="stylesheet" href="/capstone_system/style.css?v=20260924-announcement-edit1">
+    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260924-ocr1">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 <script src="/capstone_system/js/async-ui.js?v=20260920-async1"></script>
