@@ -24,8 +24,8 @@ $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     
     <link rel="icon" href="<?php echo htmlspecialchars($siteIconHref); ?>">
     
-    <link rel="stylesheet" href="/capstone_system/style.css?v=20260924-announcement-edit1">
-    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260924-ocr1">
+    <link rel="stylesheet" href="/capstone_system/style.css?v=20260925-block-chatbot1">
+    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260925-block-chatbot1">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 <script src="/capstone_system/js/async-ui.js?v=20260920-async1"></script>
@@ -59,6 +59,32 @@ $isHomePage = in_array($currentPage, ['index.php', ''], true);
 <?php endif; ?>
 
 <script>
+function scrollToPublicSection(targetId, behavior) {
+    if (!targetId) return false;
+    const targetEl = document.getElementById(targetId);
+    if (!targetEl) return false;
+
+    const publicNav = document.querySelector('body:not(.admin-shell-page) .main-nav');
+    if (publicNav) {
+        publicNav.classList.remove('nav-hidden');
+        window.VillaAnchorScrollUntil = Date.now() + 1000;
+    }
+
+    const targetTop = targetEl.getBoundingClientRect().top + window.pageYOffset;
+    const fullBleedTargets = ['amenities', 'gallery'];
+    let scrollTop = targetTop;
+
+    if (!fullBleedTargets.includes(targetId)) {
+        const navRect = publicNav ? publicNav.getBoundingClientRect() : null;
+        const navHeight = navRect ? navRect.height : 0;
+        const navTop = navRect ? Math.max(navRect.top, 0) : 0;
+        scrollTop = targetTop - navHeight - navTop - 44;
+    }
+
+    window.scrollTo({ top: Math.max(scrollTop, 0), behavior: behavior || 'smooth' });
+    return true;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     document.body.classList.add("page-loaded");
 
@@ -112,6 +138,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const updatePublicNav = function() {
             if (!publicNav) return;
             const currentY = window.scrollY;
+            if (window.VillaAnchorScrollUntil && Date.now() < window.VillaAnchorScrollUntil) {
+                publicNav.classList.remove('nav-hidden');
+                lastScrollY = Math.max(currentY, 0);
+                navTicking = false;
+                return;
+            }
             if (currentY > 120 && currentY > lastScrollY + 6) {
                 publicNav.classList.add('nav-hidden');
             } else if (currentY < lastScrollY - 6 || currentY < 80) {
@@ -186,9 +218,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (finalTarget) {
         const scrollToSection = function() {
-            const targetEl = document.getElementById(finalTarget);
-            if (targetEl) {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (scrollToPublicSection(finalTarget, 'smooth')) {
                 sessionStorage.removeItem('pendingScrollTarget');
             }
         };
@@ -206,8 +236,9 @@ document.addEventListener("DOMContentLoaded", function() {
         else if (path.includes('/pages/gallery.php')) setActiveNav('gallery');
         else if (path.includes('/pages/reviews.php')) setActiveNav('reviews');
         else if (path.includes('/pages/contact.php')) setActiveNav('contact');
-        else if (hash === 'amenities' || hash === 'gallery') setActiveNav(hash);
-        else setActiveNav('home');
+        else if (isIndexPage && (hash === 'amenities' || hash === 'gallery')) setActiveNav(hash);
+        else if (isIndexPage) setActiveNav('home');
+        else setActiveNav('');
 
         if (isIndexPage) {
             const sectionKeys = ['amenities', 'gallery'];
@@ -265,9 +296,8 @@ document.addEventListener("click", function(e) {
             const isIndexPage = currentPath.endsWith('/index.php') || currentPath.endsWith('/capstone_system/') || currentPath === '/capstone_system';
 
             if (isIndexPage) {
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) {
-                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (scrollToPublicSection(targetId, 'smooth')) {
+                    history.replaceState(null, '', '#' + targetId);
                 }
             } else {
                 sessionStorage.setItem('pendingScrollTarget', targetId);
@@ -281,9 +311,8 @@ document.addEventListener("click", function(e) {
         if (href.startsWith("#")) {
             e.preventDefault();
             const targetId = href.substring(1);
-            const targetEl = document.getElementById(targetId);
-            if (targetEl) {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (scrollToPublicSection(targetId, 'smooth')) {
+                history.replaceState(null, '', '#' + targetId);
             }
             return;
         }

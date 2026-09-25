@@ -11,11 +11,11 @@
 @import url('./css/customer-layout.css?v=20260923-footer-email1');
 @import url('./css/homepage.css');
 @import url('./css/customer-calendar.css');
-@import url('./css/gallery.css');
+@import url('./css/gallery.css?v=20260924-gallery-spacing1');
 @import url('./css/amenities.css');
 @import url('./css/reviews.css');
 @import url('./css/contact.css');
-@import url('./css/chatbot.css');
+@import url('./css/chatbot.css?v=20260925-block-chatbot1');
 
 /* Admin pages */
 @import url('./css/admin-login.css');
@@ -26,3 +26,4 @@
 @import url('./css/admin-announcements.css?v=20260924-announcement-edit1');
 @import url('./css/admin-archive.css');
 @import url('./css/admin-settings.css?v=20260923-admin-subscribers2');
+@import url('./css/admin-luxury-dashboard.css?v=20260925-sidebar-quote1');

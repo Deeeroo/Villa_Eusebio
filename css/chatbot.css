@@ -281,54 +281,64 @@
 
 /* Concierge-style customer chat refresh */
 .chatbot-toggle {
-    width: 66px;
-    height: 66px;
-    background:
-        linear-gradient(145deg, #6f8a63, #8fa27d);
-    border: 7px solid rgba(239, 236, 226, .92);
-    color: #fffdf8;
-    box-shadow:
-        0 18px 40px rgba(28, 35, 24, .26),
-        inset 0 1px 0 rgba(255,255,255,.28);
-    transition: transform .22s ease, box-shadow .22s ease, opacity .18s ease;
+    width: 58px;
+    height: 58px;
+    background: rgba(255, 253, 248, .94);
+    border: 1px solid rgba(20, 61, 45, .16);
+    border-radius: 18px;
+    color: #143d2d;
+    box-shadow: 0 18px 38px rgba(14, 38, 28, .2);
+    animation: none;
+    backdrop-filter: blur(12px);
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, opacity .18s ease;
 }
 
 .chatbot-toggle::before {
-    content: "";
-    position: absolute;
-    inset: -11px;
-    border-radius: 50%;
-    border: 1px solid rgba(111, 138, 99, .28);
+    display: none;
 }
 
 .chatbot-toggle::after {
     content: "";
     position: absolute;
-    right: 9px;
-    bottom: 10px;
-    width: 10px;
-    height: 10px;
-    border: 2px solid #f4efe6;
+    right: 8px;
+    bottom: 8px;
+    width: 9px;
+    height: 9px;
+    border: 2px solid #fffdf8;
     border-radius: 50%;
-    background: #8fb56d;
+    background: #5f9d68;
+    box-shadow: 0 0 0 3px rgba(95, 157, 104, .14);
 }
 
 .chatbot-toggle span {
     position: relative;
     z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    font-size: 1.25rem;
+    display: block;
+    width: 29px;
+    height: 29px;
+    background: currentColor;
+    -webkit-mask: url('/capstone_system/assets/message-circle-reply.svg') center / contain no-repeat;
+    mask: url('/capstone_system/assets/message-circle-reply.svg') center / contain no-repeat;
+}
+
+.chatbot-toggle span::before {
+    display: none;
+}
+
+.chatbot-toggle span::after {
+    display: none;
 }
 
 .chatbot-toggle:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow:
-        0 22px 48px rgba(28, 35, 24, .32),
-        inset 0 1px 0 rgba(255,255,255,.3);
+    transform: translateY(-2px);
+    background: #fffdf8;
+    border-color: rgba(20, 61, 45, .26);
+    box-shadow: 0 22px 46px rgba(14, 38, 28, .24);
+}
+
+.chatbot-toggle:focus-visible {
+    outline: 3px solid rgba(95, 157, 104, .28);
+    outline-offset: 4px;
 }
 
 .chatbot-toggle.is-hidden {

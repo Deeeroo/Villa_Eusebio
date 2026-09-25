@@ -168,6 +168,79 @@ $basePrice = getBasePrice($timeType);
     line-height: 1.7;
 }
 
+.cash-payment-reminder {
+    display: none;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 18px;
+    border: 2px solid #d4af37;
+    background:
+        linear-gradient(135deg, rgba(255, 249, 220, .98), rgba(255, 244, 202, .96)),
+        #fff8df;
+    color: #4f3a12;
+    box-shadow: 0 18px 40px rgba(143, 104, 11, .16);
+}
+
+.cash-payment-reminder.show {
+    display: grid;
+}
+
+.cash-reminder-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: #2f5d34;
+    color: #fff8df;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 900;
+    box-shadow: 0 10px 24px rgba(47, 93, 52, .22);
+}
+
+.cash-reminder-content h3 {
+    margin: 0 0 8px;
+    color: #2f3f2a;
+    font-size: 20px;
+}
+
+.cash-reminder-content p {
+    margin: 0;
+    color: #60491b;
+    line-height: 1.65;
+}
+
+.cash-reminder-highlight {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(212, 175, 55, .55);
+    color: #9a6100;
+    font-weight: 900;
+}
+
+.cash-reminder-points {
+    margin: 12px 0 0;
+    padding-left: 18px;
+    color: #4f3a12;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.cash-reminder-points strong {
+    color: #2f5d34;
+}
+
+.final-cash-reminder {
+    margin-bottom: 18px;
+}
+
 @media (max-width: 768px) {
     .booking-modal-box {
         padding: 24px 18px;
@@ -180,6 +253,17 @@ $basePrice = getBasePrice($timeType);
     .booking-modal-title {
         font-size: 28px;
         padding-right: 30px;
+    }
+
+    .cash-payment-reminder {
+        grid-template-columns: 1fr;
+    }
+
+    .cash-reminder-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 24px;
     }
 }
 </style>
@@ -454,6 +538,20 @@ $basePrice = getBasePrice($timeType);
                     <img id="modalProofPreview" src="" alt="Payment proof preview">
                 </div>
 
+                <div class="cash-payment-reminder" id="cashBookingReminder">
+                    <div class="cash-reminder-icon">₱</div>
+                    <div class="cash-reminder-content">
+                        <h3>Cash Reservation Reminder</h3>
+                        <p>Cash payment bookings still need a reservation fee before the date can be secured.</p>
+                        <span class="cash-reminder-highlight">Minimum payment required: ₱2,000</span>
+                        <ul class="cash-reminder-points">
+                            <li>Upload a valid ID with this booking request.</li>
+                            <li>Coordinate with the owner/admin to settle at least <strong>₱2,000</strong>.</li>
+                            <li>Your selected date is confirmed only after admin verification.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="booking-modal-row">
                     <span>Notes</span>
                     <span id="modalSpecialRequests"></span>
@@ -479,6 +577,14 @@ $basePrice = getBasePrice($timeType);
             <div>
                 <h3>Important Notice</h3>
                 <p>Please confirm: once booked, this reservation will not be eligible for cancellation or refund. Continue only if all of your details are final and correct.</p>
+            </div>
+        </div>
+        <div class="cash-payment-reminder final-cash-reminder" id="cashFinalReminder">
+            <div class="cash-reminder-icon">₱</div>
+            <div class="cash-reminder-content">
+                <h3>Please prepare the reservation fee</h3>
+                <p>Because you selected cash payment, the resort must still receive and verify at least <strong>₱2,000</strong> before your reservation date is approved.</p>
+                <span class="cash-reminder-highlight">Do not leave the payment unsettled.</span>
             </div>
         </div>
         <div class="booking-modal-actions">
@@ -527,6 +633,8 @@ const proofPreview = document.getElementById("proofPreview");
 const proofLabel = document.getElementById("proofLabel");
 const proofHelpText = document.getElementById("proofHelpText");
 const guestNameInput = document.getElementById("guest_name");
+const cashBookingReminder = document.getElementById("cashBookingReminder");
+const cashFinalReminder = document.getElementById("cashFinalReminder");
 const guestNamePattern = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
 
 const paymentMeta = {
@@ -547,7 +655,7 @@ const paymentMeta = {
     },
     cash: {
         label: "Cash Payment",
-        note: "Cash payment will be handled at the resort or by your agreed arrangement with the owner.",
+        note: "Cash payment still requires at least ₱2,000 reservation fee. Upload a valid ID, then coordinate with the owner/admin for verification.",
         image: "../assets/cash.png"
     }
 };
@@ -680,6 +788,9 @@ finalBookingForm.addEventListener("submit", function(e) {
     document.getElementById("modalGuests").textContent = guests;
     document.getElementById("modalPaymentMethod").textContent = paymentMeta[paymentMethod] ? paymentMeta[paymentMethod].label : paymentMethod;
     document.getElementById("modalProofText").textContent = proofFile ? proofFile.name : (paymentMethod === "cash" ? "No valid ID uploaded" : "No payment proof uploaded");
+    const isCashPayment = paymentMethod === "cash";
+    cashBookingReminder.classList.toggle("show", isCashPayment);
+    cashFinalReminder.classList.toggle("show", isCashPayment);
     const modalProofPreviewWrap = document.getElementById("modalProofPreviewWrap");
     const modalProofPreview = document.getElementById("modalProofPreview");
     if (proofFile && proofFile.type && proofFile.type.startsWith("image/")) {

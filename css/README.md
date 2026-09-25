@@ -38,8 +38,16 @@ All project CSS now lives directly inside this `css` folder. The files are group
 - `responsive-customer.css` - customer page responsive fixes
 - `responsive-chatbot-payment.css` - chatbot/payment responsive sizing
 - `responsive-admin.css` - admin responsive fixes
-- `responsive-final-fixes.css` - latest responsive overrides
+- `responsive-final-fixes.css` - final import layer only; keep this small
+
+## Late Override Files
+
+These files are loaded through `responsive-final-fixes.css` after the normal page and responsive files. Use them only when a rule must override multiple older styles.
+
+- `capstone-feature-additions.css` - newer feature styles shared across customer/admin pages
+- `admin-functional-overrides.css` - late admin fixes for modals, filters, calendar blocking, archive menus, and records
+- `public-polish-overrides.css` - late public navigation, homepage hero, gallery modal, and reviews polish
 
 ## Editing Rule
 
-Edit the most specific file first. For example, gallery changes go in `gallery.css`, admin reservation table changes go in `admin-reservations-sales.css`, and mobile-only issues go in the matching `responsive-*.css` file.
+Edit the most specific file first. For example, gallery changes go in `gallery.css`, admin reservation table changes go in `admin-reservations-sales.css`, and mobile-only issues go in the matching `responsive-*.css` file. Only use the late override files when moving the rule would risk changing existing behavior.

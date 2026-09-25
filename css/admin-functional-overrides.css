@@ -1,0 +1,550 @@
+/*
+  Admin functional overrides
+  ------------------------------------------------------------
+  Late-loaded admin fixes for modals, filters, calendar blocking, archive menus, reservation highlighting, and compact records.
+*/
+
+/* Reschedule modal calendar fallback: keep this last so the picker never renders as plain text. */
+body.admin-shell-page #rescheduleModal .reservation-confirm-content {
+    width: min(700px, calc(100vw - 28px)) !important;
+}
+
+body.admin-shell-page #rescheduleModal .modal-body {
+    max-height: min(70vh, 680px) !important;
+    overflow-y: auto !important;
+}
+
+body.admin-shell-page #rescheduleModal #rescheduleStayTypeSelect {
+    width: 100% !important;
+    min-height: 42px !important;
+    margin: 6px 0 12px !important;
+    padding: 0 12px !important;
+    border: 1px solid #d8cbb9 !important;
+    border-radius: 7px !important;
+    background: #fffdf8 !important;
+    color: #2f3f2a !important;
+    font-weight: 800 !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-card {
+    margin-top: 12px !important;
+    padding: 14px !important;
+    border: 1px solid #e2d6c5 !important;
+    border-radius: 8px !important;
+    background: #fffdf8 !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-toolbar {
+    display: grid !important;
+    grid-template-columns: 40px minmax(0, 1fr) 40px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-toolbar strong {
+    text-align: center !important;
+    color: #2f3f2a !important;
+    font-family: 'Playfair Display', serif !important;
+    font-size: 1.12rem !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-toolbar button {
+    width: 40px !important;
+    height: 38px !important;
+    border: 1px solid #d8cbb9 !important;
+    border-radius: 7px !important;
+    background: #fffaf0 !important;
+    color: #385832 !important;
+    font-size: 1.25rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-legend {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 10px !important;
+    color: #6b6256 !important;
+    font-size: .74rem !important;
+    font-weight: 800 !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-legend span {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-legend i {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 3px !important;
+    display: inline-block !important;
+}
+
+body.admin-shell-page #rescheduleModal .legend-open {
+    background: #f8f5ee !important;
+    border: 1px solid #d8cbb9 !important;
+}
+
+body.admin-shell-page #rescheduleModal .legend-booked {
+    background: #d1d5db !important;
+}
+
+body.admin-shell-page #rescheduleModal .legend-selected {
+    background: #6b8e6b !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    border: 1px solid #e3dacb !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day-header,
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day {
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    border-right: 1px solid #e6ded2 !important;
+    border-bottom: 1px solid #e6ded2 !important;
+    box-sizing: border-box !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day-header {
+    min-height: 32px !important;
+    background: #6b8e6b !important;
+    color: #fff !important;
+    font-size: .72rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day {
+    background: #fffdf8 !important;
+    color: #3f463a !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day.empty {
+    background: #f7f2e8 !important;
+    cursor: default !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day.past,
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day.booked {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day.selected {
+    background: #6b8e6b !important;
+    color: #fff !important;
+    box-shadow: inset 0 0 0 2px #f8f5ee !important;
+}
+
+
+/* Final modal display, filter panel, settings, archive, chatbot z-index, and calendar block cleanup fixes. */
+
+/* capstone 2 final functional fixes */
+.modal.show,
+#blockDateModal.show {
+    display: flex !important;
+}
+
+#blockDateModal {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 18px !important;
+}
+
+.calendar-context-menu,
+.archive-context-menu {
+    min-width: 180px;
+}
+
+.filter-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: .3px;
+}
+
+.filter-toggle-btn::before {
+    content: "";
+    display: none;
+}
+
+.filter-panel {
+    margin-top: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px !important;
+    align-items: end;
+}
+
+.filter-panel.show {
+    display: grid !important;
+}
+
+.filter-panel.always-visible-filter-panel {
+    display: grid !important;
+}
+
+.filter-panel input,
+.filter-panel select,
+.filter-search-wrap input {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.filter-search-wrap {
+    position: relative;
+    min-width: 190px;
+}
+
+.filter-search-wrap input {
+    padding-right: 42px !important;
+}
+
+.filter-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 999px;
+    background: #e9dfd0;
+    color: #5f4a37;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.filter-search-clear:hover,
+.filter-search-clear:focus-visible {
+    background: #6f8d6b;
+    color: #fff;
+    outline: none;
+}
+
+.filter-btn.active,
+#clearArchiveFilters {
+    background: #6f8d6b !important;
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    padding: 10px 16px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+}
+
+
+.proof-thumb {
+    max-width: 210px !important;
+    max-height: 120px !important;
+    object-fit: contain !important;
+    border-radius: 12px !important;
+    border: 1px solid #eadcc9 !important;
+    background: #fff !important;
+    padding: 4px !important;
+}
+
+.detail-wide {
+    grid-column: 1 / -1;
+}
+
+.muted-text {
+    color: #8b8277;
+    font-style: italic;
+}
+
+body.admin-shell-page .sidebar .nav-icon {
+    display: none !important;
+}
+
+body.admin-shell-page .sidebar .nav-link,
+body.admin-shell-page .sidebar a:not(.sidebar-title) {
+    gap: 0 !important;
+    padding-left: 12px !important;
+}
+
+.reservation-table tr.reservation-calendar-highlight,
+.reservation-table tr.booking-completed-row.reservation-calendar-highlight {
+    background: linear-gradient(90deg, rgba(212, 175, 55, .34), rgba(255, 252, 239, .98)) !important;
+    color: #342b17 !important;
+    box-shadow: inset 5px 0 0 #d4af37;
+}
+
+.reservation-table tr.reservation-calendar-highlight:hover,
+.reservation-table tr.booking-completed-row.reservation-calendar-highlight:hover {
+    background: linear-gradient(90deg, rgba(212, 175, 55, .42), rgba(255, 252, 239, 1)) !important;
+}
+
+.reservation-table tr.reservation-calendar-highlight .stay-badge,
+.reservation-table tr.reservation-calendar-highlight .payment-badge,
+.reservation-table tr.reservation-calendar-highlight .status {
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+
+.chatbot-toggle {
+    pointer-events: auto !important;
+    z-index: 2147483000 !important;
+}
+
+.chatbot-box,
+.chatbot-backdrop {
+    z-index: 2147482999 !important;
+}
+
+/* capstone 2 calendar block cleanup */
+.extra-head-fee-red {
+    color: #dc2626 !important;
+    font-weight: 900 !important;
+}
+
+.calendar-day.admin-blocked-day,
+.calendar-day.admin-blocked-day.booked {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 18px;
+    background:
+        linear-gradient(135deg, rgba(255,250,240,.84), rgba(213, 221, 212, .94)),
+        #d5ddd4 !important;
+    color: #34423b !important;
+    border-color: #aab8aa !important;
+    text-decoration: none !important;
+    box-shadow: inset 0 0 0 2px rgba(82, 97, 87, .12);
+}
+
+.calendar-day.admin-blocked-day::before,
+.calendar-day.admin-blocked-day.booked::before {
+    content: "Blocked";
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    z-index: 2;
+    border-radius: 999px;
+    background: rgba(58, 75, 66, .88);
+    color: #fffaf0;
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 16px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.calendar-day.admin-blocked-day::after,
+.calendar-day.admin-blocked-day.booked::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: repeating-linear-gradient(
+        135deg,
+        transparent 0 10px,
+        rgba(73, 86, 80, .12) 10px 13px
+    );
+    pointer-events: none;
+}
+
+.customer-day-info {
+    display: none !important;
+}
+
+.badge-blocked {
+    background: #eef3ed !important;
+    color: #3f5948 !important;
+    border-color: #c7d4c7 !important;
+}
+
+.calendar-context-menu button {
+    width: 100%;
+    display: block;
+    text-align: left;
+    margin: 3px 0;
+    background: #6f8d6b;
+}
+
+.calendar-context-menu .danger-context-action {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+#adminCalendar .fc-daygrid-day.admin-blocked-day {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(255,250,240,.92), rgba(214, 222, 214, .96)),
+        #d6ded6 !important;
+    box-shadow:
+        inset 0 0 0 2px rgba(64, 77, 69, .18),
+        inset 0 4px 0 rgba(255,255,255,.22) !important;
+}
+
+#adminCalendar .fc-daygrid-day.admin-blocked-day::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        135deg,
+        transparent 0 11px,
+        rgba(54, 67, 61, .11) 11px 14px
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+#adminCalendar .fc-daygrid-day.admin-blocked-day::after {
+    content: attr(data-admin-day-label);
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 20px;
+    border-radius: 999px;
+    background: rgba(48, 62, 55, .88);
+    color: #fffaf0;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+#adminCalendar .fc-daygrid-day.admin-blocked-day .fc-daygrid-day-frame {
+    position: relative;
+    z-index: 1;
+}
+
+#adminCalendar .fc-daygrid-day.admin-blocked-day .fc-daygrid-day-number {
+    color: #2f3e37 !important;
+    font-weight: 900 !important;
+    text-decoration: none !important;
+}
+
+body.admin-shell-page .admin-dashboard {
+    animation: none !important;
+}
+
+body.admin-shell-page.admin-page-exiting .admin-dashboard {
+    animation: none !important;
+}
+
+@keyframes adminPageEnter {
+    from { opacity: 0; transform: translateY(18px) scale(.985); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes adminPageExit {
+    from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    to { opacity: 0; transform: translateY(-10px) scale(.99); filter: blur(3px); }
+}
+
+.reservation-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 18px 0 20px;
+}
+
+.reservation-summary-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fffdf9 0%, #f8f1e6 100%);
+    border: 1px solid #e5dccf;
+    border-left: 5px solid #6f8d6b;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 12px 26px rgba(55, 45, 34, .08);
+}
+
+.reservation-summary-card::after {
+    content: "";
+    position: absolute;
+    right: -24px;
+    top: -24px;
+    width: 86px;
+    height: 86px;
+    border-radius: 999px;
+    background: rgba(111, 141, 107, .13);
+}
+
+.reservation-summary-card span {
+    display: block;
+    color: #776b5f;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.reservation-summary-card strong {
+    display: block;
+    margin-top: 8px;
+    color: #2f2a24;
+    font-size: 28px;
+}
+
+.reservation-summary-card.rejected { border-left-color: #9ca3af; }
+.reservation-summary-card.rejected::after { background: rgba(156, 163, 175, .18); }
+.reservation-summary-card.incoming { border-left-color: #d4af37; }
+.reservation-summary-card.incoming::after { background: rgba(212, 175, 55, .18); }
+
+.filter-dropdown-wrap {
+    background: #fffdf9;
+    border: 1px solid #e5dccf;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.sales-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.sales-table th,
+.sales-table td {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+
+.sales-table th:nth-child(1),
+.sales-table td:nth-child(1) { width: 54px; }
+.sales-table th:nth-child(2),
+.sales-table td:nth-child(2) { width: 13%; }
+.sales-table th:nth-child(3),
+.sales-table td:nth-child(3),
+.sales-table th:nth-child(4),
+.sales-table td:nth-child(4) { width: 10%; }
+.sales-table th:nth-child(5),
+.sales-table td:nth-child(5) { width: 64px; }
+
+@media (max-width: 900px) {
+    .reservation-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}

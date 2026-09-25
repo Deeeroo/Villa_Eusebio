@@ -12,7 +12,7 @@ if ($galleryResult) {
 }
 ?>
 
-<section class="page-section">
+<section class="page-section gallery-page-section">
     <div class="container">
 
         <div class="section-heading">

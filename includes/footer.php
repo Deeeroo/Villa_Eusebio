@@ -126,8 +126,8 @@ if (isset($conn)) {
     </div>
 </footer>
 
-<div id="chatbotToggle" class="chatbot-toggle" onclick="openChatbot()">
-    <span>&#128172;</span>
+<div id="chatbotToggle" class="chatbot-toggle" role="button" tabindex="0" aria-label="Open chat assistant">
+    <span aria-hidden="true"></span>
 </div>
 
 <div id="chatbotBackdrop" class="chatbot-backdrop" onclick="closeChatbot()"></div>
@@ -513,6 +513,12 @@ window.addEventListener('DOMContentLoaded', function() {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
             openChatbot();
+        });
+        toggle.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openChatbot();
+            }
         });
     }
 });

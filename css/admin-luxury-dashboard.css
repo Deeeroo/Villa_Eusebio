@@ -1,0 +1,489 @@
+/*
+  Admin luxury resort dashboard theme
+  ------------------------------------------------------------
+  Late-loaded polish for a boutique resort/SaaS admin aesthetic:
+  forest green shell, cream surfaces, subtle gold accents, cleaner tables.
+*/
+
+body.admin-shell-page {
+    --admin-forest: #0f3d2b;
+    --admin-forest-2: #1e5a3f;
+    --admin-forest-3: #2f7451;
+    --admin-cream: #fffaf0;
+    --admin-warm: #f6efe2;
+    --admin-line: #e6dccd;
+    --admin-gold: #d4af37;
+    --admin-ink: #14231d;
+    --admin-muted: #647067;
+    --admin-shadow: 0 18px 44px rgba(28, 43, 34, .08);
+    background:
+        radial-gradient(circle at top right, rgba(47, 116, 81, .1), transparent 34%),
+        linear-gradient(135deg, #fffdf8 0%, #f6efe2 100%) !important;
+    color: var(--admin-ink);
+}
+
+body.admin-shell-page .sidebar {
+    left: 0;
+    width: 248px;
+    box-sizing: border-box;
+    padding: 20px 16px 122px;
+    border-right: 0;
+    background:
+        radial-gradient(circle at 20% 10%, rgba(212, 175, 55, .16), transparent 28%),
+        linear-gradient(180deg, rgba(5, 34, 23, .98), rgba(13, 62, 43, .96));
+    box-shadow: 18px 0 48px rgba(10, 38, 27, .18);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,250,240,.32) transparent;
+}
+
+body.admin-shell-page .sidebar.active {
+    left: -268px;
+}
+
+body.admin-shell-page .sidebar::after {
+    content: "\201C More than a stay,\A a better tomorrow.\201D";
+    white-space: pre-line;
+    left: 28px;
+    right: 28px;
+    bottom: 34px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+    background: none !important;
+    color: #fffaf0;
+    font-family: 'Playfair Display', serif;
+    font-size: .92rem;
+    font-style: italic;
+    line-height: 1.25;
+    text-align: left;
+    box-shadow: none !important;
+}
+
+body.admin-shell-page .sidebar-title.sidebar-brand-link {
+    display: block !important;
+    min-height: 82px;
+    margin: 0 0 18px !important;
+    padding: 56px 8px 0 !important;
+    background: url('/capstone_system/assets/icon.jpg') top center / 48px 48px no-repeat;
+    color: #fffaf0 !important;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.46rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-align: center;
+    text-shadow: 0 8px 18px rgba(0,0,0,.24);
+}
+
+body.admin-shell-page .sidebar-title.sidebar-brand-link::after {
+    content: "RESORT";
+    display: block;
+    margin-top: 6px;
+    color: rgba(255,250,240,.72);
+    font-family: Inter, sans-serif;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .32em;
+}
+
+body.admin-shell-page .sidebar .nav-icon {
+    display: none !important;
+}
+
+body.admin-shell-page .sidebar .nav-link,
+body.admin-shell-page .sidebar a:not(.sidebar-title) {
+    min-height: 40px;
+    margin-bottom: 6px;
+    padding: 0 16px !important;
+    border-radius: 8px;
+    color: rgba(255,250,240,.92) !important;
+    font-size: .9rem;
+    font-weight: 800;
+    gap: 0 !important;
+}
+
+body.admin-shell-page .sidebar .nav-link:hover,
+body.admin-shell-page .sidebar a:not(.sidebar-title):hover {
+    background: rgba(255,255,255,.1);
+    color: #fff !important;
+}
+
+body.admin-shell-page .sidebar a.active {
+    background: linear-gradient(135deg, rgba(47,116,81,.96), rgba(75,145,98,.9)) !important;
+    color: #fff !important;
+    box-shadow: 0 16px 28px rgba(4, 26, 18, .28);
+}
+
+body.admin-shell-page .admin-dashboard {
+    margin-left: 248px;
+    padding: 0 28px 36px;
+    background:
+        radial-gradient(circle at 86% 0, rgba(47,116,81,.12), transparent 32%),
+        #f7f2e8 !important;
+}
+
+body.admin-shell-page .admin-dashboard.shift {
+    margin-left: 0;
+}
+
+body.admin-shell-page .admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    margin: 0 -28px 24px;
+    padding: 16px 28px;
+    border: 0;
+    border-radius: 0;
+    background: rgba(255,253,248,.94);
+    box-shadow: 0 12px 34px rgba(24, 40, 31, .08);
+    backdrop-filter: blur(12px);
+}
+
+body.admin-shell-page .admin-brand h1 {
+    color: var(--admin-ink);
+    font-family: Inter, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .admin-brand p {
+    color: var(--admin-muted);
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+body.admin-shell-page .menu-btn,
+body.admin-shell-page .refresh-btn,
+body.admin-shell-page .logout-btn,
+body.admin-shell-page .admin-export-btn,
+body.admin-shell-page .panel-link-btn,
+body.admin-shell-page .modal-btn,
+body.admin-shell-page .sales-pay-btn,
+body.admin-shell-page .sales-paid-lock {
+    border-radius: 8px !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .menu-btn,
+body.admin-shell-page .admin-export-btn,
+body.admin-shell-page .btn-approve {
+    border: 1px solid var(--admin-forest) !important;
+    background: linear-gradient(135deg, var(--admin-forest), var(--admin-forest-2)) !important;
+    color: #fff !important;
+    box-shadow: 0 14px 28px rgba(15, 61, 43, .18);
+}
+
+body.admin-shell-page .refresh-btn,
+body.admin-shell-page .logout-btn,
+body.admin-shell-page .panel-link-btn {
+    border: 1px solid var(--admin-line) !important;
+    background: rgba(255,253,248,.92) !important;
+    color: var(--admin-forest) !important;
+    box-shadow: none !important;
+}
+
+body.admin-shell-page .admin-userbar::before {
+    width: 42px;
+    height: 42px;
+    border: 2px solid var(--admin-gold);
+}
+
+body.admin-shell-page .admin-userbar strong {
+    color: var(--admin-ink);
+    font-weight: 900;
+}
+
+body.admin-shell-page .main-content,
+body.admin-shell-page .settings-page,
+body.admin-shell-page .announcements-page,
+body.admin-shell-page .subscribers-page {
+    border: 0;
+    border-radius: 18px;
+    background: rgba(255,253,248,.72) !important;
+    box-shadow: none;
+    padding: 0;
+}
+
+body.admin-shell-page .admin-page-heading,
+body.admin-shell-page .settings-title-row,
+body.admin-shell-page .subscriber-heading {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 22px;
+    padding: 24px 28px;
+    border: 1px solid rgba(230,220,205,.86);
+    border-radius: 16px;
+    background:
+        linear-gradient(90deg, rgba(255,253,248,.98), rgba(255,253,248,.92) 62%, rgba(15,61,43,.12));
+    box-shadow: var(--admin-shadow);
+}
+
+body.admin-shell-page .admin-page-heading h2,
+body.admin-shell-page .settings-title-row h2,
+body.admin-shell-page .subscriber-heading h2,
+body.admin-shell-page .gallery-manager-heading h2 {
+    color: var(--admin-ink) !important;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    line-height: 1.02;
+}
+
+body.admin-shell-page .admin-page-heading h2 {
+    font-size: clamp(2rem, 3vw, 3.15rem);
+}
+
+body.admin-shell-page .reservation-helper-text,
+body.admin-shell-page .calendar-helper-text,
+body.admin-shell-page .admin-page-heading p,
+body.admin-shell-page .settings-title-row p {
+    color: var(--admin-muted) !important;
+    font-size: .96rem;
+    line-height: 1.55;
+}
+
+body.admin-shell-page .admin-stats-grid,
+body.admin-shell-page .reservation-summary-grid,
+body.admin-shell-page .sales-summary-grid {
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+body.admin-shell-page .admin-stat-card,
+body.admin-shell-page .reservation-summary-card,
+body.admin-shell-page .dashboard-panel,
+body.admin-shell-page .settings-card,
+body.admin-shell-page .table-container,
+body.admin-shell-page .admin-calendar-wrapper,
+body.admin-shell-page .filter-panel,
+body.admin-shell-page .announcement-admin-item,
+body.admin-shell-page .subscriber-manage-card {
+    border: 1px solid var(--admin-line) !important;
+    border-radius: 14px !important;
+    background: rgba(255,253,248,.92) !important;
+    box-shadow: var(--admin-shadow) !important;
+}
+
+body.admin-shell-page .admin-stat-card,
+body.admin-shell-page .reservation-summary-card {
+    min-height: 112px;
+    padding: 22px 22px 20px 104px !important;
+}
+
+body.admin-shell-page .admin-stat-card::before,
+body.admin-shell-page .reservation-summary-card::before {
+    content: "";
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #e7f3e7, #d5ead9);
+    box-shadow: inset 0 0 0 1px rgba(15,61,43,.05);
+}
+
+body.admin-shell-page .pending-card::before,
+body.admin-shell-page .reservation-summary-card.incoming::before {
+    background: linear-gradient(135deg, #fff2d8, #f7daa0);
+}
+
+body.admin-shell-page .confirmed-card::before,
+body.admin-shell-page .reservation-summary-card.approved::before,
+body.admin-shell-page .revenue-card::before {
+    background: linear-gradient(135deg, #daf0df, #b8dfc5);
+}
+
+body.admin-shell-page .reservation-summary-card.rejected::before {
+    background: linear-gradient(135deg, #ffe3e3, #f8b7b7);
+}
+
+body.admin-shell-page .stat-label,
+body.admin-shell-page .reservation-summary-card span {
+    color: var(--admin-ink) !important;
+    font-size: .94rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .stat-value,
+body.admin-shell-page .reservation-summary-card strong {
+    color: #071812 !important;
+    font-size: clamp(1.9rem, 3vw, 2.55rem) !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .stat-trend {
+    color: var(--admin-forest-2);
+}
+
+body.admin-shell-page .filter-dropdown-wrap {
+    margin: 0 0 18px;
+}
+
+body.admin-shell-page .filter-panel,
+body.admin-shell-page .always-visible-filter-panel {
+    display: grid !important;
+    grid-template-columns: minmax(240px, 1.4fr) repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: center;
+    padding: 14px !important;
+}
+
+body.admin-shell-page .filter-search-wrap input,
+body.admin-shell-page .filter-panel select,
+body.admin-shell-page .settings-card input,
+body.admin-shell-page .settings-card textarea,
+body.admin-shell-page .settings-card select,
+body.admin-shell-page .subscriber-search-form input {
+    min-height: 44px;
+    border: 1px solid var(--admin-line) !important;
+    border-radius: 8px !important;
+    background: rgba(255,253,248,.96) !important;
+    color: var(--admin-ink) !important;
+}
+
+body.admin-shell-page .filter-search-clear {
+    background: rgba(15,61,43,.08) !important;
+    color: var(--admin-forest) !important;
+}
+
+body.admin-shell-page .table-container {
+    padding: 14px !important;
+    overflow-x: auto;
+}
+
+body.admin-shell-page .reservation-table,
+body.admin-shell-page .sales-table,
+body.admin-shell-page .recent-reservations-table,
+body.admin-shell-page .admin-table {
+    border-collapse: separate !important;
+    border-spacing: 0;
+    width: 100%;
+}
+
+body.admin-shell-page .reservation-table th,
+body.admin-shell-page .sales-table th,
+body.admin-shell-page .recent-reservations-table th,
+body.admin-shell-page .admin-table th {
+    background: rgba(20, 35, 29, .05) !important;
+    color: var(--admin-ink) !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    text-align: left;
+    border-bottom: 0 !important;
+}
+
+body.admin-shell-page .reservation-table td,
+body.admin-shell-page .sales-table td,
+body.admin-shell-page .recent-reservations-table td,
+body.admin-shell-page .admin-table td {
+    color: #26352f;
+    border-bottom: 1px solid rgba(230,220,205,.9) !important;
+}
+
+body.admin-shell-page .reservation-table tbody tr,
+body.admin-shell-page .sales-table tbody tr,
+body.admin-shell-page .recent-reservations-table tbody tr {
+    transition: background .18s ease, box-shadow .18s ease;
+}
+
+body.admin-shell-page .reservation-table tbody tr:hover,
+body.admin-shell-page .sales-table tbody tr:hover,
+body.admin-shell-page .recent-reservations-table tbody tr:hover {
+    background: rgba(15,61,43,.045) !important;
+}
+
+body.admin-shell-page .status,
+body.admin-shell-page .stay-badge,
+body.admin-shell-page .payment-badge,
+body.admin-shell-page .announcement-status-dot {
+    border-radius: 999px !important;
+    padding: 7px 12px !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .status.approved {
+    background: #e3f3e8 !important;
+    color: #14733e !important;
+}
+
+body.admin-shell-page .status.pending {
+    background: #fff3d9 !important;
+    color: #986205 !important;
+}
+
+body.admin-shell-page .status.rejected {
+    background: #ffe7e7 !important;
+    color: #b91c1c !important;
+}
+
+body.admin-shell-page .admin-alert,
+body.admin-shell-page .admin-notice-bar {
+    border-radius: 12px !important;
+    box-shadow: var(--admin-shadow);
+}
+
+body.admin-shell-page .admin-notice-bar {
+    background: linear-gradient(135deg, var(--admin-forest), var(--admin-forest-2)) !important;
+}
+
+body.admin-shell-page .modal-content,
+body.admin-shell-page .reservation-modal-content,
+body.admin-shell-page .sales-modal-content,
+body.admin-shell-page .reservation-confirm-content {
+    border: 1px solid var(--admin-line) !important;
+    border-radius: 16px !important;
+    background: #fffdf8 !important;
+    box-shadow: 0 30px 90px rgba(10, 38, 27, .24) !important;
+}
+
+body.admin-shell-page .reservation-modal-header,
+body.admin-shell-page #galleryEditModal .reservation-modal-header {
+    background: linear-gradient(135deg, #fffaf0, #f3eadb) !important;
+    border-bottom: 1px solid var(--admin-line) !important;
+}
+
+@media (max-width: 1120px) {
+    body.admin-shell-page .sidebar {
+        width: 220px;
+        padding-bottom: 110px;
+    }
+    body.admin-shell-page .sidebar.active {
+        left: -240px;
+    }
+    body.admin-shell-page .admin-dashboard {
+        margin-left: 220px;
+    }
+}
+
+@media (max-width: 780px) {
+    body.admin-shell-page .sidebar {
+        left: -260px;
+        width: min(248px, 84vw);
+        padding-bottom: 122px;
+    }
+    body.admin-shell-page .sidebar.active {
+        left: 0;
+    }
+    body.admin-shell-page .admin-dashboard,
+    body.admin-shell-page .admin-dashboard.shift {
+        margin-left: 0;
+        padding: 12px;
+    }
+    body.admin-shell-page .admin-topbar {
+        margin: 0 0 16px;
+        padding: 14px;
+        border-radius: 14px;
+    }
+    body.admin-shell-page .admin-page-heading,
+    body.admin-shell-page .settings-title-row,
+    body.admin-shell-page .subscriber-heading {
+        padding: 20px;
+        background:
+            linear-gradient(90deg, rgba(255,253,248,.98), rgba(255,253,248,.92) 62%, rgba(15,61,43,.12));
+    }
+    body.admin-shell-page .filter-panel,
+    body.admin-shell-page .always-visible-filter-panel {
+        grid-template-columns: 1fr;
+    }
+}

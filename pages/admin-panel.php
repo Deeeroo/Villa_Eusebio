@@ -410,6 +410,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function clearDayCellStyles() {
         calendarEl.querySelectorAll('.fc-daygrid-day').forEach(function(cell) {
             cell.style.background = '';
+            cell.classList.remove(
+                'admin-blocked-day',
+                'admin-day-tour-day',
+                'admin-overnight-day',
+                'admin-full-day',
+                'admin-22hour-day'
+            );
+            cell.removeAttribute('data-admin-day-label');
         });
     }
 
@@ -430,14 +438,19 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!props) return;
 
             if (props.type === 'blocked') {
-                cell.style.background = '#9ca3af';
+                cell.classList.add('admin-blocked-day');
+                cell.dataset.adminDayLabel = 'Blocked';
             } else if (props.type === '22hour') {
+                cell.classList.add('admin-22hour-day');
                 cell.style.background = '#d4af37';
             } else if (Array.isArray(props.slots) && props.slots.includes('day') && props.slots.includes('overnight')) {
+                cell.classList.add('admin-full-day');
                 cell.style.background = 'linear-gradient(to bottom, #1e3a8a 0 50%, #f59e0b 50% 100%)';
             } else if (props.type === 'overnight') {
+                cell.classList.add('admin-overnight-day');
                 cell.style.background = '#1e3a8a';
             } else if (props.type === 'day') {
+                cell.classList.add('admin-day-tour-day');
                 cell.style.background = '#f59e0b';
             }
         });
@@ -453,11 +466,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!cell) return null;
         const previousBackground = cell.style.background;
         const previousClass = cell.className;
-        cell.style.background = background === undefined ? '#9ca3af' : background;
+        const previousLabel = cell.dataset.adminDayLabel || '';
+        if (background === undefined) {
+            cell.style.background = '';
+            cell.classList.add('admin-blocked-day');
+            cell.dataset.adminDayLabel = 'Saving';
+        } else {
+            cell.style.background = background;
+        }
         cell.classList.add('ve-optimistic-pending');
         return function() {
             cell.style.background = previousBackground;
             cell.className = previousClass;
+            if (previousLabel) {
+                cell.dataset.adminDayLabel = previousLabel;
+            } else {
+                cell.removeAttribute('data-admin-day-label');
+            }
         };
     }
 

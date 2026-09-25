@@ -1,0 +1,331 @@
+/*
+  Public polish overrides
+  ------------------------------------------------------------
+  Late-loaded customer-facing navigation, homepage hero, gallery modal, and reviews page refinements.
+*/
+
+/* Final public homepage hero/nav refresh */
+body:not(.admin-shell-page) .main-nav {
+    position: fixed !important;
+    top: 18px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: min(1100px, calc(100% - 40px)) !important;
+    padding: 16px 22px !important;
+    border-radius: 18px !important;
+    background: rgba(250, 248, 242, .92) !important;
+    border: 1px solid rgba(255,255,255,.55) !important;
+    box-shadow: 0 20px 50px rgba(10,24,14,.24) !important;
+    backdrop-filter: blur(14px) !important;
+    align-items: center !important;
+    transition: transform .36s ease, opacity .28s ease, box-shadow .28s ease !important;
+    will-change: transform !important;
+}
+
+body:not(.admin-shell-page) .main-nav.nav-hidden {
+    transform: translate(-50%, -145%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+body:not(.admin-shell-page) #amenities {
+    scroll-margin-top: 0;
+}
+
+body:not(.admin-shell-page) #gallery {
+    scroll-margin-top: 96px;
+}
+
+body:not(.admin-shell-page) .js-reveal {
+    opacity: 0;
+    transform: translateY(26px);
+}
+
+body:not(.admin-shell-page) .js-reveal.revealed-once {
+    opacity: 1;
+    transform: translateY(0);
+    animation: villaPublicFadeIn 1.35s cubic-bezier(.19, 1, .22, 1) backwards;
+    animation-delay: var(--reveal-delay, 0s);
+}
+
+@keyframes villaPublicFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(26px);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body:not(.admin-shell-page) .main-nav,
+    body:not(.admin-shell-page) .js-reveal.revealed-once {
+        transition: none !important;
+        animation: none !important;
+    }
+    body:not(.admin-shell-page) .js-reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (max-width: 860px) {
+    body:not(.admin-shell-page) #gallery {
+        scroll-margin-top: 132px;
+    }
+}
+
+body:not(.admin-shell-page) .nav-logo a {
+    display: grid !important;
+    grid-template-columns: 44px auto !important;
+    column-gap: 12px !important;
+    align-items: center !important;
+    font-size: inherit !important;
+}
+
+body:not(.admin-shell-page) .nav-logo a::before {
+    content: "" !important;
+    grid-row: 1 / span 2 !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 999px !important;
+    background: url('/capstone_system/assets/icon.jpg') center / cover !important;
+}
+
+body:not(.admin-shell-page) .logo-main {
+    color: #263f24 !important;
+    font-family: 'Playfair Display', serif !important;
+    font-size: 23px !important;
+    font-weight: 700 !important;
+    letter-spacing: .12em !important;
+    text-transform: uppercase !important;
+}
+
+body:not(.admin-shell-page) .logo-sub {
+    color: #768252 !important;
+    font-size: 10px !important;
+    letter-spacing: 2.2px !important;
+}
+
+body:not(.admin-shell-page) .nav-links {
+    gap: 28px !important;
+}
+
+body:not(.admin-shell-page) .nav-links a {
+    color: #24281d !important;
+    font-size: 10px !important;
+    letter-spacing: 2px !important;
+    font-weight: 800 !important;
+}
+
+body:not(.admin-shell-page) .nav-links a:first-child::after {
+    width: 0 !important;
+}
+
+body:not(.admin-shell-page) .nav-links a.active::after,
+body:not(.admin-shell-page) .nav-links a:hover::after {
+    width: 22px !important;
+}
+
+body:not(.admin-shell-page) .gallery-modal,
+body:not(.admin-shell-page) .gallery-modal-content {
+    overflow: hidden !important;
+}
+
+body:not(.admin-shell-page) .gallery-close {
+    display: none !important;
+}
+
+body:not(.admin-shell-page) .reviews-page-simple {
+    position: relative !important;
+    padding: 138px 0 86px !important;
+    background:
+        linear-gradient(180deg, rgba(245,243,239,.88), rgba(239,232,220,.96)),
+        url('/capstone_system/assets/table2.jpg') center / cover fixed no-repeat !important;
+    overflow: hidden !important;
+}
+
+body:not(.admin-shell-page) .reviews-page-simple::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 12% 20%, rgba(113,132,98,.18), transparent 28%),
+        radial-gradient(circle at 88% 80%, rgba(212,197,160,.22), transparent 30%);
+    pointer-events: none;
+}
+
+body:not(.admin-shell-page) .reviews-page-simple .container {
+    position: relative;
+    z-index: 1;
+}
+
+body:not(.admin-shell-page) .review-rating-summary {
+    width: min(440px, 100%) !important;
+    margin: 18px auto 0 !important;
+    padding: 16px 18px !important;
+    border: 1px solid rgba(138,154,127,.24) !important;
+    border-radius: 8px !important;
+    background: rgba(255,253,248,.82) !important;
+    box-shadow: 0 14px 30px rgba(48,43,36,.08) !important;
+    display: grid !important;
+    gap: 4px !important;
+}
+
+body:not(.admin-shell-page) .reviews-grid-simple {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 18px !important;
+    max-width: 1120px !important;
+    padding: 0 !important;
+}
+
+body:not(.admin-shell-page) .review-card-static {
+    border: 1px solid rgba(138,154,127,.22) !important;
+    border-radius: 8px !important;
+    background: rgba(255,253,248,.86) !important;
+    box-shadow: 0 18px 38px rgba(48,43,36,.1) !important;
+    text-align: left !important;
+}
+
+@media (max-width: 768px) {
+    body:not(.admin-shell-page) .reviews-page-simple {
+        background-attachment: scroll !important;
+    }
+}
+
+body:not(.admin-shell-page) .hero {
+    min-height: min(760px, 100vh) !important;
+    padding: 132px 20px 86px !important;
+    position: relative !important;
+    background: transparent !important;
+    overflow: hidden !important;
+    z-index: 1 !important;
+}
+
+body:not(.admin-shell-page) .video-wrapper {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    z-index: 0 !important;
+    background: #061009 !important;
+}
+
+body:not(.admin-shell-page) .hero-video {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    max-width: none !important;
+}
+
+body:not(.admin-shell-page) .hero::before {
+    background: linear-gradient(180deg, rgba(3,10,6,.18), rgba(3,10,6,.5)) !important;
+}
+
+body:not(.admin-shell-page) .hero-overlay {
+    background:
+        linear-gradient(180deg, rgba(3,10,6,.2) 0%, rgba(3,10,6,.38) 55%, rgba(3,10,6,.55) 100%),
+        radial-gradient(circle at 50% 42%, rgba(0,0,0,.04), rgba(0,0,0,.56) 72%) !important;
+    z-index: 1 !important;
+}
+
+body:not(.admin-shell-page) .hero-content {
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+body:not(.admin-shell-page) .hero h1,
+body:not(.admin-shell-page) .hero .font-script {
+    color: #fffdf7 !important;
+    font-size: clamp(4.6rem, 10vw, 8.4rem) !important;
+    line-height: .9 !important;
+    margin: 8px 0 16px !important;
+    text-shadow: 0 10px 34px rgba(0,0,0,.42) !important;
+}
+
+body:not(.admin-shell-page) .hero-sub {
+    color: #b4b779 !important;
+    font-size: clamp(1rem, 2vw, 1.55rem) !important;
+    letter-spacing: .38em !important;
+    margin-bottom: 22px !important;
+}
+
+body:not(.admin-shell-page) .hero-text {
+    color: rgba(255,255,255,.9) !important;
+    max-width: 690px !important;
+    text-shadow: 0 5px 16px rgba(0,0,0,.5) !important;
+}
+
+body:not(.admin-shell-page) .hero-yearline {
+    display: inline-grid !important;
+    grid-template-columns: auto 34px auto !important;
+    align-items: center !important;
+    gap: 18px !important;
+    color: #aeb477 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .26em !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+}
+
+body:not(.admin-shell-page) .hero-yearline i {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 999px !important;
+    background: url('/capstone_system/assets/icon.jpg') center / cover !important;
+}
+
+body:not(.admin-shell-page) .hero .btn {
+    min-width: 178px !important;
+    border-radius: 6px !important;
+    background: #8b8c55 !important;
+    border-color: rgba(198,204,142,.55) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.22) !important;
+}
+
+body:not(.admin-shell-page) .hero .btn.outline {
+    background: rgba(9,20,12,.32) !important;
+    border-color: rgba(154,162,92,.8) !important;
+    color: #fff !important;
+}
+
+@media (max-width: 860px) {
+    body:not(.admin-shell-page) .main-nav {
+        top: 10px !important;
+        width: calc(100% - 20px) !important;
+        padding: 12px 14px !important;
+        border-radius: 14px !important;
+        align-items: flex-start !important;
+    }
+    body:not(.admin-shell-page) .nav-links {
+        gap: 10px 14px !important;
+        justify-content: flex-end !important;
+    }
+}
+
+@media (max-width: 540px) {
+    body:not(.admin-shell-page) .main-nav {
+        position: absolute !important;
+        flex-direction: column !important;
+    }
+    body:not(.admin-shell-page) .nav-links {
+        justify-content: center !important;
+    }
+    body:not(.admin-shell-page) .hero {
+        min-height: 680px !important;
+        padding: 160px 18px 70px !important;
+    }
+    body:not(.admin-shell-page) .hero h1,
+    body:not(.admin-shell-page) .hero .font-script {
+        font-size: clamp(3.5rem, 18vw, 5.4rem) !important;
+    }
+}
