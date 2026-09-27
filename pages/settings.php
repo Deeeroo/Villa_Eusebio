@@ -34,9 +34,9 @@ if (empty($homePreviewImages)) {
 $previewHeroImage = $homePreviewImages[0]['image_path'] ?? $currentIcon;
 $previewHeroCaption = $homePreviewImages[0]['caption'] ?: 'Villa Eusebio';
 $previewHeroVideos = [
-    '/capstone_system/assets/bgvid.mp4',
-    '/capstone_system/assets/videopool.mp4',
-    '/capstone_system/assets/videopool2.mp4',
+    ve_url('assets/bgvid.mp4'),
+    ve_url('assets/videopool.mp4'),
+    ve_url('assets/videopool2.mp4'),
 ];
 $previewHeroVideoSrc = $previewHeroVideos[array_rand($previewHeroVideos)];
 $activeAnnouncementCount = 0;

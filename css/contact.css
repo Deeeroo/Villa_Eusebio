@@ -1,4 +1,4 @@
-﻿/*
+/*
   Customer contact
   ------------------------------------------------------------
   Contact page, location section, maps area, and contact information cards.
@@ -221,7 +221,7 @@
     padding: 144px 20px 82px;
     background:
         linear-gradient(180deg, rgba(245,243,239,.86), rgba(239,232,220,.94)),
-        url('/capstone_system/assets/table2.jpg') center / cover no-repeat;
+        url('../assets/table2.jpg') center / cover no-repeat;
     overflow: hidden;
 }
 
@@ -284,7 +284,7 @@
 .brand-icon {
     width: 46px;
     height: 46px;
-    background: url('/capstone_system/assets/icon.jpg') center / cover;
+    background: url('../assets/icon.jpg') center / cover;
     border: 2px solid rgba(255,255,255,.34);
     color: transparent;
     box-shadow: 0 12px 24px rgba(0,0,0,.16);
@@ -394,5 +394,3 @@
         padding: 22px;
     }
 }
-
-

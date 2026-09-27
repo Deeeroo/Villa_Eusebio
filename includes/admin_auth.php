@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/url_helper.php';
 const VE_ADMIN_SESSION_TIMEOUT = 1800;
 const VE_ADMIN_LOCKOUT_ATTEMPTS = 5;
 const VE_ADMIN_LOCKOUT_SECONDS = 300;
@@ -12,7 +13,7 @@ function admin_start_session(): void {
     $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     session_set_cookie_params([
         'lifetime' => 0,
-        'path' => '/capstone_system',
+        'path' => ve_base_path() ?: '/',
         'secure' => $secure,
         'httponly' => true,
         'samesite' => 'Lax',
@@ -54,7 +55,7 @@ function admin_end_session(): void {
 
 function admin_redirect_to_login(string $reason = ''): void {
     $query = $reason !== '' ? '?' . http_build_query(['error' => $reason]) : '';
-    header('Location: /capstone_system/pages/owner.php' . $query);
+    header('Location: ' . ve_url('pages/owner.php') . $query);
     exit;
 }
 

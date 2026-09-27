@@ -65,7 +65,7 @@ body.admin-shell-page .sidebar-title.sidebar-brand-link {
     min-height: 82px;
     margin: 0 0 18px !important;
     padding: 56px 8px 0 !important;
-    background: url('/capstone_system/assets/icon.jpg') top center / 48px 48px no-repeat;
+    background: url('../assets/icon.jpg') top center / 48px 48px no-repeat;
     color: #fffaf0 !important;
     font-family: 'Playfair Display', serif;
     font-size: 1.46rem !important;

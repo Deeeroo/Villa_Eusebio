@@ -176,7 +176,7 @@ nav {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: url('/capstone_system/assets/icon.jpg') center / cover;
+    background: url('../assets/icon.jpg') center / cover;
     border: 1px solid rgba(151,167,131,0.65);
     display: flex;
     align-items: center;
@@ -528,7 +528,7 @@ nav {
     padding: 132px 0 72px;
     background:
         linear-gradient(180deg, rgba(245,243,239,.9), rgba(238,231,219,.96)),
-        url('/capstone_system/assets/table2.jpg') center / cover no-repeat;
+        url('../assets/table2.jpg') center / cover no-repeat;
     overflow: hidden;
 }
 
@@ -774,7 +774,7 @@ nav {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: url('/capstone_system/assets/icon.jpg') center / cover;
+    background: url('../assets/icon.jpg') center / cover;
     box-shadow: inset 0 0 0 1px rgba(94, 98, 57, .22);
 }
 
@@ -975,5 +975,3 @@ nav {
 .mute-btn:hover {
     background: rgba(0, 0, 0, 0.7);
 }
-
-

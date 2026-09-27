@@ -1,5 +1,6 @@
 <?php
 require_once "../includes/admin_auth.php";
+require_once "../includes/url_helper.php";
 admin_start_session();
 admin_security_headers();
 if (admin_is_logged_in()) {
@@ -15,7 +16,7 @@ $waitSeconds = max(0, (int)($_GET['wait'] ?? 0));
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Owner Login | Villa Eusebio</title>
-<link rel="icon" type="image/jpeg" href="/capstone_system/assets/icon.jpg">
+<link rel="icon" type="image/jpeg" href="<?php echo htmlspecialchars(ve_url('assets/icon.jpg')); ?>">
 <style>
 :root {
     --portal-green: #174b33;
@@ -344,7 +345,7 @@ body {
 <body>
 <div class="owner-portal-shell">
     <div class="owner-login-toplink">
-        <a href="/capstone_system/index.php" aria-label="Back to website">
+        <a href="<?php echo htmlspecialchars(ve_url('index.php')); ?>" aria-label="Back to website">
             <span aria-hidden="true">&larr;</span>
             <span>Back to website</span>
         </a>
@@ -352,7 +353,7 @@ body {
 
     <main class="owner-login-page" aria-labelledby="ownerLoginTitle">
         <div class="owner-brand-block">
-            <img class="owner-brand-icon" src="/capstone_system/assets/admin-login-leaf.png" alt="Villa Eusebio leaf mark">
+            <img class="owner-brand-icon" src="<?php echo htmlspecialchars(ve_url('assets/admin-login-leaf.png')); ?>" alt="Villa Eusebio leaf mark">
             <h1>Villa Eusebio</h1>
             <p>Management Portal</p>
         </div>

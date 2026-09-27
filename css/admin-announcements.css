@@ -1,4 +1,4 @@
-﻿/*
+/*
   Admin announcements
   ------------------------------------------------------------
   Announcement page, homepage announcement bubble, and announcement modal styles.
@@ -20,7 +20,7 @@
 .announcement-preview-panel {
     background:
         linear-gradient(180deg, rgba(255,253,248,.96), rgba(247,238,221,.96)),
-        url('/capstone_system/assets/icon.jpg') top 18px right 18px / 70px 70px no-repeat !important;
+        url('../assets/icon.jpg') top 18px right 18px / 70px 70px no-repeat !important;
     border-radius: 16px;
 }
 
@@ -82,7 +82,7 @@
     width: min(540px, 100%);
     background:
         linear-gradient(180deg, rgba(255,253,248,.98), rgba(246,238,224,.98)),
-        url('/capstone_system/assets/icon.jpg') top 24px right 24px / 72px 72px no-repeat;
+        url('../assets/icon.jpg') top 24px right 24px / 72px 72px no-repeat;
     border: 1px solid #e6d7bd;
     border-radius: 18px;
     padding: 28px;
@@ -449,5 +449,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-

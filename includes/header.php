@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/url_helper.php';
 $currentPage = basename($_SERVER['PHP_SELF']);
 $adminPages = ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'audit_trail.php', 'announcements.php', 'subscribers.php'];
 if (in_array($currentPage, $adminPages, true)) {
@@ -19,7 +20,7 @@ if (isset($conn) && $conn instanceof mysqli) {
 }
 $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     ? $siteIconPath
-    : '/capstone_system/' . ltrim($siteIconPath, '/');
+    : ve_url($siteIconPath);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,11 +32,11 @@ $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     
     <link rel="icon" href="<?php echo htmlspecialchars($siteIconHref); ?>">
     
-    <link rel="stylesheet" href="/capstone_system/style.css?v=20260927-announcement-close-animation1">
-    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260927-export-button1">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('style.css?v=20260927-announcement-close-animation1')); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('responsive-fixes.css?v=20260927-export-button1')); ?>">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-<script src="/capstone_system/js/async-ui.js?v=20260920-async1"></script>
+<script src="<?php echo htmlspecialchars(ve_url('js/async-ui.js?v=20260920-async1')); ?>"></script>
 </head>
 <body class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'audit_trail.php', 'announcements.php', 'subscribers.php'], true) ? 'admin-shell-page' : ''; ?>">
 
@@ -47,24 +48,36 @@ $isHomePage = in_array($currentPage, ['index.php', ''], true);
 <?php if (!in_array($currentPage, $hideMainNavPages, true)): ?>
 <nav class="main-nav">
     <div class="nav-logo">
-        <a href="/capstone_system/index.php">
+        <a href="<?php echo htmlspecialchars(ve_url('index.php')); ?>">
             <div class="logo-main">Villa Eusebio</div>
             <div class="logo-sub">Antipolo Sanctuary</div>
         </a>
     </div>
 
     <div class="nav-links">
-        <a href="/capstone_system/index.php" data-nav="home" class="<?php echo $isHomePage ? 'active' : ''; ?>">Home</a>
-        <a href="/capstone_system/pages/appointment.php" data-nav="calendar" class="<?php echo $currentPage === 'appointment.php' ? 'active' : ''; ?>">Calendar</a>
-        <a href="/capstone_system/index.php#amenities" data-nav="amenities">Amenities</a>
-        <a href="/capstone_system/index.php#gallery" data-nav="gallery">Gallery</a>
-        <a href="/capstone_system/pages/reviews.php" data-nav="reviews" class="<?php echo $currentPage === 'reviews.php' ? 'active' : ''; ?>">Reviews</a>
-        <a href="/capstone_system/pages/contact.php" data-nav="contact" class="<?php echo $currentPage === 'contact.php' ? 'active' : ''; ?>">Contact</a>
+        <a href="<?php echo htmlspecialchars(ve_url('index.php')); ?>" data-nav="home" class="<?php echo $isHomePage ? 'active' : ''; ?>">Home</a>
+        <a href="<?php echo htmlspecialchars(ve_url('pages/appointment.php')); ?>" data-nav="calendar" class="<?php echo $currentPage === 'appointment.php' ? 'active' : ''; ?>">Calendar</a>
+        <a href="<?php echo htmlspecialchars(ve_url('index.php#amenities')); ?>" data-nav="amenities">Amenities</a>
+        <a href="<?php echo htmlspecialchars(ve_url('index.php#gallery')); ?>" data-nav="gallery">Gallery</a>
+        <a href="<?php echo htmlspecialchars(ve_url('pages/reviews.php')); ?>" data-nav="reviews" class="<?php echo $currentPage === 'reviews.php' ? 'active' : ''; ?>">Reviews</a>
+        <a href="<?php echo htmlspecialchars(ve_url('pages/contact.php')); ?>" data-nav="contact" class="<?php echo $currentPage === 'contact.php' ? 'active' : ''; ?>">Contact</a>
     </div>
 </nav>
 <?php endif; ?>
 
 <script>
+const villaBasePath = <?php echo json_encode(ve_base_path(), JSON_UNESCAPED_SLASHES); ?>;
+const villaIndexPath = <?php echo json_encode(ve_url('index.php'), JSON_UNESCAPED_SLASHES); ?>;
+const villaAdminBadgesPath = <?php echo json_encode(ve_url('api/admin_badges.php'), JSON_UNESCAPED_SLASHES); ?>;
+
+function isVillaIndexPage(pathname) {
+    const basePath = villaBasePath || '';
+    return pathname.endsWith('/index.php') ||
+        pathname === basePath ||
+        pathname === basePath + '/' ||
+        (basePath === '' && pathname === '/');
+}
+
 function scrollToPublicSection(targetId, behavior) {
     if (!targetId) return false;
     const targetEl = document.getElementById(targetId);
@@ -116,13 +129,13 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!sidebar) return;
 
             const badgeRequest = window.VillaAsync
-                ? window.VillaAsync.cachedJson('/capstone_system/api/admin_badges.php', {}, {
+                ? window.VillaAsync.cachedJson(villaAdminBadgesPath, {}, {
                     ttl: 5000,
                     cacheKey: 'adminBadges',
                     force: true,
                     onUpdate: applyAdminSidebarBadges
                 })
-                : fetch('/capstone_system/api/admin_badges.php').then(response => response.ok ? response.json() : null);
+                : fetch(villaAdminBadgesPath).then(response => response.ok ? response.json() : null);
 
             badgeRequest
                 .then(applyAdminSidebarBadges)
@@ -218,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const pendingTarget = sessionStorage.getItem("pendingScrollTarget");
     const currentPath = window.location.pathname;
-    const isIndexPage = currentPath.endsWith('/index.php') || currentPath.endsWith('/capstone_system/') || currentPath === '/capstone_system';
+    const isIndexPage = isVillaIndexPage(currentPath);
     const targetFromHash = window.location.hash ? window.location.hash.substring(1) : '';
     const finalTarget = isIndexPage ? (pendingTarget || targetFromHash) : '';
 
@@ -295,11 +308,11 @@ document.addEventListener("click", function(e) {
         }
         if (linkUrl.origin !== window.location.origin || ['mailto:', 'tel:'].includes(linkUrl.protocol)) return;
 
-        if (href.includes('/index.php#')) {
+        if (linkUrl.pathname.endsWith('/index.php') && linkUrl.hash) {
             e.preventDefault();
-            const targetId = href.split('#')[1] || '';
+            const targetId = linkUrl.hash.substring(1);
             const currentPath = window.location.pathname;
-            const isIndexPage = currentPath.endsWith('/index.php') || currentPath.endsWith('/capstone_system/') || currentPath === '/capstone_system';
+            const isIndexPage = isVillaIndexPage(currentPath);
 
             if (isIndexPage) {
                 if (scrollToPublicSection(targetId, 'smooth')) {
@@ -308,7 +321,7 @@ document.addEventListener("click", function(e) {
             } else {
                 sessionStorage.setItem('pendingScrollTarget', targetId);
                 startPageExit(function() {
-                    window.location = '/capstone_system/index.php#' + targetId;
+                    window.location = villaIndexPath + '#' + targetId;
                 });
             }
             return;

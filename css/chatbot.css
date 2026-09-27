@@ -1,4 +1,4 @@
-﻿/*
+/*
   Automated customer chatbot
   ------------------------------------------------------------
   Floating customer automated message box and keyword assistant styles.
@@ -317,8 +317,8 @@
     width: 29px;
     height: 29px;
     background: currentColor;
-    -webkit-mask: url('/capstone_system/assets/message-circle-reply.svg') center / contain no-repeat;
-    mask: url('/capstone_system/assets/message-circle-reply.svg') center / contain no-repeat;
+    -webkit-mask: url('../assets/message-circle-reply.svg') center / contain no-repeat;
+    mask: url('../assets/message-circle-reply.svg') center / contain no-repeat;
 }
 
 .chatbot-toggle span::before {
@@ -389,7 +389,7 @@
 .chatbot-avatar {
     width: 40px;
     height: 40px;
-    background: url('/capstone_system/assets/icon.jpg') center / cover;
+    background: url('../assets/icon.jpg') center / cover;
     border: 2px solid rgba(0,0,0,.15);
     box-shadow: 0 12px 24px rgba(0,0,0,.18);
 }
@@ -613,5 +613,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-

@@ -1,4 +1,5 @@
 <?php
+require_once "includes/url_helper.php";
 include "includes/header.php";
 include "includes/db.php";
 require_once "includes/capstone2_features.php";
@@ -18,9 +19,9 @@ if ($announcementResult) {
     $activeAnnouncement = mysqli_fetch_assoc($announcementResult);
 }
 $heroVideos = [
-    '/capstone_system/assets/bgvid.mp4',
-    '/capstone_system/assets/videopool.mp4',
-    '/capstone_system/assets/videopool2.mp4',
+    ve_url('assets/bgvid.mp4'),
+    ve_url('assets/videopool.mp4'),
+    ve_url('assets/videopool2.mp4'),
 ];
 $heroVideoSrc = $heroVideos[array_rand($heroVideos)];
 ?>

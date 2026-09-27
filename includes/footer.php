@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/url_helper.php';
 // footer settings values
 if (!isset($conn)) {
     $dbPath = __DIR__ . '/db.php';
@@ -46,11 +47,11 @@ if (isset($conn)) {
             <div class="footer-col">
                 <h4>Quick Links</h4>
                 <ul class="footer-links">
-                    <li><a href="/capstone_system/pages/appointment.php">Calendar</a></li>
-                    <li><a href="/capstone_system/index.php#amenities">Amenities</a></li>
-                    <li><a href="/capstone_system/pages/gallery.php">Gallery</a></li>
-                    <li><a href="/capstone_system/pages/reviews.php">Reviews</a></li>
-                    <li><a href="/capstone_system/pages/contact.php">Contact</a></li>
+                    <li><a href="<?php echo htmlspecialchars(ve_url('pages/appointment.php')); ?>">Calendar</a></li>
+                    <li><a href="<?php echo htmlspecialchars(ve_url('index.php#amenities')); ?>">Amenities</a></li>
+                    <li><a href="<?php echo htmlspecialchars(ve_url('pages/gallery.php')); ?>">Gallery</a></li>
+                    <li><a href="<?php echo htmlspecialchars(ve_url('pages/reviews.php')); ?>">Reviews</a></li>
+                    <li><a href="<?php echo htmlspecialchars(ve_url('pages/contact.php')); ?>">Contact</a></li>
                 </ul>
             </div>
 
@@ -101,7 +102,7 @@ if (isset($conn)) {
                     <p>Get updates, special offers, and resort news.</p>
                 </div>
             </div>
-            <form class="footer-subscribe" action="/capstone_system/api/subscribe.php" method="POST" novalidate onsubmit="handleFooterSubscribe(event, this);">
+            <form class="footer-subscribe" action="<?php echo htmlspecialchars(ve_url('api/subscribe.php')); ?>" method="POST" novalidate onsubmit="handleFooterSubscribe(event, this);">
                 <div class="footer-subscribe-control">
                     <input
                         type="email"
@@ -128,8 +129,8 @@ if (isset($conn)) {
         <div class="footer-bottom">
             <p>&copy; 2026 Villa Eusebio. All rights reserved.</p>
             <div class="footer-legal-links">
-                <a href="/capstone_system/pages/privacy-policy.php">Privacy Policy</a>
-                <a href="/capstone_system/pages/terms-of-use.php">Terms of Use</a>
+                <a href="<?php echo htmlspecialchars(ve_url('pages/privacy-policy.php')); ?>">Privacy Policy</a>
+                <a href="<?php echo htmlspecialchars(ve_url('pages/terms-of-use.php')); ?>">Terms of Use</a>
             </div>
             <small>Crafted with care for your comfort.</small>
         </div>
@@ -523,10 +524,10 @@ function botMessageHasAny(message, terms) {
 
 function getBotReply(message) {
     const msg = normalizeBotText(message);
-    const calendarLink = botLink('/capstone_system/pages/appointment.php', 'Calendar page');
-    const contactLink = botLink('/capstone_system/pages/contact.php', 'Contact page');
-    const galleryLink = botLink('/capstone_system/pages/gallery.php', 'Gallery page');
-    const reviewsLink = botLink('/capstone_system/pages/reviews.php', 'Reviews page');
+    const calendarLink = botLink(<?php echo json_encode(ve_url('pages/appointment.php'), JSON_UNESCAPED_SLASHES); ?>, 'Calendar page');
+    const contactLink = botLink(<?php echo json_encode(ve_url('pages/contact.php'), JSON_UNESCAPED_SLASHES); ?>, 'Contact page');
+    const galleryLink = botLink(<?php echo json_encode(ve_url('pages/gallery.php'), JSON_UNESCAPED_SLASHES); ?>, 'Gallery page');
+    const reviewsLink = botLink(<?php echo json_encode(ve_url('pages/reviews.php'), JSON_UNESCAPED_SLASHES); ?>, 'Reviews page');
 
     if (msg === '') {
         return 'You can ask me about booking steps, available dates, rates, payment methods, amenities, guest count, house rules, location, or contact details.';

@@ -1,4 +1,4 @@
-﻿/*
+/*
   Customer homepage
   ------------------------------------------------------------
   Hero, homepage content sections, and homepage gallery preview.
@@ -107,7 +107,7 @@
     border-radius: 50%;
     background:
         radial-gradient(circle, rgba(174,180,119,.2), transparent 62%),
-        url('/capstone_system/assets/icon.jpg') center / cover;
+        url('../assets/icon.jpg') center / cover;
     opacity: .85;
 }
 
@@ -348,7 +348,7 @@
     padding: 100px 0;
     text-align: center;
     background:
-        url('/capstone_system/assets/table2.jpg') center / cover no-repeat,
+        url('../assets/table2.jpg') center / cover no-repeat,
         var(--off-white);
     background-attachment: fixed, scroll;
     overflow: hidden;
@@ -584,5 +584,3 @@
     text-align: center;
     margin-top: 30px;
 }
-
-

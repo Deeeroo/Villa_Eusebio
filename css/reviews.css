@@ -1,4 +1,4 @@
-﻿/*
+/*
   Customer reviews
   ------------------------------------------------------------
   Review page layout, review cards, ratings, and review form polish.
@@ -144,7 +144,7 @@
     padding: 138px 0 86px;
     background:
         linear-gradient(180deg, rgba(245,243,239,.88), rgba(239,232,220,.96)),
-        url('/capstone_system/assets/table2.jpg') center / cover fixed no-repeat;
+        url('../assets/table2.jpg') center / cover fixed no-repeat;
     overflow: hidden;
 }
 
@@ -228,5 +228,3 @@
         background-attachment: scroll;
     }
 }
-
-

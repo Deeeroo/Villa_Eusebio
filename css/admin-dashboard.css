@@ -1,4 +1,4 @@
-﻿/*
+/*
   Admin dashboard
   ------------------------------------------------------------
   Modern admin dashboard cards, side panels, statistics, and dashboard visual system.
@@ -37,7 +37,7 @@ body.admin-shell-page .sidebar::after {
     border-radius: 14px;
     background:
         linear-gradient(180deg, rgba(255,250,240,.25), rgba(43,67,39,.82)),
-        url('/capstone_system/assets/icon.jpg') center 8px / 44px 44px no-repeat,
+        url('../assets/icon.jpg') center 8px / 44px 44px no-repeat,
         #496b42;
     color: #fff;
     font-family: 'Playfair Display', serif;
@@ -56,7 +56,7 @@ body.admin-shell-page .sidebar-title {
     font-family: 'Playfair Display', serif;
     font-size: 16px !important;
     line-height: 1.1;
-    background: url('/capstone_system/assets/icon.jpg') top center / 40px 40px no-repeat;
+    background: url('../assets/icon.jpg') top center / 40px 40px no-repeat;
 }
 
 body.admin-shell-page .sidebar .nav-link,
@@ -223,7 +223,7 @@ body.admin-shell-page .admin-userbar::before {
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    background: url('/capstone_system/assets/icon.jpg') center / cover;
+    background: url('../assets/icon.jpg') center / cover;
     border: 2px solid #d4af37;
     box-shadow: 0 8px 18px rgba(62,54,42,.14);
 }
@@ -726,5 +726,3 @@ body.admin-shell-page #adminCalendar .fc-scroller {
         padding-bottom: 18px;
     }
 }
-
-

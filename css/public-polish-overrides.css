@@ -93,7 +93,7 @@ body:not(.admin-shell-page) .nav-logo a::before {
     width: 42px !important;
     height: 42px !important;
     border-radius: 999px !important;
-    background: url('/capstone_system/assets/icon.jpg') center / cover !important;
+    background: url('../assets/icon.jpg') center / cover !important;
 }
 
 body:not(.admin-shell-page) .logo-main {
@@ -145,7 +145,7 @@ body:not(.admin-shell-page) .reviews-page-simple {
     padding: 138px 0 86px !important;
     background:
         linear-gradient(180deg, rgba(245,243,239,.88), rgba(239,232,220,.96)),
-        url('/capstone_system/assets/table2.jpg') center / cover fixed no-repeat !important;
+        url('../assets/table2.jpg') center / cover fixed no-repeat !important;
     overflow: hidden !important;
 }
 
@@ -280,7 +280,7 @@ body:not(.admin-shell-page) .hero-yearline i {
     width: 34px !important;
     height: 34px !important;
     border-radius: 999px !important;
-    background: url('/capstone_system/assets/icon.jpg') center / cover !important;
+    background: url('../assets/icon.jpg') center / cover !important;
 }
 
 body:not(.admin-shell-page) .hero .btn {
