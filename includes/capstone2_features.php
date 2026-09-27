@@ -22,7 +22,49 @@ function ve_table_exists(mysqli $conn, string $table): bool {
     return $result && mysqli_num_rows($result) > 0;
 }
 
+function ve_ensure_admin_schema(mysqli $conn): void {
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        full_name VARCHAR(150) NOT NULL,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        role ENUM('owner','admin','staff') NOT NULL DEFAULT 'owner',
+        last_login DATETIME NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    if (!ve_table_exists($conn, 'admins')) {
+        return;
+    }
+
+    $countResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM admins");
+    $countRow = $countResult ? mysqli_fetch_assoc($countResult) : ['total' => 0];
+    if ((int)($countRow['total'] ?? 0) > 0) {
+        return;
+    }
+
+    $username = trim((string)(getenv('ADMIN_USERNAME') ?: ''));
+    $password = (string)(getenv('ADMIN_PASSWORD') ?: '');
+    $fullName = trim((string)(getenv('ADMIN_FULL_NAME') ?: 'Villa Eusebio Owner'));
+
+    if ($username === '' || $password === '') {
+        error_log('Admin account is not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD to create the first admin account.');
+        return;
+    }
+
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $stmt = mysqli_prepare($conn, "INSERT INTO admins (full_name, username, password_hash, role) VALUES (?, ?, ?, 'owner')");
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, 'sss', $fullName, $username, $hash);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+    }
+}
+
 function ve_ensure_capstone2_schema(mysqli $conn): void {
+    ve_ensure_admin_schema($conn);
+
     if (ve_table_exists($conn, 'bookings')) {
         if (!ve_column_exists($conn, 'bookings', 'archived')) {
             @mysqli_query($conn, "ALTER TABLE bookings ADD COLUMN archived TINYINT(1) NOT NULL DEFAULT 0 AFTER status");

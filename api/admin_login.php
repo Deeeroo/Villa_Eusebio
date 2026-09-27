@@ -3,6 +3,8 @@ require_once "../includes/admin_auth.php";
 admin_start_session();
 admin_security_headers();
 include "../includes/db.php";
+require_once "../includes/capstone2_features.php";
+ve_ensure_capstone2_schema($conn);
 
 function admin_login_redirect(string $error, int $wait = 0): void {
     $params = ['error' => $error];
