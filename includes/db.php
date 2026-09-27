@@ -6,12 +6,22 @@ if (!function_exists('mysqli_init')) {
     die('Database driver is not available.');
 }
 
-$dbHost = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
+$isRailway = getenv('RAILWAY_ENVIRONMENT') !== false || getenv('RAILWAY_SERVICE_NAME') !== false;
+$dbUrl = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: '';
+$dbHostEnv = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '';
+$dbNameEnv = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: '';
+
+if ($isRailway && $dbUrl === '' && ($dbHostEnv === '' || $dbNameEnv === '')) {
+    error_log('Database is not configured. Add a Railway MySQL service and connect its MYSQLHOST, MYSQLPORT, MYSQLUSER, MYSQLPASSWORD, and MYSQLDATABASE variables.');
+    http_response_code(500);
+    die('Database is not configured.');
+}
+
+$dbHost = $dbHostEnv !== '' ? $dbHostEnv : 'localhost';
 $dbPort = (int)(getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: 3306);
 $dbUser = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
 $dbPass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASSWORD') ?: '';
-$dbName = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'villa_eusebio_db';
-$dbUrl = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: '';
+$dbName = $dbNameEnv !== '' ? $dbNameEnv : 'villa_eusebio_db';
 
 if ($dbUrl !== '') {
     $parts = parse_url($dbUrl);
