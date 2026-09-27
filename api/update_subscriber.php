@@ -1,8 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    die('Unauthorized access.');
-}
+require_once '../includes/admin_auth.php';
+admin_require_login(false);
 
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
@@ -15,13 +13,7 @@ function redirect_subscribers(string $message, bool $isError = false): void {
 }
 
 function save_subscriber_log(mysqli $conn, string $note): void {
-    $adminId = (int)($_SESSION['admin_id'] ?? 0);
-    $stmt = mysqli_prepare($conn, "INSERT INTO settings_logs (admin_id, setting_area, action_note) VALUES (?, 'Subscribers', ?)");
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, 'is', $adminId, $note);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
-    }
+    ve_audit_log($conn, 'Subscribers', $note);
 }
 
 $action = $_POST['action'] ?? '';

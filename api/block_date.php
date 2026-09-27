@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/admin_auth.php';
+admin_start_session();
 $isAsyncRequest = (
     isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'fetch'
 ) || (
@@ -25,11 +26,9 @@ function block_date_label(string $dateValue): string {
     return $time ? date('l, F j, Y', $time) : $dateValue;
 }
 
-if (!isset($_SESSION['admin_logged_in'])) {
-    block_date_response(false, 'Unauthorized access.', 401);
-}
+admin_require_login(false);
 include '../includes/db.php';
-require_once '../includes/capstone2_features.php';
+require_once '../includes/booking_availability.php';
 ve_ensure_capstone2_schema($conn);
 
 $action = trim($_POST['action'] ?? 'create');
@@ -38,7 +37,7 @@ $blockedDate = trim($_POST['blocked_date'] ?? '');
 $stayType = trim($_POST['stay_type'] ?? 'day');
 $reason = trim($_POST['reason'] ?? '');
 
-$allowedTypes = ['day', 'overnight', '22hour', 'whole'];
+$allowedTypes = ve_allowed_block_types();
 
 if ($action === 'delete') {
     if ($blockId <= 0) {
@@ -69,25 +68,9 @@ if ($reason === '') {
     block_date_response(false, 'Please enter a reason before blocking this date.', 422);
 }
 
-$approvedStmt = mysqli_prepare($conn, "
-    SELECT bs.booking_id
-    FROM booked_dates bd
-    INNER JOIN bookings bs ON bs.booking_id = bd.booking_id
-    WHERE bd.booked_date = ?
-        AND bs.status = 'approved'
-        AND COALESCE(bs.archived, 0) = 0
-    LIMIT 1
-");
-if ($approvedStmt) {
-    mysqli_stmt_bind_param($approvedStmt, 's', $blockedDate);
-    mysqli_stmt_execute($approvedStmt);
-    $approvedResult = mysqli_stmt_get_result($approvedStmt);
-    $hasApprovedBooking = $approvedResult && mysqli_num_rows($approvedResult) > 0;
-    mysqli_stmt_close($approvedStmt);
-
-    if ($hasApprovedBooking) {
-        block_date_response(false, 'Cannot block ' . block_date_label($blockedDate) . ' because it already has an approved reservation.', 409);
-    }
+$blockAvailability = ve_check_block_availability($conn, $blockedDate, $stayType, $action === 'update' ? $blockId : 0);
+if (!$blockAvailability['available']) {
+    block_date_response(false, $blockAvailability['message'], 409);
 }
 
 if ($action === 'update' && $blockId > 0) {

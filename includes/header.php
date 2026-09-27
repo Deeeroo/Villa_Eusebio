@@ -1,4 +1,11 @@
 <?php
+$currentPage = basename($_SERVER['PHP_SELF']);
+$adminPages = ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'audit_trail.php', 'announcements.php', 'subscribers.php'];
+if (in_array($currentPage, $adminPages, true)) {
+    require_once __DIR__ . '/admin_auth.php';
+    admin_require_login(true);
+}
+
 if (!isset($conn) || !($conn instanceof mysqli)) {
     $dbPath = __DIR__ . '/db.php';
     if (file_exists($dbPath)) {
@@ -24,17 +31,16 @@ $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     
     <link rel="icon" href="<?php echo htmlspecialchars($siteIconHref); ?>">
     
-    <link rel="stylesheet" href="/capstone_system/style.css?v=20260925-block-chatbot1">
-    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260925-block-chatbot1">
+    <link rel="stylesheet" href="/capstone_system/style.css?v=20260927-announcement-close-animation1">
+    <link rel="stylesheet" href="/capstone_system/responsive-fixes.css?v=20260927-export-button1">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 <script src="/capstone_system/js/async-ui.js?v=20260920-async1"></script>
 </head>
-<body class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'announcements.php', 'subscribers.php'], true) ? 'admin-shell-page' : ''; ?>">
+<body class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'audit_trail.php', 'announcements.php', 'subscribers.php'], true) ? 'admin-shell-page' : ''; ?>">
 
 <?php
-$currentPage = basename($_SERVER['PHP_SELF']);
-$hideMainNavPages = ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'announcements.php', 'subscribers.php'];
+$hideMainNavPages = $adminPages;
 $isHomePage = in_array($currentPage, ['index.php', ''], true);
 ?>
 

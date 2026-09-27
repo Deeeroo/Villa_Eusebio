@@ -5,6 +5,12 @@ ve_ensure_capstone2_schema($conn);
 
 $mode = $_GET['mode'] ?? 'dates';
 $excludeBookingId = isset($_GET['exclude_booking_id']) ? (int)$_GET['exclude_booking_id'] : 0;
+$bookingsPaused = ve_bookings_paused($conn);
+$bookingPauseMessage = ve_booking_pause_message($conn);
+$systemMeta = [
+    'bookings_paused' => $bookingsPaused,
+    'booking_pause_message' => $bookingPauseMessage
+];
 
 $sql = "
     SELECT
@@ -32,7 +38,8 @@ if (!$result) {
     header('Content-Type: application/json');
     echo json_encode($mode === 'events' ? [] : [
         'dates' => new stdClass(),
-        'meta' => new stdClass()
+        'meta' => new stdClass(),
+        'system' => $systemMeta
     ]);
     exit;
 }
@@ -161,6 +168,7 @@ if ($mode === 'events') {
 } else {
     echo json_encode([
         'dates' => $dates,
-        'meta' => $dateMeta
+        'meta' => $dateMeta,
+        'system' => $systemMeta
     ]);
 }

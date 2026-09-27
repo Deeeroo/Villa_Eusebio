@@ -4,6 +4,8 @@
 $timeType = $_GET['time_type'] ?? '';
 $checkIn = $_GET['check_in_date'] ?? '';
 $checkOut = $_GET['check_out_date'] ?? '';
+$bookingsPaused = isset($conn) && $conn instanceof mysqli ? ve_bookings_paused($conn) : false;
+$bookingPauseMessage = isset($conn) && $conn instanceof mysqli ? ve_booking_pause_message($conn) : 'Bookings are temporarily closed. Please check again later or contact Villa Eusebio for assistance.';
 
 function getStayLabel($type) {
     if ($type === 'day') return 'Day Tour';
@@ -29,6 +31,22 @@ function getBasePrice($type) {
 $stayLabel = getStayLabel($timeType);
 $stayTime = getStayTime($timeType);
 $basePrice = getBasePrice($timeType);
+
+if ($bookingsPaused):
+?>
+
+<div class="booking-wrapper booking-closed-wrapper">
+    <div class="booking-closed-card">
+        <span class="booking-closed-kicker">No bookings for now</span>
+        <h1>Bookings are temporarily closed</h1>
+        <p><?php echo htmlspecialchars($bookingPauseMessage); ?></p>
+        <a class="back-link" href="../pages/appointment.php">Back to Calendar</a>
+    </div>
+</div>
+
+<?php
+exit;
+endif;
 ?>
 
 <style>
@@ -641,17 +659,17 @@ const paymentMeta = {
     gcash: {
         label: "GCash",
         note: "Scan this QR image to pay through GCash.",
-        image: "../assets/qrcodesample.png"
+        image: "../assets/gcashqrcode.jpg"
     },
     bdo: {
         label: "BDO Bank Transfer",
         note: "Scan this QR image or replace it with your official BDO payment QR.",
-        image: "../assets/qrcodesample.png"
+        image: "../assets/bdoqrcode.jpg"
     },
     unionbank: {
         label: "UnionBank",
         note: "Scan this QR image or replace it with your official UnionBank payment QR.",
-        image: "../assets/qrcodesample.png"
+        image: "../assets/ubqrcode.jpg"
     },
     cash: {
         label: "Cash Payment",
@@ -883,7 +901,5 @@ guestLimitModal.addEventListener("click", function(e) {
     }
 });
 </script>
-
-<?php include "../includes/footer.php"; ?>
 
 

@@ -5,7 +5,7 @@ All project CSS now lives directly inside this `css` folder. The files are group
 ## Entry Files
 
 - `../style.css` loads desktop/default styles.
-- `../responsive-fixes.css` loads mobile, tablet, zoom, and final sizing fixes.
+- `../responsive-fixes.css` loads responsive and late-stage styles in a fixed order.
 
 ## Main CSS Files
 
@@ -38,15 +38,15 @@ All project CSS now lives directly inside this `css` folder. The files are group
 - `responsive-customer.css` - customer page responsive fixes
 - `responsive-chatbot-payment.css` - chatbot/payment responsive sizing
 - `responsive-admin.css` - admin responsive fixes
-- `responsive-final-fixes.css` - final import layer only; keep this small
+- `responsive-final-fixes.css` - import-only layer for late overrides; keep this small
 
 ## Late Override Files
 
-These files are loaded through `responsive-final-fixes.css` after the normal page and responsive files. Use them only when a rule must override multiple older styles.
+These files are loaded through `responsive-final-fixes.css` after the normal page and responsive files. Use them only when a rule must safely override several older styles.
 
-- `capstone-feature-additions.css` - newer feature styles shared across customer/admin pages
-- `admin-functional-overrides.css` - late admin fixes for modals, filters, calendar blocking, archive menus, and records
-- `public-polish-overrides.css` - late public navigation, homepage hero, gallery modal, and reviews polish
+- `capstone-feature-additions.css` - shared feature styles used by customer/admin pages
+- `admin-functional-overrides.css` - admin rules that must load after older admin styles
+- `public-polish-overrides.css` - customer-facing rules that must load after older public styles
 
 ## Editing Rule
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
   Admin calendar
   ------------------------------------------------------------
   FullCalendar and admin booking-calendar display styles.
@@ -144,14 +144,14 @@
     background: #C6A96B !important; /* gold tone */
 }
 
-/* REMOVE HARSH SHADOW */
+/* Calendar shell */
 .fc-scrollgrid {
     border-radius: 12px;
     overflow: hidden;
     border: none;
 }
 
-/* CALENDAR CONTAINER */
+/* Calendar container */
 #calendar {
     background: white;
     border-radius: 16px;

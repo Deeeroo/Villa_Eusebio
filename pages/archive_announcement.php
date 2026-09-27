@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) { header('Location: owner.php'); exit; }
+require_once '../includes/admin_auth.php';
+admin_require_login(true);
 include '../includes/header.php';
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';

@@ -1,10 +1,6 @@
 <?php
-session_start();
-
-if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: ../pages/owner.php");
-    exit;
-}
+require_once "../includes/admin_auth.php";
+admin_require_login(true);
 
 include "../includes/header.php";
 include "../includes/db.php";
@@ -27,6 +23,14 @@ function getBasePrice($type) {
     return 0;
 }
 
+function stayTypeColorClass($type) {
+    if ($type === 'day') return 'next-booking-day';
+    if ($type === 'overnight') return 'next-booking-overnight';
+    if ($type === '22hour') return 'next-booking-22hour';
+    if ($type === 'full') return 'next-booking-full';
+    return 'next-booking-default';
+}
+
 $pendingCount = 0;
 $approvedCount = 0;
 $totalRevenue = 0;
@@ -38,10 +42,82 @@ $currentMonth = date('Y-m');
 $totalReservations = count($appointments);
 $recentAppointments = array_slice($appointments, 0, 5);
 $latestReservation = $appointments[0] ?? null;
+$todayDate = new DateTimeImmutable('today');
+$nextBookedDate = null;
+$nextBookedStayLabel = 'Calendar clear';
+$nextBookedStayClass = 'next-booking-default';
+$nextBookedStayPills = [];
 $activeAnnouncement = null;
-$announcementResult = mysqli_query($conn, "SELECT title, message, updated_at FROM announcements WHERE is_active = 1 AND archived_at IS NULL ORDER BY updated_at DESC, announcement_id DESC LIMIT 1");
+$announcementResult = mysqli_query($conn, "SELECT title, message, updated_at, expires_at FROM announcements WHERE is_active = 1 AND archived_at IS NULL AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY updated_at DESC, announcement_id DESC LIMIT 1");
 if ($announcementResult) {
     $activeAnnouncement = mysqli_fetch_assoc($announcementResult);
+}
+
+$nextBookedRows = [];
+$todayString = $todayDate->format('Y-m-d');
+$nextBookedStmt = mysqli_prepare($conn, "
+    SELECT bd.booked_date, bd.time_type, bs.time_type AS booking_time_type
+    FROM booked_dates bd
+    INNER JOIN bookings bs ON bs.booking_id = bd.booking_id
+    WHERE bs.status = 'approved'
+        AND COALESCE(bs.archived, 0) = 0
+        AND bd.booked_date >= ?
+    ORDER BY bd.booked_date ASC, FIELD(bd.time_type, 'day', 'overnight'), bs.booking_id ASC
+");
+if ($nextBookedStmt) {
+    mysqli_stmt_bind_param($nextBookedStmt, 's', $todayString);
+    mysqli_stmt_execute($nextBookedStmt);
+    $nextBookedResult = mysqli_stmt_get_result($nextBookedStmt);
+    $nextBookedDateString = null;
+    while ($nextBookedResult && ($row = mysqli_fetch_assoc($nextBookedResult))) {
+        if ($nextBookedDateString === null) {
+            $nextBookedDateString = $row['booked_date'];
+        }
+        if ($row['booked_date'] !== $nextBookedDateString) {
+            break;
+        }
+        $nextBookedRows[] = $row;
+    }
+    mysqli_stmt_close($nextBookedStmt);
+
+    if ($nextBookedDateString !== null) {
+        $nextBookedDate = new DateTimeImmutable($nextBookedDateString . ' 00:00:00');
+        $nextSlots = [];
+        $has22Hour = false;
+        foreach ($nextBookedRows as $nextRow) {
+            $nextSlots[] = $nextRow['time_type'];
+            if (($nextRow['booking_time_type'] ?? '') === '22hour') {
+                $has22Hour = true;
+            }
+        }
+        $nextSlots = array_values(array_unique($nextSlots));
+        if ($has22Hour) {
+            $nextBookedStayLabel = '22-Hour Stay';
+            $nextBookedStayClass = stayTypeColorClass('22hour');
+            $nextBookedStayPills = [
+                ['label' => $nextBookedStayLabel, 'class' => $nextBookedStayClass],
+            ];
+        } elseif (in_array('day', $nextSlots, true) && in_array('overnight', $nextSlots, true)) {
+            $nextBookedStayLabel = 'Day Tour + Overnight';
+            $nextBookedStayClass = stayTypeColorClass('full');
+            $nextBookedStayPills = [
+                ['label' => 'Day Tour', 'class' => stayTypeColorClass('day')],
+                ['label' => 'Overnight', 'class' => stayTypeColorClass('overnight')],
+            ];
+        } elseif (in_array('overnight', $nextSlots, true)) {
+            $nextBookedStayLabel = 'Overnight Stay';
+            $nextBookedStayClass = stayTypeColorClass('overnight');
+            $nextBookedStayPills = [
+                ['label' => $nextBookedStayLabel, 'class' => $nextBookedStayClass],
+            ];
+        } elseif (in_array('day', $nextSlots, true)) {
+            $nextBookedStayLabel = 'Day Tour';
+            $nextBookedStayClass = stayTypeColorClass('day');
+            $nextBookedStayPills = [
+                ['label' => $nextBookedStayLabel, 'class' => $nextBookedStayClass],
+            ];
+        }
+    }
 }
 
 foreach ($appointments as $appointment) {
@@ -149,7 +225,26 @@ foreach ($appointments as $appointment) {
     <div class="calendar-admin-head">
         <div>
             <h2>Booking Calendar</h2>
-            <p class="calendar-helper-text">Right-click any day to block a date and add the reason why it is unavailable.</p>
+        </div>
+        <div class="calendar-next-booking-card">
+            <span>Next Booked Day</span>
+            <?php if ($nextBookedDate):
+                $daysRemaining = (int)$todayDate->diff($nextBookedDate)->format('%a');
+                $dayLabel = $daysRemaining === 0 ? 'Today' : $daysRemaining . ' day' . ($daysRemaining === 1 ? '' : 's') . ' remaining';
+            ?>
+                <strong><?php echo htmlspecialchars($dayLabel); ?></strong>
+                <small>
+                    <span class="next-booking-stay-pills">
+                        <?php foreach ($nextBookedStayPills as $stayPill): ?>
+                            <b class="next-booking-stay-pill <?php echo htmlspecialchars($stayPill['class']); ?>"><?php echo htmlspecialchars($stayPill['label']); ?></b>
+                        <?php endforeach; ?>
+                    </span>
+                    <em><?php echo htmlspecialchars($nextBookedDate->format('M d, Y')); ?></em>
+                </small>
+            <?php else: ?>
+                <strong>No upcoming bookings</strong>
+                <small><b class="next-booking-default">Calendar clear</b></small>
+            <?php endif; ?>
         </div>
         <button type="button" class="calendar-block-help-btn" id="calendarBlockHelp">Right-click a day to block</button>
     </div>
@@ -208,7 +303,7 @@ foreach ($appointments as $appointment) {
         <?php else: ?>
             <span class="announcement-status-dot muted">No active notice</span>
             <h3>No announcement yet</h3>
-            <p>Create a customer-facing announcement and it will appear as a notification bubble on the homepage.</p>
+            <p>Announcement Here</p>
         <?php endif; ?>
     </div>
 

@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) { header('Location: owner.php'); exit; }
+require_once '../includes/admin_auth.php';
+admin_require_login(true);
 include '../includes/header.php';
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
@@ -12,6 +12,8 @@ $currentAddress = ve_setting($conn, 'contact_address', 'Antipolo, Rizal');
 $currentFacebook = ve_setting($conn, 'facebook_link', '');
 $currentInstagram = ve_setting($conn, 'instagram_link', '');
 $currentBio = ve_setting($conn, 'bio_text', 'A nature-inspired sanctuary.');
+$bookingsPaused = ve_bookings_paused($conn);
+$bookingPauseNote = ve_booking_pause_message($conn);
 $homeGalleryCountResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM gallery_images WHERE show_on_home = 1 AND archived_at IS NULL");
 $homeGalleryCountRow = $homeGalleryCountResult ? mysqli_fetch_assoc($homeGalleryCountResult) : ['total' => 0];
 $homeGalleryCount = (int)($homeGalleryCountRow['total'] ?? 0);
@@ -26,11 +28,23 @@ if (empty($homePreviewImages)) {
     $homePreviewImages[] = [
         'image_path' => $currentIcon ?: 'assets/icon.jpg',
         'caption' => 'Villa Eusebio',
-        'description' => 'Relax, unwind, enjoy.'
+        'description' => 'A nature-inspired sanctuary.'
     ];
 }
 $previewHeroImage = $homePreviewImages[0]['image_path'] ?? $currentIcon;
 $previewHeroCaption = $homePreviewImages[0]['caption'] ?: 'Villa Eusebio';
+$previewHeroVideos = [
+    '/capstone_system/assets/bgvid.mp4',
+    '/capstone_system/assets/videopool.mp4',
+    '/capstone_system/assets/videopool2.mp4',
+];
+$previewHeroVideoSrc = $previewHeroVideos[array_rand($previewHeroVideos)];
+$activeAnnouncementCount = 0;
+$announcementCountResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM announcements WHERE is_active = 1 AND archived_at IS NULL AND (expires_at IS NULL OR expires_at > NOW())");
+if ($announcementCountResult) {
+    $announcementCountRow = mysqli_fetch_assoc($announcementCountResult);
+    $activeAnnouncementCount = (int)($announcementCountRow['total'] ?? 0);
+}
 $images = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archived_at IS NULL ORDER BY show_on_home DESC, image_id ASC");
 $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archived_at IS NOT NULL ORDER BY archived_at DESC, image_id DESC");
 ?>
@@ -45,31 +59,68 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
     <a href="settings.php" class="nav-link active"><span class="nav-icon">ST</span><span>Settings</span></a>
 </div>
 <div class="admin-dashboard"><div class="admin-topbar"><div class="admin-brand"><button id="menuToggle" class="menu-btn">Menu</button><div><h1>Villa Eusebio</h1><p>Settings</p></div></div><div class="admin-userbar"><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div></div>
-<div class="main-content settings-page"><div class="settings-title-row"><div><h2>Settings</h2><p class="reservation-helper-text">Manage site content, contact links, and gallery images.</p></div><form method="POST" action="../api/undo_settings.php" onsubmit="return confirm('Undo the last settings change?');"><button type="submit" class="settings-undo-btn">Undo Last Change</button></form></div><?php if(isset($_GET['success'])): ?><div class="admin-alert success-alert"><?php echo htmlspecialchars($_GET['success']); ?></div><?php endif; ?><?php if(isset($_GET['error'])): ?><div class="admin-alert error-alert"><?php echo htmlspecialchars($_GET['error']); ?></div><?php endif; ?>
+<div class="main-content settings-page"><div class="settings-title-row"><div><h2>Settings</h2><p class="reservation-helper-text">Manage site content, contact links, and gallery images.</p></div><div class="settings-title-actions"><a class="settings-undo-btn settings-audit-title-btn" href="audit_trail.php">Audit Trail</a><form method="POST" action="../api/undo_settings.php" onsubmit="return confirm('Undo the last settings change?');"><button type="submit" class="settings-undo-btn">Undo Last Change</button></form></div></div><?php if(isset($_GET['success'])): ?><div class="admin-alert success-alert"><?php echo htmlspecialchars($_GET['success']); ?></div><?php endif; ?><?php if(isset($_GET['error'])): ?><div class="admin-alert error-alert"><?php echo htmlspecialchars($_GET['error']); ?></div><?php endif; ?>
+<form class="settings-card booking-pause-card <?php echo $bookingsPaused ? 'is-paused' : 'is-open'; ?>" method="POST" action="../api/update_settings.php" onsubmit="return confirm('<?php echo $bookingsPaused ? 'Resume customer bookings now?' : 'Pause all customer bookings now?'; ?>');">
+    <input type="hidden" name="action" value="booking_pause">
+    <input type="hidden" name="bookings_paused" value="<?php echo $bookingsPaused ? '0' : '1'; ?>">
+    <div class="booking-pause-copy">
+        <div>
+            <h3>Fully Booked / No Bookings For Now</h3>
+            <p class="settings-note">Emergency control for closing the customer booking system. When turned on, customers cannot select dates or submit booking requests.</p>
+        </div>
+        <span class="booking-pause-status"><?php echo $bookingsPaused ? 'Bookings Paused' : 'Bookings Open'; ?></span>
+    </div>
+    <label>Customer message while paused</label>
+    <textarea name="booking_pause_note" rows="2"><?php echo htmlspecialchars($bookingPauseNote); ?></textarea>
+    <button class="modal-btn <?php echo $bookingsPaused ? 'btn-approve' : 'btn-reject'; ?>" type="submit"><?php echo $bookingsPaused ? 'Resume Bookings' : 'Pause All Bookings'; ?></button>
+</form>
 <div class="settings-grid">
 <form class="settings-card" method="POST" action="../api/update_settings.php" enctype="multipart/form-data"><input type="hidden" name="action" value="site"><h3>Contact and Social Links</h3><label>Phone</label><input name="contact_phone" value="<?php echo htmlspecialchars($currentPhone); ?>"><label>Email</label><input name="contact_email" value="<?php echo htmlspecialchars($currentEmail); ?>"><label>Address</label><textarea name="contact_address"><?php echo htmlspecialchars($currentAddress); ?></textarea><label>Facebook Link</label><input name="facebook_link" value="<?php echo htmlspecialchars($currentFacebook); ?>"><label>Instagram Link</label><input name="instagram_link" value="<?php echo htmlspecialchars($currentInstagram); ?>"><label>Homepage Bio</label><textarea name="bio_text"><?php echo htmlspecialchars($currentBio); ?></textarea><label>Icon Image</label><div class="settings-icon-preview"><img src="../<?php echo htmlspecialchars(ltrim($currentIcon, '/')); ?>" alt="Current icon"><span>Current site icon</span></div><input type="file" name="site_icon" accept="image/*"><button class="modal-btn btn-approve" type="submit">Save Site Info</button></form>
-<form id="galleryUploadForm" class="settings-card" method="POST" action="../api/update_settings.php" enctype="multipart/form-data"><input type="hidden" name="action" value="gallery_upload"><h3>Gallery Images</h3><label>Upload Image</label><input type="file" name="gallery_image" accept="image/*" required><label>Image Name</label><input name="caption" placeholder="Example: Pool at Night" required><label>Description</label><textarea name="description" rows="3" placeholder="Optional image description"></textarea><p class="settings-note">New images are added to the gallery page only.</p><button class="modal-btn btn-approve" type="submit">Add Image</button></form>
 <div class="settings-card homepage-preview-card">
     <h3>Customer Homepage Preview</h3>
-    <p class="settings-note">This is a simple preview of the first screen customers see when they open the website.</p>
-    <div class="settings-homepage-preview">
-        <div class="settings-preview-nav">
-            <img src="../<?php echo htmlspecialchars(ltrim($currentIcon, '/')); ?>" alt="Villa Eusebio icon">
-            <div>
-                <strong>Villa Eusebio</strong>
-                <span><?php echo htmlspecialchars($currentAddress); ?></span>
+    <div class="settings-homepage-preview settings-minimal-home-preview">
+        <div class="settings-mini-nav">
+            <div class="settings-mini-brand">
+                <img src="../<?php echo htmlspecialchars(ltrim($currentIcon, '/')); ?>" alt="Villa Eusebio icon">
+                <div>
+                    <strong>Villa Eusebio</strong>
+                    <span>Antipolo Sanctuary</span>
+                </div>
+            </div>
+            <div class="settings-mini-links" aria-hidden="true">
+                <span>Home</span>
+                <span>Calendar</span>
+                <span>Gallery</span>
             </div>
         </div>
-        <div class="settings-preview-hero">
-            <img src="../<?php echo htmlspecialchars(ltrim($previewHeroImage, '/')); ?>" alt="<?php echo htmlspecialchars($previewHeroCaption); ?>">
-            <div class="settings-preview-overlay"></div>
-            <div class="settings-preview-copy">
-                <small>Private Resort</small>
+        <div class="settings-mini-hero">
+            <img class="settings-mini-poster" src="../<?php echo htmlspecialchars(ltrim($previewHeroImage, '/')); ?>" alt="<?php echo htmlspecialchars($previewHeroCaption); ?>">
+            <video class="settings-mini-video" muted playsinline preload="metadata" aria-label="Paused shuffled homepage background video preview">
+                <source src="<?php echo htmlspecialchars($previewHeroVideoSrc); ?>" type="video/mp4">
+            </video>
+            <div class="settings-mini-overlay"></div>
+            <div class="settings-mini-copy">
+                <small>Est. 2024</small>
                 <h4>Villa Eusebio</h4>
+                <span>A Nature-Inspired Sanctuary</span>
                 <p><?php echo htmlspecialchars($currentBio); ?></p>
+                <div class="settings-mini-actions">
+                    <i>Book Now</i>
+                </div>
+            </div>
+            <div class="settings-mini-badges">
+                <?php if ($activeAnnouncementCount > 0): ?><span>Announcement <?php echo $activeAnnouncementCount; ?></span><?php endif; ?>
+                <?php if ($bookingsPaused): ?><span>Bookings paused</span><?php endif; ?>
             </div>
         </div>
-        <div class="settings-preview-gallery">
+        <div class="settings-mini-sections" aria-label="Homepage sections">
+            <span>Find Us</span>
+            <span>Amenities</span>
+            <span>Gallery</span>
+            <span>Reviews</span>
+            <span>Contact</span>
+        </div>
+        <div class="settings-mini-gallery">
             <?php foreach ($homePreviewImages as $previewImage): ?>
                 <div>
                     <img src="../<?php echo htmlspecialchars(ltrim($previewImage['image_path'], '/')); ?>" alt="<?php echo htmlspecialchars($previewImage['caption'] ?: 'Villa Eusebio'); ?>">
@@ -77,7 +128,8 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
                 </div>
             <?php endforeach; ?>
         </div>
-        <div class="settings-preview-footer">
+        <div class="settings-mini-contact">
+            <span><?php echo htmlspecialchars($currentAddress); ?></span>
             <span><?php echo htmlspecialchars($currentPhone); ?></span>
             <span><?php echo htmlspecialchars($currentEmail); ?></span>
         </div>
@@ -94,11 +146,6 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
     </div>
     <div class="gallery-home-countbar">
         <div><strong>Homepage images</strong><span><?php echo $homeGalleryCount; ?> of 3 selected</span></div>
-        <div class="gallery-count-dots" aria-hidden="true">
-            <i class="<?php echo $homeGalleryCount >= 1 ? 'active' : ''; ?>"></i>
-            <i class="<?php echo $homeGalleryCount >= 2 ? 'active' : ''; ?>"></i>
-            <i class="<?php echo $homeGalleryCount >= 3 ? 'active' : ''; ?>"></i>
-        </div>
     </div>
     <div class="gallery-manager-toolbar">
         <div class="gallery-admin-tabs" role="tablist" aria-label="Gallery filters">
@@ -124,7 +171,7 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
             <div class="gallery-card-body">
                 <p><?php echo htmlspecialchars($img['caption'] ?: 'Villa Eusebio'); ?></p>
                 <?php if(!empty($img['description'])): ?><small class="gallery-admin-desc"><?php echo htmlspecialchars($img['description']); ?></small><?php endif; ?>
-                <?php if($homepageLimitReached): ?><small class="gallery-admin-desc gallery-limit-note">Homepage limit reached. Remove one homepage image first.</small><?php endif; ?>
+                <?php if($homepageLimitReached): ?><small class="gallery-admin-desc gallery-limit-note">Homepage limit reached. 3/3</small><?php endif; ?>
             </div>
             <div class="gallery-admin-actions">
                 <button type="button" class="modal-btn btn-cancel-action gallery-edit-btn">Edit</button>
@@ -175,6 +222,28 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
         </div>
     </div>
 </div>
+<div id="galleryUploadModal" class="modal reservation-modal gallery-upload-modal" aria-hidden="true">
+    <div class="modal-content reservation-confirm-content gallery-upload-content">
+        <div class="modal-header reservation-modal-header">
+            <div><p class="reservation-modal-kicker">Gallery Images</p><h3>Add Gallery Image</h3></div>
+            <button type="button" class="close-gallery-upload" aria-label="Close add image form">&times;</button>
+        </div>
+        <form id="galleryUploadForm" class="gallery-upload-form" method="POST" action="../api/update_settings.php" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="gallery_upload">
+            <label>Upload Image</label>
+            <input type="file" name="gallery_image" accept="image/*" required>
+            <label>Image Name</label>
+            <input name="caption" placeholder="Example: Pool at Night" required>
+            <label>Description</label>
+            <textarea name="description" rows="3" placeholder="Optional image description"></textarea>
+            <p class="settings-note">New images are added to the gallery page only.</p>
+            <div class="modal-footer reservation-confirm-actions">
+                <button type="button" class="modal-btn btn-cancel-action close-gallery-upload">Cancel</button>
+                <button class="modal-btn btn-approve" type="submit">Add Image</button>
+            </div>
+        </form>
+    </div>
+</div>
 <div id="galleryEditModal" class="modal reservation-modal">
     <div class="modal-content reservation-confirm-content">
         <div class="modal-header reservation-modal-header">
@@ -206,6 +275,7 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
 <script>document.addEventListener('DOMContentLoaded',function(){const btn=document.getElementById('menuToggle'),sidebar=document.getElementById('sidebar'),dash=document.querySelector('.admin-dashboard');if(localStorage.getItem('sidebar')==='collapsed'){sidebar.classList.add('active');dash.classList.add('shift');}if(btn){btn.onclick=function(){sidebar.classList.toggle('active');dash.classList.toggle('shift');localStorage.setItem('sidebar',sidebar.classList.contains('active')?'collapsed':'expanded');};}});</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const scrollKey = 'villaSettingsScrollY';
     const modal = document.getElementById('galleryEditModal');
     const editId = document.getElementById('galleryEditId');
     const editCaption = document.getElementById('galleryEditCaption');
@@ -220,8 +290,51 @@ document.addEventListener('DOMContentLoaded', function() {
     const emptyState = document.getElementById('galleryEmptyState');
     const addImagesBtn = document.getElementById('galleryAddImagesBtn');
     const uploadForm = document.getElementById('galleryUploadForm');
+    const uploadModal = document.getElementById('galleryUploadModal');
+    const miniVideos = Array.from(document.querySelectorAll('.settings-mini-video'));
     const cards = Array.from(document.querySelectorAll('.gallery-admin-item'));
     let activeFilter = 'all';
+
+    miniVideos.forEach(function(video) {
+        video.pause();
+        video.addEventListener('loadedmetadata', function() {
+            try {
+                if (Number.isFinite(video.duration) && video.duration > 0.25) {
+                    video.currentTime = 0.2;
+                }
+            } catch (error) {}
+        }, { once: true });
+        video.addEventListener('loadeddata', function() {
+            video.pause();
+            video.classList.add('is-ready');
+        }, { once: true });
+        video.addEventListener('seeked', function() {
+            video.pause();
+            video.classList.add('is-ready');
+        }, { once: true });
+    });
+
+    function rememberSettingsScroll() {
+        sessionStorage.setItem(scrollKey, String(window.scrollY || document.documentElement.scrollTop || 0));
+    }
+
+    function restoreSettingsScroll() {
+        const savedScroll = sessionStorage.getItem(scrollKey);
+        if (savedScroll === null) return;
+
+        sessionStorage.removeItem(scrollKey);
+        const y = parseInt(savedScroll, 10);
+        if (!Number.isFinite(y)) return;
+
+        window.scrollTo({ top: y, left: 0, behavior: 'auto' });
+        setTimeout(function() {
+            window.scrollTo({ top: y, left: 0, behavior: 'auto' });
+        }, 120);
+    }
+
+    document.querySelectorAll('.settings-page form').forEach(function(form) {
+        form.addEventListener('submit', rememberSettingsScroll);
+    });
 
     function openEditModal(card) {
         editId.value = card.dataset.imageId || '';
@@ -248,8 +361,26 @@ document.addEventListener('DOMContentLoaded', function() {
             previewModal.classList.remove('show', 'closing');
             previewModal.setAttribute('aria-hidden', 'true');
             previewImg.src = '';
-            if (!modal.classList.contains('show')) document.body.style.overflow = '';
+            if (!modal.classList.contains('show') && (!uploadModal || !uploadModal.classList.contains('show'))) document.body.style.overflow = '';
         }, 260);
+    }
+
+    function openUploadModal() {
+        if (!uploadModal) return;
+        uploadModal.classList.add('show');
+        uploadModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const fileInput = uploadForm ? uploadForm.querySelector('input[type="file"]') : null;
+        if (fileInput) {
+            setTimeout(function() { fileInput.focus(); }, 120);
+        }
+    }
+
+    function closeUploadModal() {
+        if (!uploadModal) return;
+        uploadModal.classList.remove('show');
+        uploadModal.setAttribute('aria-hidden', 'true');
+        if (!previewModal.classList.contains('show')) document.body.style.overflow = '';
     }
 
     function applyGalleryFilters() {
@@ -338,23 +469,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (addImagesBtn && uploadForm) {
+    document.querySelectorAll('.close-gallery-upload').forEach(function(btn) {
+        btn.addEventListener('click', closeUploadModal);
+    });
+
+    if (uploadModal) {
+        uploadModal.addEventListener('click', function(e) {
+            if (e.target === uploadModal) closeUploadModal();
+        });
+    }
+
+    if (addImagesBtn && uploadForm && uploadModal) {
         addImagesBtn.addEventListener('click', function() {
-            uploadForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            uploadForm.classList.add('settings-card-pulse');
-            setTimeout(function() { uploadForm.classList.remove('settings-card-pulse'); }, 900);
-            const fileInput = uploadForm.querySelector('input[type="file"]');
-            if (fileInput) fileInput.focus();
+            openUploadModal();
         });
     }
 
     document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && uploadModal && uploadModal.classList.contains('show')) {
+            closeUploadModal();
+            return;
+        }
         if (e.key === 'Escape' && previewModal && previewModal.classList.contains('show')) {
             closePreviewModal();
         }
     });
 
     applyGalleryFilters();
+    requestAnimationFrame(restoreSettingsScroll);
 });
 </script>
 

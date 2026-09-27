@@ -27,42 +27,42 @@ function ve_review_relative_label(string $dateString): string {
 
 $reviews = [
     [
-        'name' => 'Roleto Monteclaro Jr.',
+        'name' => 'Guest R. M.',
         'text' => 'My Family liked it. Sobrang lapit sa kabihasnan. Walang tolls at di masakit sa gas. Will definitely come back.',
         'date' => '2026-03-04'
     ],
     [
-        'name' => 'yeehnard buco',
+        'name' => 'Guest Y. B.',
         'text' => 'ANG GANDA pag gabi na may iba ibang kulay',
         'date' => '2025-07-04'
     ],
     [
-        'name' => 'Matt Peralta',
+        'name' => 'Guest M. P.',
         'text' => 'Edited review - still a great experience overall.',
         'date' => '2026-05-04'
     ],
     [
-        'name' => 'Jhen Nares',
+        'name' => 'Guest J. N.',
         'text' => 'Great place and nice atmosphere.',
         'date' => '2025-06-04'
     ],
     [
-        'name' => 'Kenneth Quesada',
+        'name' => 'Guest K. Q.',
         'text' => 'Clean space and relaxing stay for family outings.',
         'date' => '2023-06-04'
     ],
     [
-        'name' => 'Lawrence Bernardino',
+        'name' => 'Guest L. B.',
         'text' => 'Nice place for gatherings and overnight stays.',
         'date' => '2022-06-04'
     ],
     [
-        'name' => 'Gilbert Guevarra',
+        'name' => 'Guest G. G.',
         'text' => 'Good service and peaceful location.',
         'date' => '2022-06-04'
     ],
     [
-        'name' => 'Rommel DF',
+        'name' => 'Guest R. D.',
         'text' => 'Good experience overall.',
         'date' => '2024-06-04'
     ],
@@ -96,5 +96,3 @@ include __DIR__ . "/../includes/header.php";
         </div>
     </div>
 </section>
-
-<?php include __DIR__ . "/../includes/footer.php"; ?>

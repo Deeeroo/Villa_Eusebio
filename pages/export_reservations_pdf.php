@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) { header('Location: owner.php'); exit; }
+require_once '../includes/admin_auth.php';
+admin_require_login(true);
 include '../includes/db.php';
 include '../includes/booking_repository.php';
 

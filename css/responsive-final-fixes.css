@@ -1,9 +1,9 @@
 /*
-  Final responsive fixes
+  Late CSS layer
   ------------------------------------------------------------
-  Kept as the final loaded CSS layer. It now only wires the organized late-stage override files in order.
+  Small import-only layer for rules that must load after the main page styles.
 */
 
 @import url('./capstone-feature-additions.css?v=20260924-css-clean1');
-@import url('./admin-functional-overrides.css?v=20260925-block-chatbot1');
+@import url('./admin-functional-overrides.css?v=20260926-past-blocked-done1');
 @import url('./public-polish-overrides.css?v=20260925-amenities-frame1');

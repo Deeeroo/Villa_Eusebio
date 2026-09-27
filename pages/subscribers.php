@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) { header('Location: owner.php'); exit; }
+require_once '../includes/admin_auth.php';
+admin_require_login(true);
 include '../includes/header.php';
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
@@ -62,9 +62,12 @@ if ($totalResult && $row = mysqli_fetch_assoc($totalResult)) {
                 <p class="reservation-helper-text">View website email subscribers and remove entries when needed.</p>
             </div>
             <form class="subscriber-search-form" method="GET" action="subscribers.php">
-                <input type="search" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search email">
-                <button class="admin-export-btn" type="submit">Search</button>
-                <?php if ($search !== ''): ?><a class="settings-undo-btn" href="subscribers.php">Clear</a><?php endif; ?>
+                <label for="subscriberSearchEmail">Find subscriber</label>
+                <div class="subscriber-search-row">
+                    <input id="subscriberSearchEmail" type="search" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search email address">
+                    <button class="subscriber-search-btn" type="submit">Search</button>
+                    <?php if ($search !== ''): ?><a class="subscriber-clear-btn" href="subscribers.php">Clear</a><?php endif; ?>
+                </div>
             </form>
         </div>
 

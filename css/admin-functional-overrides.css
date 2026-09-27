@@ -1,7 +1,7 @@
 /*
-  Admin functional overrides
+  Admin late overrides
   ------------------------------------------------------------
-  Late-loaded admin fixes for modals, filters, calendar blocking, archive menus, reservation highlighting, and compact records.
+  Kept here when a rule needs to win over older admin styles.
 */
 
 /* Reschedule modal calendar fallback: keep this last so the picker never renders as plain text. */
@@ -159,9 +159,7 @@ body.admin-shell-page #rescheduleModal .reschedule-calendar-day.selected {
 }
 
 
-/* Final modal display, filter panel, settings, archive, chatbot z-index, and calendar block cleanup fixes. */
-
-/* capstone 2 final functional fixes */
+/* Shared modal, filter, archive, chatbot, and calendar behavior. */
 .modal.show,
 #blockDateModal.show {
     display: flex !important;
@@ -316,7 +314,7 @@ body.admin-shell-page .sidebar a:not(.sidebar-title) {
     z-index: 2147482999 !important;
 }
 
-/* capstone 2 calendar block cleanup */
+/* Calendar blocking states. */
 .extra-head-fee-red {
     color: #dc2626 !important;
     font-weight: 900 !important;
@@ -366,6 +364,24 @@ body.admin-shell-page .sidebar a:not(.sidebar-title) {
         rgba(73, 86, 80, .12) 10px 13px
     );
     pointer-events: none;
+}
+
+.calendar-day.admin-blocked-day.past,
+.calendar-day.admin-blocked-day.past.booked {
+    padding-bottom: 0;
+    background: #d8d8d8 !important;
+    color: #666 !important;
+    border-color: #d8d8d8 !important;
+    text-decoration: line-through !important;
+    box-shadow: none !important;
+}
+
+.calendar-day.admin-blocked-day.past::before,
+.calendar-day.admin-blocked-day.past::after,
+.calendar-day.admin-blocked-day.past.booked::before,
+.calendar-day.admin-blocked-day.past.booked::after {
+    content: none !important;
+    display: none !important;
 }
 
 .customer-day-info {
@@ -484,13 +500,7 @@ body.admin-shell-page.admin-page-exiting .admin-dashboard {
 
 .reservation-summary-card::after {
     content: "";
-    position: absolute;
-    right: -24px;
-    top: -24px;
-    width: 86px;
-    height: 86px;
-    border-radius: 999px;
-    background: rgba(111, 141, 107, .13);
+    display: none;
 }
 
 .reservation-summary-card span {
@@ -509,9 +519,7 @@ body.admin-shell-page.admin-page-exiting .admin-dashboard {
 }
 
 .reservation-summary-card.rejected { border-left-color: #9ca3af; }
-.reservation-summary-card.rejected::after { background: rgba(156, 163, 175, .18); }
 .reservation-summary-card.incoming { border-left-color: #d4af37; }
-.reservation-summary-card.incoming::after { background: rgba(212, 175, 55, .18); }
 
 .filter-dropdown-wrap {
     background: #fffdf9;
@@ -523,13 +531,19 @@ body.admin-shell-page.admin-page-exiting .admin-dashboard {
 
 .sales-table {
     width: 100%;
+    min-width: 1120px;
     table-layout: fixed;
 }
 
 .sales-table th,
 .sales-table td {
     white-space: normal !important;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.sales-table th {
+    overflow-wrap: normal;
 }
 
 .sales-table th:nth-child(1),
@@ -541,7 +555,10 @@ body.admin-shell-page.admin-page-exiting .admin-dashboard {
 .sales-table th:nth-child(4),
 .sales-table td:nth-child(4) { width: 10%; }
 .sales-table th:nth-child(5),
-.sales-table td:nth-child(5) { width: 64px; }
+.sales-table td:nth-child(5) {
+    width: 86px;
+    text-align: center;
+}
 
 @media (max-width: 900px) {
     .reservation-summary-grid {

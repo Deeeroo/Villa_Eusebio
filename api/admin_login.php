@@ -1,21 +1,39 @@
 <?php
-session_start();
+require_once "../includes/admin_auth.php";
+admin_start_session();
+admin_security_headers();
 include "../includes/db.php";
 
-$username = trim($_POST['username'] ?? '');
-$password = trim($_POST['password'] ?? '');
-
-if ($username === '' || $password === '') {
-    header('Location: ../pages/owner.php?error=1');
+function admin_login_redirect(string $error, int $wait = 0): void {
+    $params = ['error' => $error];
+    if ($wait > 0) {
+        $params['wait'] = $wait;
+    }
+    header('Location: ../pages/owner.php?' . http_build_query($params));
     exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !admin_verify_csrf_token($_POST['csrf_token'] ?? null)) {
+    admin_login_redirect('auth');
+}
+
+$username = strtolower(trim($_POST['username'] ?? ''));
+$password = (string)($_POST['password'] ?? '');
+
+if ($username === '' || $password === '' || strlen($username) > 120 || strlen($password) > 255) {
+    admin_login_redirect('1');
+}
+
+$lockRemaining = admin_login_lock_remaining($conn, $username);
+if ($lockRemaining > 0) {
+    admin_login_redirect('locked', $lockRemaining);
 }
 
 $sql = "SELECT id, full_name, username, password_hash, role FROM admins WHERE username = ? LIMIT 1";
 $stmt = mysqli_prepare($conn, $sql);
 
 if (!$stmt) {
-    header('Location: ../pages/owner.php?error=1');
-    exit;
+    admin_login_redirect('1');
 }
 
 mysqli_stmt_bind_param($stmt, 's', $username);
@@ -25,11 +43,18 @@ $admin = $result ? mysqli_fetch_assoc($result) : null;
 mysqli_stmt_close($stmt);
 
 if ($admin && password_verify($password, $admin['password_hash'])) {
-    $_SESSION['admin_logged_in'] = true;
-    $_SESSION['admin_id'] = (int)$admin['id'];
-    $_SESSION['admin_username'] = $admin['username'];
-    $_SESSION['admin_full_name'] = $admin['full_name'];
-    $_SESSION['admin_role'] = $admin['role'];
+    if (password_needs_rehash($admin['password_hash'], PASSWORD_DEFAULT)) {
+        $newHash = password_hash($password, PASSWORD_DEFAULT);
+        $rehashStmt = mysqli_prepare($conn, "UPDATE admins SET password_hash = ? WHERE id = ?");
+        if ($rehashStmt) {
+            mysqli_stmt_bind_param($rehashStmt, 'si', $newHash, $admin['id']);
+            mysqli_stmt_execute($rehashStmt);
+            mysqli_stmt_close($rehashStmt);
+        }
+    }
+
+    admin_record_login_attempt($conn, $username, true);
+    admin_login_success($admin);
 
     $updateSql = "UPDATE admins SET last_login = NOW() WHERE id = ?";
     $updateStmt = mysqli_prepare($conn, $updateSql);
@@ -43,6 +68,10 @@ if ($admin && password_verify($password, $admin['password_hash'])) {
     exit;
 }
 
-header('Location: ../pages/owner.php?error=1');
-exit;
-?>
+admin_record_login_attempt($conn, $username, false);
+$lockRemaining = admin_login_lock_remaining($conn, $username);
+if ($lockRemaining > 0) {
+    admin_login_redirect('locked', $lockRemaining);
+}
+
+admin_login_redirect('1');

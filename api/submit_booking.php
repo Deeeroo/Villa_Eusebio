@@ -1,6 +1,6 @@
 <?php
 include "../includes/db.php";
-include "../includes/booking_repository.php";
+include "../includes/booking_availability.php";
 require_once "../includes/ocr_helper.php";
 ve_ensure_capstone2_schema($conn);
 date_default_timezone_set('Asia/Manila');
@@ -9,42 +9,6 @@ function respondError($message) {
     http_response_code(400);
     echo $message;
     exit;
-}
-
-function getRequiredSlots($timeType) {
-    if ($timeType === 'day') return ['day'];
-    if ($timeType === 'overnight') return ['overnight'];
-    if ($timeType === '22hour') return ['day', 'overnight'];
-    return [];
-}
-
-function getExpectedCheckout($checkin, $timeType) {
-    if ($timeType === 'day') return $checkin;
-    if ($timeType === 'overnight' || $timeType === '22hour') {
-        return date('Y-m-d', strtotime($checkin . ' +1 day'));
-    }
-    return '';
-}
-
-function hasStayStartPassed($checkin, $timeType) {
-    $startTimes = [
-        'day' => '09:00:00',
-        'overnight' => '19:00:00',
-        '22hour' => '09:00:00',
-    ];
-
-    if (!isset($startTimes[$timeType]) || $checkin !== date('Y-m-d')) {
-        return false;
-    }
-
-    return time() >= strtotime($checkin . ' ' . $startTimes[$timeType]);
-}
-
-function stayStartPassedMessage($timeType) {
-    if ($timeType === 'day') return 'Day Tour can no longer be booked today because its 9:00 AM start time has passed.';
-    if ($timeType === 'overnight') return 'Overnight Stay can no longer be booked today because its 7:00 PM start time has passed.';
-    if ($timeType === '22hour') return '22-Hour Stay can no longer be booked today because its 9:00 AM start time has passed.';
-    return 'Selected stay type can no longer be booked today.';
 }
 
 function uploadProofFile($fieldName, $paymentMethod) {
@@ -86,6 +50,10 @@ function uploadProofFile($fieldName, $paymentMethod) {
     return $fileName;
 }
 
+if (ve_bookings_paused($conn)) {
+    respondError(ve_booking_pause_message($conn));
+}
+
 $name = trim($_POST['guest_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $mobile = trim($_POST['mobile'] ?? '');
@@ -108,59 +76,23 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkin) || !preg_match('/^\d{4}-\d{2}
 $allowedPayments = ['gcash', 'bdo', 'unionbank', 'cash'];
 if (!in_array($paymentMethod, $allowedPayments, true)) respondError('Invalid payment method.');
 
-$requiredSlots = getRequiredSlots($timeType);
+$requiredSlots = ve_required_slots($timeType);
 if (empty($requiredSlots)) respondError('Invalid stay type.');
 
 $today = date('Y-m-d');
 if ($checkin < $today) respondError('Past dates are not allowed.');
-if (hasStayStartPassed($checkin, $timeType)) respondError(stayStartPassedMessage($timeType));
+if (ve_stay_start_passed_today($checkin, $timeType)) respondError(ve_stay_start_passed_message($timeType));
 
-$expectedCheckout = getExpectedCheckout($checkin, $timeType);
+$expectedCheckout = ve_checkout_date($checkin, $timeType);
 if ($checkout !== $expectedCheckout) respondError('Selected check-out date does not match the chosen stay type.');
 
 $guestsInt = (int) $guests;
 if ($guestsInt <= 0) respondError('Number of guests must be at least 1.');
 if ($guestsInt > 50) respondError('50 above is impossible for the resort capacity.');
 
-$slotDate = $checkin;
-$conflictStmt = mysqli_prepare($conn, "SELECT time_type FROM booked_dates WHERE booked_date = ?");
-if (!$conflictStmt) respondError('Database error: ' . mysqli_error($conn));
-mysqli_stmt_bind_param($conflictStmt, "s", $slotDate);
-mysqli_stmt_execute($conflictStmt);
-$conflictResult = mysqli_stmt_get_result($conflictStmt);
-$existingSlots = [];
-while ($row = mysqli_fetch_assoc($conflictResult)) {
-    $existingSlots[] = $row['time_type'];
-}
-mysqli_stmt_close($conflictStmt);
-
-$blockStmt = mysqli_prepare($conn, "SELECT stay_type FROM admin_blocks WHERE blocked_date = ?");
-if ($blockStmt) {
-    mysqli_stmt_bind_param($blockStmt, 's', $slotDate);
-    mysqli_stmt_execute($blockStmt);
-    $blockResult = mysqli_stmt_get_result($blockStmt);
-    while ($block = mysqli_fetch_assoc($blockResult)) {
-        if ($block['stay_type'] === '22hour' || $block['stay_type'] === 'whole') {
-            $existingSlots[] = 'day';
-            $existingSlots[] = 'overnight';
-        } else {
-            $existingSlots[] = $block['stay_type'];
-        }
-    }
-    mysqli_stmt_close($blockStmt);
-}
-$existingSlots = array_values(array_unique($existingSlots));
-
-if ($timeType === '22hour' && !empty($existingSlots)) {
-    respondError('Selected date is not available for a 22-hour stay.');
-}
-if (in_array('day', $existingSlots, true) && in_array('overnight', $existingSlots, true)) {
-    respondError('Selected date is already fully booked.');
-}
-foreach ($requiredSlots as $slot) {
-    if (in_array($slot, $existingSlots, true)) {
-        respondError('Selected date is not available for the chosen stay type.');
-    }
+$availability = ve_check_date_availability($conn, $checkin, $timeType);
+if (!$availability['available']) {
+    respondError($availability['message'] ?: 'Selected date is not available for the chosen stay type.');
 }
 
 $reservationFeeAmount = 2000.00;
@@ -246,16 +178,41 @@ $isImageProof = in_array($proofExt, ['jpg', 'jpeg', 'png', 'webp'], true);
     <link rel="stylesheet" href="../responsive-fixes.css">
     <style>
         body {margin:0;font-family:Arial,sans-serif;background:#F5F3EF;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#2E2E2E;padding:20px;box-sizing:border-box;}
-        .success-box {width:100%;max-width:760px;background:#fff;border:1px solid #ddd;border-radius:14px;padding:36px 28px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.08);} 
-        .success-box h1 {margin-top:0;color:#2f6f4f;} .proof-preview{margin-top:18px;padding:14px;border:1px solid #e6e0d8;border-radius:12px;background:#faf7f2;} .proof-preview img{max-width:100%;height:auto;border-radius:10px;border:1px solid #ddd;} .back-link{display:inline-block;margin-top:18px;padding:12px 18px;border-radius:10px;background:#2f6f4f;color:#fff;text-decoration:none;}
+        .success-box {width:100%;max-width:820px;background:#fff;border:1px solid #ddd;border-radius:14px;padding:36px 28px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.08);}
+        .success-box h1 {margin-top:0;color:#2f6f4f;}
+        .success-lead {max-width:620px;margin:0 auto 18px;line-height:1.6;}
+        .booking-reference {display:inline-flex;align-items:center;gap:8px;margin:4px 0 16px;padding:8px 14px;border-radius:999px;background:#edf5ee;color:#255c42;font-weight:800;}
+        .fee-summary {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:560px;margin:0 auto 18px;}
+        .fee-summary p {margin:0;padding:13px 14px;border:1px solid #e6dccf;border-radius:12px;background:#fffaf4;}
+        .next-steps {margin:20px auto 0;max-width:680px;text-align:left;padding:18px 20px;border:1px solid #d9e5d8;border-radius:14px;background:#f5faf4;}
+        .next-steps h2 {margin:0 0 8px;color:#1f5d40;font-size:20px;}
+        .next-steps p {margin:0 0 12px;line-height:1.6;color:#4f574f;}
+        .next-steps ul {margin:0;padding-left:20px;color:#4d4d46;line-height:1.7;}
+        .next-steps li + li {margin-top:4px;}
+        .proof-preview{margin-top:18px;padding:14px;border:1px solid #e6e0d8;border-radius:12px;background:#faf7f2;}
+        .proof-preview img{max-width:100%;height:auto;border-radius:10px;border:1px solid #ddd;}
+        .back-link{display:inline-block;margin-top:18px;padding:12px 18px;border-radius:10px;background:#2f6f4f;color:#fff;text-decoration:none;font-weight:800;}
+        @media (max-width: 620px) {.fee-summary{grid-template-columns:1fr}.success-box{padding:28px 18px}.next-steps{padding:16px}}
     </style>
 </head>
 <body>
 <div class="success-box">
     <h1>Booking submitted successfully</h1>
-    <p>Your reservation request is now pending admin review.</p>
-    <p><strong>Reservation Fee:</strong> ₱<?php echo number_format($reservationFeeAmount, 2); ?></p>
-    <p><strong>Remaining Balance:</strong> ₱<?php echo number_format($remainingBalance, 2); ?></p>
+    <p class="success-lead">Your reservation request is now pending admin review. Please wait for a while as we check your selected date, guest details, and uploaded proof.</p>
+    <div class="booking-reference">Booking Reference #<?php echo (int)$bookingId; ?></div>
+    <div class="fee-summary">
+        <p><strong>Reservation Fee:</strong><br>₱<?php echo number_format($reservationFeeAmount, 2); ?></p>
+        <p><strong>Remaining Balance:</strong><br>₱<?php echo number_format($remainingBalance, 2); ?></p>
+    </div>
+    <div class="next-steps">
+        <h2>What happens next?</h2>
+        <p>Villa Eusebio admin will review your request and contact you through the mobile number or email address you submitted.</p>
+        <ul>
+            <li>Please keep your phone and email available for confirmation or follow-up questions.</li>
+            <li>Your booking is not final until the admin approves it.</li>
+            <li>Once approved, you will receive confirmation and instructions for the remaining balance.</li>
+        </ul>
+    </div>
     <div class="proof-preview">
         <p><strong>Uploaded File:</strong> <?php echo $proofLabel; ?></p>
         <?php if ($proofUrl && $isImageProof): ?>

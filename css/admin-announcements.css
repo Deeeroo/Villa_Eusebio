@@ -71,6 +71,11 @@
 
 .announcement-modal.show {
     display: flex;
+    animation: announcementOverlayIn .22s ease both;
+}
+
+.announcement-modal.show.closing {
+    animation: announcementOverlayOut .24s ease both;
 }
 
 .announcement-modal-card {
@@ -85,9 +90,58 @@
     position: relative;
 }
 
+.announcement-modal.show .announcement-modal-card {
+    animation: announcementCardIn .34s cubic-bezier(.18, .9, .22, 1.08) both;
+}
+
+.announcement-modal.show.closing .announcement-modal-card {
+    animation: announcementCardOut .22s ease both;
+}
+
 @keyframes announcementPulse {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
+}
+
+@keyframes announcementOverlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes announcementOverlayOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes announcementCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes announcementCardOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .announcement-modal.show,
+    .announcement-modal.show.closing,
+    .announcement-modal.show.closing .announcement-modal-card,
+    .announcement-modal.show .announcement-modal-card {
+        animation: none;
+    }
 }
 
 .announcement-close {
@@ -161,6 +215,18 @@
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 18px;
+}
+
+.announcement-duration-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(170px, .5fr);
+    gap: 10px;
+    align-items: center;
+}
+
+.announcement-duration-grid input:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 
 .announcement-editor-actions .modal-btn {
@@ -306,10 +372,18 @@
     border-left: 5px solid #d4af37;
 }
 
+.announcement-admin-item.expired {
+    border-left: 5px solid #b42318;
+}
+
 .announcement-admin-item span {
     color: #6f8d6b;
     font-weight: 900;
     font-size: 12px;
+}
+
+.announcement-admin-item.expired span {
+    color: #b42318;
 }
 
 .announcement-admin-item h4,
@@ -370,6 +444,9 @@
     .announcement-actions form,
     .announcement-actions a {
         width: 100%;
+    }
+    .announcement-duration-grid {
+        grid-template-columns: 1fr;
     }
 }
 

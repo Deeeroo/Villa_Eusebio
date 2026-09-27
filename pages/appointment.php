@@ -1,6 +1,15 @@
-<?php include "../includes/header.php"; ?>
+<?php
+include "../includes/header.php";
+$initialBookingsPaused = isset($conn) && $conn instanceof mysqli ? ve_bookings_paused($conn) : false;
+$initialBookingPauseMessage = isset($conn) && $conn instanceof mysqli ? ve_booking_pause_message($conn) : 'Bookings are temporarily closed. Please check again later or contact Villa Eusebio for assistance.';
+?>
 
 <div class="booking-wrapper">
+    <div class="booking-pause-notice" id="bookingPauseNotice" <?php echo $initialBookingsPaused ? '' : 'hidden'; ?>>
+        <strong>No bookings for now</strong>
+        <span id="bookingPauseMessage"><?php echo htmlspecialchars($initialBookingPauseMessage); ?></span>
+    </div>
+
     <div class="calendar-panel">
         <h2 class="font-script">Select Date</h2>
 
@@ -81,6 +90,8 @@ let currentYear = currentDate.getFullYear();
 
 let bookedDates = {};
 let bookedMeta = {};
+let bookingsPaused = <?php echo $initialBookingsPaused ? 'true' : 'false'; ?>;
+let bookingPauseMessage = <?php echo json_encode($initialBookingPauseMessage); ?>;
 const slotLabels = { day: 'Day Tour', overnight: 'Overnight Stay', '22hour': '22-Hour Stay', whole: 'Whole Day Blocked', blocked: 'Blocked' };
 const slotTimes = { day: '9:00 AM - 5:00 PM', overnight: '7:00 PM - 7:00 AM', '22hour': '9:00 AM - 7:00 AM', whole: 'Whole day unavailable', blocked: 'Unavailable' };
 const stayStartMinutes = { day: 9 * 60, overnight: 19 * 60, '22hour': 9 * 60 };
@@ -101,6 +112,34 @@ const displayCheckOut = document.getElementById('displayCheckOut');
 const inputCheckIn = document.getElementById('inputCheckIn');
 const inputCheckOut = document.getElementById('inputCheckOut');
 const reservationForm = document.getElementById('reservationForm');
+const bookingWrapper = document.querySelector('.booking-wrapper');
+const bookingPauseNotice = document.getElementById('bookingPauseNotice');
+const bookingPauseMessageEl = document.getElementById('bookingPauseMessage');
+const completeReservationBtn = reservationForm.querySelector('.btn-complete');
+
+function clearSelectedDate() {
+    selectedCheckIn = '';
+    selectedCheckOut = '';
+    inputCheckIn.value = '';
+    inputCheckOut.value = '';
+    displayCheckIn.textContent = 'Select a date';
+    displayCheckOut.textContent = '--';
+}
+
+function setBookingPauseUi() {
+    if (bookingWrapper) bookingWrapper.classList.toggle('booking-paused', bookingsPaused);
+    if (bookingPauseNotice) bookingPauseNotice.hidden = !bookingsPaused;
+    if (bookingPauseMessageEl) bookingPauseMessageEl.textContent = bookingPauseMessage;
+    document.querySelectorAll('input[name="time_type"]').forEach(function(radio) {
+        radio.disabled = bookingsPaused;
+        if (bookingsPaused) radio.checked = false;
+    });
+    if (completeReservationBtn) {
+        completeReservationBtn.disabled = bookingsPaused;
+        completeReservationBtn.textContent = bookingsPaused ? 'BOOKINGS TEMPORARILY CLOSED' : 'COMPLETE RESERVATION';
+    }
+    if (bookingsPaused) clearSelectedDate();
+}
 
 function formatDate(date) {
     const y = date.getFullYear();
@@ -159,9 +198,57 @@ function getSlotsForDate(dateString) {
     return bookedDates[dateString] || [];
 }
 
+function getMetaStayType(item) {
+    return item.booking_time_type || item.slot || '';
+}
+
+function metaItemAffectsStayType(item, selectedType) {
+    if (!selectedType) return true;
+
+    const itemType = getMetaStayType(item);
+    const itemSlot = item.slot || itemType;
+
+    if (itemType === '22hour' || itemType === 'whole' || itemSlot === 'whole' || itemType === 'blocked') {
+        return true;
+    }
+
+    if (selectedType === 'day') {
+        return itemSlot === 'day' || itemType === 'day';
+    }
+
+    if (selectedType === 'overnight') {
+        return itemSlot === 'overnight' || itemType === 'overnight';
+    }
+
+    if (selectedType === '22hour') {
+        return itemSlot === 'day' || itemSlot === 'overnight' || itemType === 'day' || itemType === 'overnight';
+    }
+
+    return false;
+}
+
+function dateHasCheckoutDayBlock(dateString) {
+    const metaItems = bookedMeta[dateString] || [];
+    return metaItems.some(function(item) {
+        const itemType = getMetaStayType(item);
+        return item.is_blocked && (itemType === '22hour' || itemType === 'whole' || item.slot === '22hour' || item.slot === 'whole');
+    });
+}
+
+function hasCheckoutDayBlock(dateString, timeType) {
+    if (timeType !== 'overnight' && timeType !== '22hour') return false;
+    return dateHasCheckoutDayBlock(getNextDay(dateString));
+}
+
+function getCheckoutDayBlockMessage(dateString) {
+    return 'Blocked: Check-out date is unavailable (' + prettyDate(getNextDay(dateString)) + ')';
+}
+
 function isDateUnavailable(dateString, timeType) {
+    if (bookingsPaused) return true;
     if (isPastDate(dateString)) return true;
     if (hasStayStartPassedToday(dateString, timeType)) return true;
+    if (hasCheckoutDayBlock(dateString, timeType)) return true;
 
     const slots = getSlotsForDate(dateString);
 
@@ -212,29 +299,42 @@ function renderCalendar() {
         dayCell.textContent = day;
 
         const metaItems = bookedMeta[dateString] || [];
+        const visibleMetaItems = selectedType
+            ? metaItems.filter(function(item) { return metaItemAffectsStayType(item, selectedType); })
+            : metaItems;
         let hasAdminBlock = false;
-        if (metaItems.length > 0) {
-            hasAdminBlock = metaItems.some(function(item) { return item.is_blocked; });
-            const infoLines = metaItems.map(function(item) {
+        if (visibleMetaItems.length > 0) {
+            hasAdminBlock = visibleMetaItems.some(function(item) { return item.is_blocked; });
+            const infoLines = visibleMetaItems.map(function(item) {
                 if (item.is_blocked) {
-                    const t = item.booking_time_type || item.slot || 'blocked';
+                    const t = getMetaStayType(item) || 'blocked';
                     return 'Blocked: ' + (slotLabels[t] || 'Unavailable') + ' - ' + (item.block_reason || 'No reason provided');
                 }
-                const t = item.booking_time_type || item.slot || '';
+                const t = getMetaStayType(item);
                 return 'Booked: ' + (slotLabels[t] || t) + ' (' + (slotTimes[t] || 'time unavailable') + ')';
             });
             dayCell.title = infoLines.join('\n');
         }
 
         const past = isPastDate(dateString);
-        const unavailable = selectedType ? isDateUnavailable(dateString, selectedType) : past;
+        const unavailable = bookingsPaused || (selectedType ? isDateUnavailable(dateString, selectedType) : past);
 
         if (past) {
             dayCell.classList.add('past');
         }
 
-        if (hasAdminBlock) {
+        if (bookingsPaused && !past) {
+            dayCell.classList.add('booking-paused-day');
+            dayCell.title = bookingPauseMessage;
+        }
+
+        if (hasAdminBlock && !past) {
             dayCell.classList.add('admin-blocked-day');
+        }
+
+        if (selectedType && hasCheckoutDayBlock(dateString, selectedType) && !past) {
+            dayCell.classList.add('admin-blocked-day');
+            dayCell.title = (dayCell.title ? dayCell.title + '\n' : '') + getCheckoutDayBlockMessage(dateString);
         }
 
         if (selectedType && hasStayStartPassedToday(dateString, selectedType)) {
@@ -256,6 +356,11 @@ function renderCalendar() {
 }
 
 function handleDateSelect(dateString) {
+    if (bookingsPaused) {
+        showPopup(bookingPauseMessage);
+        return;
+    }
+
     const timeType = getSelectedTimeType();
 
     if (!timeType) {
@@ -309,12 +414,7 @@ nextMonthBtn.addEventListener('click', () => {
 
 document.querySelectorAll('input[name="time_type"]').forEach(radio => {
     radio.addEventListener('change', () => {
-        selectedCheckIn = '';
-        selectedCheckOut = '';
-        inputCheckIn.value = '';
-        inputCheckOut.value = '';
-        displayCheckIn.textContent = 'Select a date';
-        displayCheckOut.textContent = '--';
+        clearSelectedDate();
         renderCalendar();
     });
 });
@@ -325,9 +425,17 @@ if (window.VillaAsync) {
 
 function applyBookedDateData(data) {
     if (!data) return;
-        bookedDates = data.dates || {};
-        bookedMeta = data.meta || {};
-        renderCalendar();
+    bookedDates = data.dates || {};
+    bookedMeta = data.meta || {};
+    const system = data.system || {};
+    if (Object.prototype.hasOwnProperty.call(system, 'bookings_paused')) {
+        bookingsPaused = system.bookings_paused === true || system.bookings_paused === '1';
+    }
+    if (system.booking_pause_message) {
+        bookingPauseMessage = system.booking_pause_message;
+    }
+    setBookingPauseUi();
+    renderCalendar();
 }
 
 function refreshBookedDates(force) {
@@ -353,7 +461,8 @@ function refreshBookedDates(force) {
         });
 }
 
-refreshBookedDates(false);
+setBookingPauseUi();
+refreshBookedDates(bookingsPaused);
 setInterval(function() {
     if (document.visibilityState === 'visible') {
         refreshBookedDates(true);
@@ -367,6 +476,12 @@ if (window.VillaAsync) {
 }
 
 reservationForm.addEventListener('submit', function(e) {
+    if (bookingsPaused) {
+        e.preventDefault();
+        showPopup(bookingPauseMessage);
+        return;
+    }
+
     if (!inputCheckIn.value || !inputCheckOut.value) {
         e.preventDefault();
         showPopup('Please select your stay type and date first.');
@@ -420,7 +535,3 @@ function closePopup() {
         ">OK</button>
     </div>
 </div>
-
-<?php include "../includes/footer.php"; ?>
-
-

@@ -101,9 +101,19 @@ if (isset($conn)) {
                     <p>Get updates, special offers, and resort news.</p>
                 </div>
             </div>
-            <form class="footer-subscribe" action="/capstone_system/api/subscribe.php" method="POST" onsubmit="handleFooterSubscribe(event, this);">
+            <form class="footer-subscribe" action="/capstone_system/api/subscribe.php" method="POST" novalidate onsubmit="handleFooterSubscribe(event, this);">
                 <div class="footer-subscribe-control">
-                    <input type="email" name="email" placeholder="Your email address" required>
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Your email address"
+                        autocomplete="email"
+                        inputmode="email"
+                        maxlength="190"
+                        pattern="^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$"
+                        title="Enter a valid email address such as name@gmail.com."
+                        required
+                    >
                     <button type="submit">Subscribe</button>
                 </div>
                 <small class="footer-subscribe-message" aria-live="polite"></small>
@@ -196,13 +206,30 @@ document.addEventListener('DOMContentLoaded', function() {
             sendChatMessage();
         });
     }
+    document.querySelectorAll('.footer-subscribe').forEach(initFooterSubscribeCooldown);
 });
 
 function handleFooterSubscribe(event, form) {
     event.preventDefault();
     const message = form.querySelector('.footer-subscribe-message');
     const button = form.querySelector('button');
+    const emailInput = form.querySelector('input[name="email"]');
     const formData = new FormData(form);
+    const cooldownRemaining = getFooterSubscribeCooldownRemaining();
+
+    if (cooldownRemaining > 0) {
+        showFooterSubscribeMessage(form, 'Please wait ' + formatFooterCooldown(cooldownRemaining) + ' before subscribing another email.', true);
+        updateFooterSubscribeCooldown(form);
+        return;
+    }
+
+    const emailError = getFooterEmailError(emailInput ? emailInput.value : '');
+
+    if (emailError) {
+        showFooterSubscribeMessage(form, emailError, true);
+        if (emailInput) emailInput.focus();
+        return;
+    }
 
     if (message) {
         message.innerHTML = window.VillaAsync ? window.VillaAsync.skeletonMarkup(1) : 'Saving...';
@@ -224,22 +251,127 @@ function handleFooterSubscribe(event, form) {
     subscribeRequest
         .then(data => {
             form.classList.toggle('subscribed', !!data.ok);
-            if (message) {
-                message.className = 'footer-subscribe-message';
-                message.textContent = data.message || (data.ok ? 'Subscribed successfully.' : 'Please try again.');
-                message.classList.toggle('is-error', !data.ok);
+            if (data.cooldown_seconds) {
+                setFooterSubscribeCooldown(Number(data.cooldown_seconds) || 120);
             }
+            showFooterSubscribeMessage(form, data.message || (data.ok ? 'Subscribed successfully.' : 'Please try again.'), !data.ok);
             if (data.ok) form.reset();
         })
         .catch(() => {
-            if (message) {
-                message.textContent = 'Please try again.';
-                message.classList.add('is-error');
-            }
+            showFooterSubscribeMessage(form, 'Please try again.', true);
         })
         .finally(() => {
             if (button) button.disabled = false;
+            updateFooterSubscribeCooldown(form);
         });
+}
+
+function getFooterEmailError(value) {
+    const email = String(value || '').trim();
+    if (email === '') return 'Please enter your email address.';
+    if (email.length > 190) return 'Email address is too long.';
+    if (/\s/.test(email)) return 'Email address cannot contain spaces.';
+    const parts = email.split('@');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) return 'Please enter a valid email address like name@gmail.com.';
+    if (!/[a-z]/i.test(parts[0])) return 'Please enter a real email address, not only numbers or symbols.';
+    const domain = parts[1].toLowerCase();
+    if (!domain.includes('.') || domain.startsWith('.') || domain.endsWith('.')) return 'Email must include a valid domain like gmail.com.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return 'Please enter a valid email address like name@gmail.com.';
+    if (isLikelyMisspelledCommonEmailDomain(domain)) return 'Please enter a working email address.';
+    return '';
+}
+
+function isLikelyMisspelledCommonEmailDomain(domain) {
+    const commonDomains = [
+        'gmail.com',
+        'yahoo.com',
+        'outlook.com',
+        'hotmail.com',
+        'icloud.com',
+        'proton.me',
+        'protonmail.com',
+        'live.com',
+        'aol.com'
+    ];
+    if (commonDomains.includes(domain)) return false;
+
+    const domainName = domain.split('.')[0] || '';
+    return commonDomains.some(function(commonDomain) {
+        const commonName = commonDomain.split('.')[0] || '';
+        return levenshteinDistance(domain, commonDomain) <= 2 ||
+            (domainName !== commonName && levenshteinDistance(domainName, commonName) === 1);
+    });
+}
+
+function levenshteinDistance(a, b) {
+    const rows = Array.from({ length: a.length + 1 }, function(_, i) {
+        return [i];
+    });
+    for (let j = 1; j <= b.length; j++) rows[0][j] = j;
+
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            rows[i][j] = Math.min(
+                rows[i - 1][j] + 1,
+                rows[i][j - 1] + 1,
+                rows[i - 1][j - 1] + cost
+            );
+        }
+    }
+
+    return rows[a.length][b.length];
+}
+
+function showFooterSubscribeMessage(form, text, isError) {
+    const message = form.querySelector('.footer-subscribe-message');
+    if (!message) return;
+    message.textContent = text;
+    message.className = 'footer-subscribe-message';
+    message.classList.toggle('is-error', !!isError);
+}
+
+function initFooterSubscribeCooldown(form) {
+    const button = form.querySelector('button');
+    if (button && !button.dataset.defaultText) {
+        button.dataset.defaultText = button.textContent;
+    }
+    updateFooterSubscribeCooldown(form);
+    if (!form.dataset.cooldownTimer) {
+        form.dataset.cooldownTimer = '1';
+        window.setInterval(function() {
+            updateFooterSubscribeCooldown(form);
+        }, 1000);
+    }
+}
+
+function getFooterSubscribeCooldownRemaining() {
+    const cooldownUntil = Number(localStorage.getItem('villaFooterSubscribeCooldownUntil') || 0);
+    return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+}
+
+function setFooterSubscribeCooldown(seconds) {
+    localStorage.setItem('villaFooterSubscribeCooldownUntil', String(Date.now() + Math.max(1, seconds) * 1000));
+}
+
+function updateFooterSubscribeCooldown(form) {
+    const button = form.querySelector('button');
+    if (!button) return;
+    const remaining = getFooterSubscribeCooldownRemaining();
+    const defaultText = button.dataset.defaultText || 'Subscribe';
+    if (remaining > 0) {
+        button.disabled = true;
+        button.textContent = 'Wait ' + formatFooterCooldown(remaining);
+    } else {
+        button.disabled = false;
+        button.textContent = defaultText;
+    }
+}
+
+function formatFooterCooldown(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return minutes + ':' + String(remainingSeconds).padStart(2, '0');
 }
 
 function openChatbot() {

@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) die('Unauthorized access.');
+require_once '../includes/admin_auth.php';
+admin_require_login(false);
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
 ve_ensure_capstone2_schema($conn);
@@ -13,13 +13,7 @@ function save_setting(mysqli $conn, string $key, string $value): void {
 }
 
 function save_settings_log(mysqli $conn, string $area, string $note): void {
-    $adminId = (int)($_SESSION['admin_id'] ?? 0);
-    $stmt = mysqli_prepare($conn, "INSERT INTO settings_logs (admin_id, setting_area, action_note) VALUES (?, ?, ?)");
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, 'iss', $adminId, $area, $note);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
-    }
+    ve_audit_log($conn, $area, $note);
 }
 
 function save_settings_snapshot(mysqli $conn, string $note): void {
@@ -55,6 +49,19 @@ function redirect_settings(string $type, string $message): void {
 }
 
 $action = $_POST['action'] ?? 'site';
+if ($action === 'booking_pause') {
+    save_settings_snapshot($conn, 'Before emergency booking control update');
+    $paused = (string)($_POST['bookings_paused'] ?? '0') === '1' ? '1' : '0';
+    $note = trim($_POST['booking_pause_note'] ?? '');
+    if ($note === '') {
+        $note = 'Bookings are temporarily closed. Please check again later or contact Villa Eusebio for assistance.';
+    }
+
+    save_setting($conn, 'bookings_paused', $paused);
+    save_setting($conn, 'bookings_pause_note', $note);
+    save_settings_log($conn, 'Booking Control', $paused === '1' ? 'Paused all new customer bookings.' : 'Resumed new customer bookings.');
+    redirect_settings('success', $paused === '1' ? 'Bookings are now paused for customers.' : 'Bookings are now open for customers.');
+}
 if ($action === 'site') {
     save_settings_snapshot($conn, 'Before site settings update');
     foreach (['contact_phone','contact_email','contact_address','facebook_link','instagram_link','bio_text'] as $key) {

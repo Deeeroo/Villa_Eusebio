@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: owner.php");
-    exit;
-}
+require_once "../includes/admin_auth.php";
+admin_require_login(true);
 
 include "../includes/header.php";
 include "../includes/db.php";
@@ -211,7 +208,10 @@ foreach ($rows as $countRow) {
                 <p class="reservation-modal-kicker">Villa Eusebio</p>
                 <h3>Reservation Details</h3>
             </div>
-            <span class="close-modal">&times;</span>
+            <div class="reservation-modal-header-actions">
+                <span id="reservationModalStatus" class="reservation-modal-status-pill"></span>
+                <span class="close-modal">&times;</span>
+            </div>
         </div>
 
         <div class="modal-body" id="modalDetails"></div>
@@ -452,6 +452,74 @@ document.addEventListener("DOMContentLoaded", function () {
         return '../uploads/' + encodeURIComponent(cleaned.split('/').pop());
     }
 
+    function buildReservationRow(label, value) {
+        return '<div class="reservation-info-row"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function buildReservationAttachment(data) {
+        if (!data.proof_of_payment) {
+            return '<div class="reservation-attachment-card is-empty"><strong>No attachment uploaded</strong><span>Payment proof file was not provided.</span></div>';
+        }
+
+        const proofUrl = getProofUrl(data.proof_of_payment);
+        const proofExt = data.proof_of_payment.split('.').pop().toLowerCase();
+        const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(proofExt);
+        const fileLabel = proofExt ? proofExt.toUpperCase() + ' file' : 'Uploaded file';
+        const actionLabel = isImage ? 'View full image' : 'Open file';
+        const preview = isImage
+            ? '<a class="reservation-attachment-preview" href="' + proofUrl + '" target="_blank"><img src="' + proofUrl + '" alt="Payment proof"></a>'
+            : '<a class="reservation-attachment-preview file-preview" href="' + proofUrl + '" target="_blank">File</a>';
+
+        return '<div class="reservation-attachment-card">' +
+            preview +
+            '<div class="reservation-attachment-meta">' +
+                '<strong>Uploaded attachment</strong>' +
+                '<span>' + escapeHtml(fileLabel) + '</span>' +
+                '<a href="' + proofUrl + '" target="_blank">' + actionLabel + '</a>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function buildReservationDetails(data) {
+        const stayClass = 'stay-badge ' + (data.stay_class || '');
+        const paymentClass = 'payment-badge ' + (data.payment_class || '');
+
+        return '<div class="reservation-modern-details">' +
+            '<section class="reservation-stay-summary">' +
+                '<div class="reservation-summary-left">' +
+                    '<span class="' + escapeHtml(stayClass) + '">' + escapeHtml(data.time_type || '—') + '</span>' +
+                    '<span class="reservation-summary-divider"></span>' +
+                    '<strong>' + escapeHtml(data.guests || '0') + ' guests</strong>' +
+                '</div>' +
+                '<div class="reservation-summary-dates">' +
+                    '<div><span>Check-in</span><strong>' + escapeHtml(data.check_in_date || '—') + '</strong><small>' + escapeHtml(data.check_in_time || '—') + '</small></div>' +
+                    '<i>&rarr;</i>' +
+                    '<div><span>Check-out</span><strong>' + escapeHtml(data.check_out_date || '—') + '</strong><small>' + escapeHtml(data.check_out_time || '—') + '</small></div>' +
+                '</div>' +
+            '</section>' +
+            '<div class="reservation-modern-grid">' +
+                '<section class="reservation-detail-section">' +
+                    '<h4>Guest Information</h4>' +
+                    buildReservationRow('Guest Name', data.guest_name) +
+                    buildReservationRow('Email Address', data.email) +
+                    buildReservationRow('Mobile Number', data.mobile) +
+                    buildReservationRow('Address', data.address) +
+                '</section>' +
+                '<section class="reservation-detail-section">' +
+                    '<h4>Payment & Attachment</h4>' +
+                    '<div class="reservation-payment-method"><span>Payment Method</span><strong><span class="' + escapeHtml(paymentClass) + '">' + escapeHtml(data.payment_method || '—') + '</span></strong></div>' +
+                    '<div class="reservation-uploaded-attachment"><span>Uploaded Attachment</span>' + buildReservationAttachment(data) + '</div>' +
+                '</section>' +
+                '<section class="reservation-detail-section reservation-detail-section-wide">' +
+                    '<h4>Additional Details</h4>' +
+                    buildReservationRow('Date Booked', data.created_at) +
+                    buildReservationRow('Special Requests', data.special_requests || 'No special requests') +
+                    (data.rejection_reason ? buildReservationRow('Rejection Reason', data.rejection_reason) : '') +
+                '</section>' +
+            '</div>' +
+        '</div>';
+    }
+
     function openConfirmModal(id, action) {
         const actionLabel = action === 'approved' ? 'approve' : 'reject';
         confirmTitle.textContent = action === 'approved' ? 'Approve this booking?' : 'Reject this booking?';
@@ -674,34 +742,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = this.dataset;
             const modalDetails = document.getElementById('modalDetails');
             const modalActions = document.getElementById('modalActions');
+            const modalStatus = document.getElementById('reservationModalStatus');
 
-            modalDetails.innerHTML =
-                '<div class="reservation-detail-grid">' +
-                buildDetailItem('Guest Name', data.guest_name) +
-                buildDetailItem('Email Address', data.email) +
-                buildDetailItem('Mobile Number', data.mobile) +
-                buildDetailItem('Address', data.address) +
-                buildBadgeDetailItem('Stay Type', data.time_type, 'stay-badge ' + data.stay_class) +
-                buildDetailItem('Number of Guests', data.guests) +
-                buildBadgeDetailItem('Payment Method', data.payment_method, 'payment-badge ' + data.payment_class) +
-                buildDetailItem('Reservation Date', data.created_at) +
-                buildDetailItem('Check-in', data.check_in_date + ' • ' + data.check_in_time) +
-                buildDetailItem('Check-out', data.check_out_date + ' • ' + data.check_out_time) +
-                buildStatusDetailItem('Status', data.status) +
-                buildSpecialRequestItem('Notes', data.special_requests) +
-                (data.rejection_reason ? buildSpecialRequestItem('Rejection Reason', data.rejection_reason) : '') +
-                buildDetailItem('Payment Proof File', data.proof_of_payment || 'No payment proof uploaded') +
-                '</div>';
-
-            if (data.proof_of_payment) {
-                const proofExt = data.proof_of_payment.split('.').pop().toLowerCase();
-                const proofUrl = getProofUrl(data.proof_of_payment);
-                if (['jpg', 'jpeg', 'png', 'webp'].includes(proofExt)) {
-                    modalDetails.innerHTML += '<div class="reservation-proof-preview"><p>Uploaded Payment Proof</p><a href="' + proofUrl + '" target="_blank"><img src="' + proofUrl + '" alt="Payment proof"></a><a href="' + proofUrl + '" target="_blank">Open payment proof file</a></div>';
-                } else {
-                    modalDetails.innerHTML += '<div class="reservation-proof-preview"><p>Uploaded Payment Proof</p><a href="' + proofUrl + '" target="_blank">Open payment proof file</a></div>';
-                }
-            }
+            modalStatus.className = 'reservation-modal-status-pill status-' + escapeHtml(String(data.status || 'pending').toLowerCase());
+            modalStatus.textContent = statusLabel(data.status);
+            modalDetails.innerHTML = buildReservationDetails(data);
             modalDetails.innerHTML += buildOcrPanel(data);
 
             if (data.status === 'pending') {

@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: owner.php");
-    exit;
-}
+require_once "../includes/admin_auth.php";
+admin_require_login(true);
 
 include "../includes/header.php";
 include "../includes/db.php";
@@ -207,6 +204,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
                     data-status_raw="<?php echo htmlspecialchars(strtolower($row['status'])); ?>"
                     data-payment_status="<?php echo htmlspecialchars(ucfirst($row['payment_status'] ?: 'unpaid')); ?>"
                     data-payment_status_raw="<?php echo htmlspecialchars(strtolower($row['payment_status'] ?: 'unpaid')); ?>"
+                    data-base_stay_value="₱<?php echo number_format($baseStayValue); ?>"
                     data-stay_value="₱<?php echo number_format($row['stay_value']); ?>"
                     data-reservation_fee_amount="₱<?php echo number_format((float)$row['reservation_fee_amount']); ?>"
                     data-reservation_fee_status="<?php echo htmlspecialchars(ucfirst($row['reservation_fee_status'] ?: 'unpaid')); ?>"
@@ -267,6 +265,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
             <div>
                 <p class="reservation-modal-kicker">Villa Eusebio</p>
                 <h3>Sales Record Details</h3>
+                <p class="sales-modal-subtitle" id="salesModalSubtitle"></p>
             </div>
             <span class="close-sales-modal">&times;</span>
         </div>
@@ -329,6 +328,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const resFeeConfirmModal = document.getElementById('reservationFeeConfirmModal');
     const salesDetails = document.getElementById('salesModalDetails');
     const salesActions = document.getElementById('salesModalActions');
+    const salesSubtitle = document.getElementById('salesModalSubtitle');
     const salesConfirmForm = document.getElementById('salesConfirmForm');
     const resFeeConfirmForm = document.getElementById('resFeeConfirmForm');
     let pendingExternalSync = false;
@@ -453,6 +453,99 @@ document.addEventListener("DOMContentLoaded", function () {
         return '../uploads/' + encodeURIComponent(cleaned.split('/').pop());
     }
 
+    function buildSalesInfoRow(label, value) {
+        return '<div class="sales-info-row"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function buildSalesMiniMetric(label, value) {
+        return '<div class="sales-mini-metric"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
+    }
+
+    function buildSalesStatusPill(status, type) {
+        const raw = String(status || 'unpaid').toLowerCase();
+        const label = raw === 'paid' ? 'Paid' : (raw === 'approved' ? 'Approved' : (raw === 'rejected' ? 'Rejected' : (raw === 'pending' ? 'Pending' : 'Unpaid')));
+        return '<span class="sales-status-pill sales-status-' + escapeHtml(raw) + ' sales-status-kind-' + escapeHtml(type || 'payment') + '">' + label + '</span>';
+    }
+
+    function buildSalesProof(data) {
+        if (!data.proof_of_payment) {
+            return '<div class="sales-proof-card is-empty"><span>No uploaded proof</span></div>';
+        }
+
+        const proofUrl = getProofUrl(data.proof_of_payment);
+        const proofExt = data.proof_of_payment.split('.').pop().toLowerCase();
+        const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(proofExt);
+        const fileLabel = proofExt ? proofExt.toUpperCase() + ' file' : 'Uploaded file';
+        const preview = isImage
+            ? '<a class="sales-proof-preview" href="' + proofUrl + '" target="_blank"><img src="' + proofUrl + '" alt="Uploaded proof"></a>'
+            : '<a class="sales-proof-preview file-preview" href="' + proofUrl + '" target="_blank">File</a>';
+
+        return '<div class="sales-proof-card">' +
+            preview +
+            '<div class="sales-proof-meta">' +
+                '<strong>' + escapeHtml(data.proof_of_payment) + '</strong>' +
+                '<span>' + escapeHtml(fileLabel) + '</span>' +
+                '<a href="' + proofUrl + '" target="_blank">' + (isImage ? 'View full image' : 'Open uploaded file') + '</a>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function buildSalesRecordDetails(data) {
+        const balancePaid = String(data.payment_status_raw || data.payment_status || '').toLowerCase() === 'paid';
+        const reservationFeePaid = String(data.reservation_fee_status_raw || data.reservation_fee_status || '').toLowerCase() === 'paid';
+        const bookingStatusRaw = String(data.status_raw || data.status || '').toLowerCase();
+
+        return '<div class="sales-record-modern">' +
+            '<div class="sales-record-layout">' +
+                '<div class="sales-record-main">' +
+                    '<section class="sales-record-section">' +
+                        '<h4>Guest Information</h4>' +
+                        buildSalesInfoRow('Guest name', data.guest_name) +
+                        buildSalesInfoRow('Email address', data.email) +
+                        buildSalesInfoRow('Mobile number', data.mobile) +
+                        buildSalesInfoRow('Address', data.address) +
+                    '</section>' +
+                    '<section class="sales-record-section">' +
+                        '<h4>Stay Details</h4>' +
+                        '<div class="sales-stay-grid">' +
+                            buildSalesMiniMetric('Check-in date', data.check_in_date) +
+                            buildSalesMiniMetric('Check-out date', data.check_out_date) +
+                            buildSalesMiniMetric('Guests', data.guests) +
+                            '<div class="sales-mini-metric"><span>Stay type</span><strong><span class="stay-badge ' + escapeHtml(data.stay_class || '') + '">' + escapeHtml(data.time_type || '—') + '</span></strong></div>' +
+                            '<div class="sales-mini-metric"><span>Booking status</span><strong>' + buildSalesStatusPill(bookingStatusRaw, 'booking') + '</strong></div>' +
+                        '</div>' +
+                    '</section>' +
+                    '<section class="sales-record-section">' +
+                        '<h4>Notes</h4>' +
+                        '<p class="sales-notes-text">' + escapeHtml(data.special_requests || 'No notes') + '</p>' +
+                    '</section>' +
+                    '<section class="sales-record-section">' +
+                        '<h4>Uploaded Proof</h4>' +
+                        buildSalesProof(data) +
+                    '</section>' +
+                '</div>' +
+                '<aside class="sales-payment-summary-card">' +
+                    '<h4>Payment Summary</h4>' +
+                    '<div class="sales-payment-top">' +
+                        '<div><span>Payment status</span>' + buildSalesStatusPill(data.payment_status_raw, 'payment') + '</div>' +
+                        '<div><span>Payment method</span><strong><span class="payment-badge ' + escapeHtml(data.payment_class || '') + '">' + escapeHtml(data.payment_method || '—') + '</span></strong></div>' +
+                    '</div>' +
+                    '<div class="sales-payment-lines">' +
+                        '<div><span>Stay value</span><strong>' + escapeHtml(data.base_stay_value || data.stay_value) + '</strong></div>' +
+                        '<div><span>Additional guest fee</span><strong>' + escapeHtml(data.additional_guest_fee || '₱0') + '</strong></div>' +
+                        '<div class="sales-payment-total"><span>Total amount</span><strong>' + escapeHtml(data.stay_value) + '</strong></div>' +
+                        '<div><span>Reservation fee paid</span><strong>' + buildSalesStatusPill(data.reservation_fee_status_raw, 'reservation') + ' <em>−' + escapeHtml(data.reservation_fee_amount) + '</em></strong></div>' +
+                    '</div>' +
+                    '<div class="sales-remaining-block ' + (balancePaid ? 'is-paid' : 'is-unpaid') + '">' +
+                        '<span>Remaining balance</span>' +
+                        '<strong>' + escapeHtml(balancePaid ? '₱0' : data.remaining_balance) + '</strong>' +
+                        '<small>' + (reservationFeePaid ? 'Reservation fee has been deducted.' : 'Pay the reservation fee before marking balance paid.') + '</small>' +
+                    '</div>' +
+                '</aside>' +
+            '</div>' +
+        '</div>';
+    }
+
     function findSalesRow(id) {
         return document.querySelector('.sales-row[data-id="' + String(id || '').replace(/"/g, '') + '"]');
     }
@@ -520,37 +613,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (event.target.closest('.sales-pay-btn') || event.target.closest('.sales-paid-lock')) return;
 
             const data = row.dataset;
-            salesDetails.innerHTML =
-                '<div class="reservation-detail-grid">' +
-                buildDetailItem('Guest Name', data.guest_name) +
-                buildDetailItem('Email Address', data.email) +
-                buildDetailItem('Mobile Number', data.mobile) +
-                buildDetailItem('Address', data.address) +
-                buildDetailItem('Check-in Date', data.check_in_date) +
-                buildDetailItem('Check-out Date', data.check_out_date) +
-                buildDetailItem('Guests', data.guests) +
-                buildBadgeDetailItem('Stay Type', data.time_type, 'stay-badge ' + data.stay_class) +
-                buildBadgeDetailItem('Payment Method', data.payment_method, 'payment-badge ' + data.payment_class) +
-                buildBookingStatusDetailItem('Booking Status', data.status) +
-                buildStatusDetailItem('Payment Status', data.payment_status_raw) +
-                buildDetailItem('Stay Value', data.stay_value) +
-                buildDetailItem('Reservation Fee', data.reservation_fee_amount) +
-                buildDetailItem('Additional Guest Fee', data.additional_guest_fee) +
-                buildDetailItem('Remaining Balance', data.remaining_balance) +
-                buildStatusDetailItem('Reservation Fee Status', data.reservation_fee_status_raw) +
-                buildSpecialRequestItem('Notes', data.special_requests) +
-                buildDetailItem('Uploaded File', data.proof_of_payment || 'No uploaded file') +
-                '</div>';
-
-            if (data.proof_of_payment) {
-                const proofExt = data.proof_of_payment.split('.').pop().toLowerCase();
-                const proofUrl = getProofUrl(data.proof_of_payment);
-                if (['jpg', 'jpeg', 'png', 'webp'].includes(proofExt)) {
-                    salesDetails.innerHTML += '<div class="reservation-proof-preview"><p>Uploaded Proof Preview</p><a href="' + proofUrl + '" target="_blank"><img src="' + proofUrl + '" alt="Uploaded proof"></a><a href="' + proofUrl + '" target="_blank">Open full image</a></div>';
-                } else {
-                    salesDetails.innerHTML += '<div class="reservation-proof-preview"><p>Uploaded Proof File</p><a href="' + proofUrl + '" target="_blank">Open uploaded file</a></div>';
-                }
+            if (salesSubtitle) {
+                salesSubtitle.textContent = (data.guest_name || 'Guest') + ' · ' + (data.time_type || 'Stay');
             }
+            salesDetails.innerHTML = buildSalesRecordDetails(data);
             salesDetails.innerHTML += buildOcrPanel(data);
 
             if (String(data.status || '').toLowerCase() === 'rejected') {

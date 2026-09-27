@@ -1,4 +1,4 @@
-﻿/*
+/*
   Customer layout
   ------------------------------------------------------------
   Customer header, navigation, section titles, footer, and homepage navigation fixes.
@@ -883,39 +883,33 @@ nav {
 
 
 
-/* Late homepage fixes for hero buttons, gallery button, hero contrast, and mute control. */
-
-/* HERO BUTTON FIX */
+/* Homepage buttons, hero contrast, and mute control. */
 .hero .btn {
-    background: #98a084 !important;
+    min-width: 236px !important;
+    padding: 16px 34px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #b4b16b 0%, #8e9358 100%) !important;
     color: #ffffff !important;
-    border: 1px solid #98a084 !important;
-    box-shadow: none !important;
+    border: 1px solid rgba(229, 226, 156, .82) !important;
+    box-shadow: 0 18px 42px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.28) !important;
+    letter-spacing: .18em !important;
+    text-transform: uppercase !important;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease !important;
 }
 
 .hero .btn:hover {
-    background: #7f886d !important;
+    background: linear-gradient(135deg, #c0bd77 0%, #7f886d 100%) !important;
     color: #ffffff !important;
-    border-color: #7f886d !important;
-}
-
-.hero .btn.outline {
-    background: transparent !important;
-    color: #98a084 !important;
-    border: 1px solid #98a084 !important;
-}
-
-.hero .btn.outline:hover {
-    background: rgba(138, 154, 127, 0.08) !important;
-    color: #7f886d !important;
-    border-color: #7f886d !important;
+    border-color: rgba(241, 238, 173, .95) !important;
+    box-shadow: 0 22px 52px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.32) !important;
+    transform: translateY(-2px);
 }
 
 .hero .hero-est {
     color: rgba(212, 197, 160, 0.95) !important;
 }
 
-/* FIX GALLERY BUTTON */
+/* Gallery action button. */
 .gallery-action .btn {
     background: #98a084 !important;
     color: #ffffff !important;
@@ -928,7 +922,7 @@ nav {
     color: #ffffff !important;
 }
 
-/* HERO TEXT VISIBILITY FIX */
+/* Hero text contrast. */
 .hero::before {
     content: "";
     position: absolute;

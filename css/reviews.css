@@ -68,10 +68,6 @@
     font-size: 11px;
     color: #999;
 }
-.review-header strong::before {
-    content: "ðŸ‘¤ ";
-}
-
 .reviews-container {
     height: 100vh; /* FULL SCREEN */
     width: 100%;

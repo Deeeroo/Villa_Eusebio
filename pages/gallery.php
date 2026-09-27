@@ -106,7 +106,6 @@ function closeGalleryModalDirect() {
 </script>
 
 
-<?php include "../includes/footer.php"; ?>
 
 
 

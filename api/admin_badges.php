@@ -1,12 +1,7 @@
 <?php
-session_start();
+require_once '../includes/admin_auth.php';
+admin_require_login(false);
 header('Content-Type: application/json');
-
-if (!isset($_SESSION['admin_logged_in'])) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
 
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';

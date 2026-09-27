@@ -1,11 +1,9 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    die('Unauthorized access.');
-}
+require_once '../includes/admin_auth.php';
+admin_require_login(false);
 
 include '../includes/db.php';
-include '../includes/booking_repository.php';
+include '../includes/booking_availability.php';
 ve_ensure_capstone2_schema($conn);
 
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
@@ -22,38 +20,6 @@ function redirect_reschedule($type, $message, $redirect) {
     exit;
 }
 
-function reschedule_required_slots($timeType) {
-    if ($timeType === 'day') return ['day'];
-    if ($timeType === 'overnight') return ['overnight'];
-    if ($timeType === '22hour') return ['day', 'overnight'];
-    return [];
-}
-
-function reschedule_conflict_date_label($dateValue) {
-    $time = strtotime($dateValue);
-    return $time ? date('l, F j, Y', $time) : $dateValue;
-}
-
-function reschedule_conflict_slot_label($slot) {
-    if ($slot === 'day') return 'Day Tour';
-    if ($slot === 'overnight') return 'Overnight Stay';
-    if ($slot === '22hour') return '22-Hour Stay';
-    if ($slot === 'whole' || $slot === 'blocked') return 'Whole Day';
-    return ucwords(str_replace(['_', '-'], ' ', (string)$slot));
-}
-
-function reschedule_conflict_message($dateValue, $slot) {
-    return 'Conflict Detected on ' . reschedule_conflict_date_label($dateValue) . ' (' . reschedule_conflict_slot_label($slot) . ' Already Booked).';
-}
-
-function reschedule_checkout_date($checkIn, $timeType) {
-    $date = new DateTime($checkIn);
-    if ($timeType === 'overnight' || $timeType === '22hour') {
-        $date->modify('+1 day');
-    }
-    return $date->format('Y-m-d');
-}
-
 if ($id <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkIn) || !in_array($timeType, ['day', 'overnight', '22hour'], true)) {
     redirect_reschedule('error', 'Invalid reschedule request.', $redirect);
 }
@@ -63,7 +29,7 @@ if (!$booking) {
     redirect_reschedule('error', 'Booking not found.', $redirect);
 }
 
-$requiredSlots = reschedule_required_slots($timeType);
+$requiredSlots = ve_required_slots($timeType);
 if (empty($requiredSlots)) {
     redirect_reschedule('error', 'Invalid stay type for this booking.', $redirect);
 }
@@ -73,51 +39,14 @@ if ($checkIn < $today) {
     redirect_reschedule('error', 'Past dates are not allowed for rescheduling.', $redirect);
 }
 
-$checkOut = reschedule_checkout_date($checkIn, $timeType);
+$checkOut = ve_checkout_date($checkIn, $timeType);
 $status = strtolower($booking['status'] ?? '');
 
 mysqli_begin_transaction($conn);
 try {
-    $conflictStmt = mysqli_prepare($conn, "SELECT time_type FROM booked_dates WHERE booking_id != ? AND booked_date = ?");
-    if (!$conflictStmt) {
-        throw new Exception(mysqli_error($conn));
-    }
-    mysqli_stmt_bind_param($conflictStmt, 'is', $id, $checkIn);
-    mysqli_stmt_execute($conflictStmt);
-    $conflictResult = mysqli_stmt_get_result($conflictStmt);
-    $existingSlots = [];
-    while ($row = mysqli_fetch_assoc($conflictResult)) {
-        $existingSlots[] = $row['time_type'];
-    }
-    mysqli_stmt_close($conflictStmt);
-
-    $blockStmt = mysqli_prepare($conn, "SELECT stay_type FROM admin_blocks WHERE blocked_date = ?");
-    if ($blockStmt) {
-        mysqli_stmt_bind_param($blockStmt, 's', $checkIn);
-        mysqli_stmt_execute($blockStmt);
-        $blockResult = mysqli_stmt_get_result($blockStmt);
-        while ($block = mysqli_fetch_assoc($blockResult)) {
-            if ($block['stay_type'] === '22hour' || $block['stay_type'] === 'whole') {
-                $existingSlots[] = 'day';
-                $existingSlots[] = 'overnight';
-            } else {
-                $existingSlots[] = $block['stay_type'];
-            }
-        }
-        mysqli_stmt_close($blockStmt);
-    }
-
-    $existingSlots = array_values(array_unique($existingSlots));
-    if ($timeType === '22hour' && !empty($existingSlots)) {
-        throw new Exception(reschedule_conflict_message($checkIn, $existingSlots[0] ?? 'day'));
-    }
-    if (in_array('day', $existingSlots, true) && in_array('overnight', $existingSlots, true)) {
-        throw new Exception(reschedule_conflict_message($checkIn, 'whole'));
-    }
-    foreach ($requiredSlots as $slot) {
-        if (in_array($slot, $existingSlots, true)) {
-            throw new Exception(reschedule_conflict_message($checkIn, $slot));
-        }
+    $availability = ve_check_date_availability($conn, $checkIn, $timeType, $id);
+    if (!$availability['available']) {
+        throw new Exception($availability['message']);
     }
 
     $updateStmt = mysqli_prepare($conn, "UPDATE bookings SET check_in_date = ?, check_out_date = ?, time_type = ? WHERE booking_id = ?");
@@ -171,23 +100,15 @@ try {
         mysqli_stmt_close($paymentUpdateStmt);
     }
 
-    $deleteStmt = mysqli_prepare($conn, "DELETE FROM booked_dates WHERE booking_id = ?");
-    if ($deleteStmt) {
-        mysqli_stmt_bind_param($deleteStmt, 'i', $id);
-        mysqli_stmt_execute($deleteStmt);
-        mysqli_stmt_close($deleteStmt);
-    }
-
     if ($status === 'approved') {
-        $insertStmt = mysqli_prepare($conn, "INSERT INTO booked_dates (booking_id, booked_date, time_type) VALUES (?, ?, ?)");
-        if (!$insertStmt) {
-            throw new Exception(mysqli_error($conn));
+        ve_replace_booking_slots($conn, $id, $checkIn, $timeType);
+    } else {
+        $deleteStmt = mysqli_prepare($conn, "DELETE FROM booked_dates WHERE booking_id = ?");
+        if ($deleteStmt) {
+            mysqli_stmt_bind_param($deleteStmt, 'i', $id);
+            mysqli_stmt_execute($deleteStmt);
+            mysqli_stmt_close($deleteStmt);
         }
-        foreach ($requiredSlots as $slot) {
-            mysqli_stmt_bind_param($insertStmt, 'iss', $id, $checkIn, $slot);
-            mysqli_stmt_execute($insertStmt);
-        }
-        mysqli_stmt_close($insertStmt);
     }
 
     mysqli_commit($conn);

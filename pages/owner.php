@@ -1,9 +1,13 @@
 <?php
-session_start();
-if (isset($_SESSION['admin_logged_in'])) {
+require_once "../includes/admin_auth.php";
+admin_start_session();
+admin_security_headers();
+if (admin_is_logged_in()) {
     header('Location: admin-panel.php');
     exit;
 }
+$errorCode = $_GET['error'] ?? '';
+$waitSeconds = max(0, (int)($_GET['wait'] ?? 0));
 ?>
 
 <link rel="icon" type="image/jpeg" href="/capstone_system/assets/icon.jpg">
@@ -228,11 +232,20 @@ body {
             <p>Enter your credentials to continue</p>
         </div>
 
-        <?php if (isset($_GET['error'])): ?>
-            <div class="login-error" id="loginError">Invalid username or password.</div>
+        <?php if ($errorCode !== ''): ?>
+            <div class="login-error" id="loginError">
+                <?php if ($errorCode === 'locked'): ?>
+                    Too many failed login attempts. Please wait <?php echo max(1, (int)ceil($waitSeconds / 60)); ?> minute(s), then try again.
+                <?php elseif ($errorCode === 'timeout'): ?>
+                    Your admin session expired. Please log in again.
+                <?php else: ?>
+                    Invalid username or password.
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
 
         <form action="../api/admin_login.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(admin_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
 
             <!-- USERNAME -->
             <div class="owner-form-group">

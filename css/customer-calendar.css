@@ -50,6 +50,28 @@
     align-items: start;
 }
 
+.booking-pause-notice {
+    grid-column: 1 / -1;
+    padding: 18px 20px;
+    border: 1px solid #efc4b6;
+    border-radius: 12px;
+    background: #fff4ef;
+    color: #744235;
+    box-shadow: 0 10px 24px rgba(89, 57, 42, .08);
+}
+
+.booking-pause-notice strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #b42318;
+    font-size: 1.05rem;
+}
+
+.booking-pause-notice span {
+    display: block;
+    line-height: 1.6;
+}
+
 /* CALENDAR */
 
 .calendar-day {
@@ -251,6 +273,13 @@ td {
     color: #666;
 }
 
+.calendar-day.booking-paused-day {
+    background: #dfdfdf;
+    color: #777;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
 .calendar-legend {
     display: flex;
     gap: 20px;
@@ -307,6 +336,16 @@ td {
 .option-card:hover {
     border-color: var(--sage);
     background: rgba(138,154,127,0.05);
+}
+
+.booking-paused .option-card {
+    opacity: .58;
+    cursor: not-allowed;
+}
+
+.booking-paused .option-card:hover {
+    border-color: rgba(138,154,127,0.18);
+    background: #fff;
 }
 
 .option-card input[type="radio"] {
@@ -371,6 +410,59 @@ td {
 
 .btn-complete:hover {
     background: #222;
+}
+
+.btn-complete:disabled {
+    background: #a7a29a;
+    cursor: not-allowed;
+    opacity: .8;
+}
+
+.booking-closed-wrapper {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+}
+
+.booking-closed-card {
+    padding: 42px 34px;
+    border: 1px solid #e6d8c6;
+    border-radius: 16px;
+    background: #fffdf8;
+    text-align: center;
+    box-shadow: 0 14px 34px rgba(0,0,0,.08);
+}
+
+.booking-closed-kicker {
+    display: inline-flex;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #fff0ea;
+    color: #b42318;
+    font-weight: 800;
+}
+
+.booking-closed-card h1 {
+    margin: 0 0 12px;
+    color: #1e3d2b;
+}
+
+.booking-closed-card p {
+    margin: 0 auto;
+    max-width: 560px;
+    color: #5f5a50;
+    line-height: 1.7;
+}
+
+.booking-closed-card .back-link {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: #2f6f4f;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
 }
 
 .booking-form .form-group {

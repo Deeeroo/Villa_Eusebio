@@ -1,12 +1,8 @@
 /*
-  Capstone feature additions
+  Shared feature styles
   ------------------------------------------------------------
-  New customer/admin feature styles: notes, smart filters, chat, reviews, badges, summaries, and tables.
+  Small UI pieces used across customer and admin pages.
 */
-
-/* Capstone 2 feature additions for calendar notes, smart filters, archive menus, settings, and review summary. */
-
-/* capstone 2 additions */
 .calendar-info-note,
 .room-capacity-note,
 .field-help {
@@ -110,14 +106,41 @@
     border-radius:14px;
     border:1px solid #eadcc9;
 }
-.admin-chat-msg { margin: 10px 0; max-width: 72%; padding: 10px 12px; border-radius: 14px; }
-.admin-chat-msg.customer { background:#f4efe7; margin-right:auto; }
-.admin-chat-msg.admin { background:#dfeadd; margin-left:auto; text-align:right; }
-.admin-chat-msg p { margin: 5px 0; }
-.admin-chat-msg small { color:#777; font-size:11px; }
-.admin-chat-form { display:flex; gap:10px; margin-top:12px; }
-.admin-chat-form input { flex:1; }
-.live-request-btn { grid-column: 1 / -1; background:#6f8d6b !important; color:white !important; }
+.admin-chat-msg {
+    max-width: 72%;
+    margin: 10px 0;
+    padding: 10px 12px;
+    border-radius: 14px;
+}
+.admin-chat-msg.customer {
+    margin-right: auto;
+    background: #f4efe7;
+}
+.admin-chat-msg.admin {
+    margin-left: auto;
+    background: #dfeadd;
+    text-align: right;
+}
+.admin-chat-msg p {
+    margin: 5px 0;
+}
+.admin-chat-msg small {
+    color: #777;
+    font-size: 11px;
+}
+.admin-chat-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+.admin-chat-form input {
+    flex: 1;
+}
+.live-request-btn {
+    grid-column: 1 / -1;
+    background: #6f8d6b !important;
+    color: white !important;
+}
 .review-rating-summary {
     display:inline-flex;
     align-items:center;
@@ -129,11 +152,29 @@
     border:1px solid #eadcc9;
     color:#3d3d3d;
 }
-.review-rating-summary span { color:#d4af37; letter-spacing:2px; }
-.review-rating-summary small { color:#777; }
-.stay-22hour, .badge-22hour { background:#f8e6a3 !important; color:#7a5500 !important; border-color:#e0bd3b !important; }
-.special-request-text { color:#777 !important; font-weight:700; }
+.review-rating-summary span {
+    color: #d4af37;
+    letter-spacing: 2px;
+}
+.review-rating-summary small {
+    color: #777;
+}
+.stay-22hour,
+.badge-22hour {
+    background: #f8e6a3 !important;
+    color: #7a5500 !important;
+    border-color: #e0bd3b !important;
+}
+.special-request-text {
+    color: #777 !important;
+    font-weight: 700;
+}
 @media (max-width: 900px) {
-    .admin-block-form { width:100%; }
-    .admin-block-form input, .admin-block-form select { flex: 1 1 160px; }
+    .admin-block-form {
+        width: 100%;
+    }
+    .admin-block-form input,
+    .admin-block-form select {
+        flex: 1 1 160px;
+    }
 }

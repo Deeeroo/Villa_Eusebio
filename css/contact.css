@@ -276,9 +276,7 @@
 }
 
 .brand-card {
-    background:
-        linear-gradient(145deg, rgba(62,91,55,.92), rgba(128,145,107,.84)),
-        url('/capstone_system/assets/icon.jpg') right 22px bottom 22px / 110px 110px no-repeat;
+    background: linear-gradient(145deg, rgba(62,91,55,.92), rgba(128,145,107,.84));
     color: #fffdf8;
     overflow: hidden;
 }

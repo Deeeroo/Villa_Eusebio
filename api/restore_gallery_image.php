@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) die('Unauthorized access.');
+require_once '../includes/admin_auth.php';
+admin_require_login(false);
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
 ve_ensure_capstone2_schema($conn);

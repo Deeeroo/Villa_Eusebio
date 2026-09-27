@@ -13,16 +13,22 @@ if ($galleryHomeResult) {
     }
 }
 $activeAnnouncement = null;
-$announcementResult = mysqli_query($conn, "SELECT title, message, image_path, updated_at FROM announcements WHERE is_active = 1 AND archived_at IS NULL ORDER BY updated_at DESC, announcement_id DESC LIMIT 1");
+$announcementResult = mysqli_query($conn, "SELECT title, message, image_path, updated_at, expires_at FROM announcements WHERE is_active = 1 AND archived_at IS NULL AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY updated_at DESC, announcement_id DESC LIMIT 1");
 if ($announcementResult) {
     $activeAnnouncement = mysqli_fetch_assoc($announcementResult);
 }
+$heroVideos = [
+    '/capstone_system/assets/bgvid.mp4',
+    '/capstone_system/assets/videopool.mp4',
+    '/capstone_system/assets/videopool2.mp4',
+];
+$heroVideoSrc = $heroVideos[array_rand($heroVideos)];
 ?>
 
 <section class="hero">
     <div class="video-wrapper">
         <video id="heroVideo" autoplay muted loop playsinline preload="auto" class="hero-video">
-            <source src="/capstone_system/assets/bgvid.mp4" type="video/mp4">
+            <source src="<?php echo htmlspecialchars($heroVideoSrc); ?>" type="video/mp4">
         </video>
 
         <button id="muteBtn" class="mute-btn">&#128263;</button>
@@ -46,7 +52,6 @@ if ($announcementResult) {
 
         <div class="hero-buttons">
             <a href="pages/appointment.php" class="btn">Book now</a>
-            <a href="#amenities" class="btn outline">Explore</a>
         </div>
 
         <div class="hero-est">Est. 2024</div>
@@ -76,16 +81,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('announcementModal');
     const close = document.getElementById('announcementClose');
     if (!bubble || !modal || !close) return;
-    bubble.addEventListener('click', function() {
+    let closeTimer = null;
+
+    function openAnnouncement() {
+        if (closeTimer) clearTimeout(closeTimer);
+        modal.classList.remove('closing');
         modal.classList.add('show');
         modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeAnnouncement() {
+        if (!modal.classList.contains('show') || modal.classList.contains('closing')) return;
+        modal.classList.add('closing');
+        modal.setAttribute('aria-hidden', 'true');
+        closeTimer = setTimeout(function() {
+            modal.classList.remove('show', 'closing');
+        }, 260);
+    }
+
+    bubble.addEventListener('click', function() {
+        openAnnouncement();
     });
     close.addEventListener('click', function() {
-        modal.classList.remove('show');
-        modal.setAttribute('aria-hidden', 'true');
+        closeAnnouncement();
     });
     modal.addEventListener('click', function(e) {
-        if (e.target === modal) close.click();
+        if (e.target === modal) closeAnnouncement();
     });
 });
 </script>

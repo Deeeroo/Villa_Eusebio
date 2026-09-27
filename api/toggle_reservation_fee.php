@@ -1,8 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    die('Unauthorized');
-}
+require_once '../includes/admin_auth.php';
+admin_require_login(false);
 include '../includes/db.php';
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 if ($id > 0) {
