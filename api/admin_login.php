@@ -32,7 +32,7 @@ if ($lockRemaining > 0) {
     admin_login_redirect('locked', $lockRemaining);
 }
 
-$sql = "SELECT id, full_name, username, password_hash, role FROM admins WHERE username = ? LIMIT 1";
+$sql = "SELECT id, full_name, username, password_hash, role FROM admins WHERE LOWER(username) = ? LIMIT 1";
 $stmt = mysqli_prepare($conn, $sql);
 
 if (!$stmt) {

@@ -38,15 +38,32 @@ function ve_ensure_admin_schema(mysqli $conn): void {
         return;
     }
 
-    $countResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM admins");
-    $countRow = $countResult ? mysqli_fetch_assoc($countResult) : ['total' => 0];
-    if ((int)($countRow['total'] ?? 0) > 0) {
-        return;
-    }
-
-    $username = trim((string)(getenv('ADMIN_USERNAME') ?: ''));
+    $username = strtolower(trim((string)(getenv('ADMIN_USERNAME') ?: '')));
     $password = (string)(getenv('ADMIN_PASSWORD') ?: '');
     $fullName = trim((string)(getenv('ADMIN_FULL_NAME') ?: 'Villa Eusebio Owner'));
+    $forceReset = (string)(getenv('ADMIN_FORCE_RESET') ?: '') === '1';
+
+    $countResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM admins");
+    $countRow = $countResult ? mysqli_fetch_assoc($countResult) : ['total' => 0];
+    $adminCount = (int)($countRow['total'] ?? 0);
+
+    if ($adminCount > 0) {
+        if ($forceReset && $username !== '' && $password !== '') {
+            $idResult = mysqli_query($conn, "SELECT id FROM admins ORDER BY id ASC LIMIT 1");
+            $idRow = $idResult ? mysqli_fetch_assoc($idResult) : null;
+            $adminId = (int)($idRow['id'] ?? 0);
+            if ($adminId > 0) {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = mysqli_prepare($conn, "UPDATE admins SET full_name = ?, username = ?, password_hash = ?, role = 'owner', updated_at = NOW() WHERE id = ?");
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, 'sssi', $fullName, $username, $hash, $adminId);
+                    mysqli_stmt_execute($stmt);
+                    mysqli_stmt_close($stmt);
+                }
+            }
+        }
+        return;
+    }
 
     if ($username === '' || $password === '') {
         error_log('Admin account is not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD to create the first admin account.');
