@@ -457,7 +457,7 @@ nav {
 
 .footer-subscribe button:disabled {
     opacity: .72;
-    cursor: wait;
+    cursor: not-allowed;
 }
 
 .footer-subscribe-message {
@@ -473,6 +473,10 @@ nav {
 
 .footer-subscribe-message.is-error {
     color: #ffb4a8;
+}
+
+.footer-subscribe-message.is-cooldown {
+    color: #dbe7c9;
 }
 
 .footer-service-strip {

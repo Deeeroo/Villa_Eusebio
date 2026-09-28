@@ -1,10 +1,12 @@
 <?php
+require_once "../includes/admin_auth.php";
 include "../includes/db.php";
 require_once "../includes/capstone2_features.php";
 ve_ensure_capstone2_schema($conn);
 
 $mode = $_GET['mode'] ?? 'dates';
 $excludeBookingId = isset($_GET['exclude_booking_id']) ? (int)$_GET['exclude_booking_id'] : 0;
+$showPrivateDetails = isset($_COOKIE[session_name()]) && admin_is_logged_in();
 $bookingsPaused = ve_bookings_paused($conn);
 $bookingPauseMessage = ve_booking_pause_message($conn);
 $systemMeta = [
@@ -65,15 +67,15 @@ while ($row = mysqli_fetch_assoc($result)) {
         continue;
     }
     $dateMeta[$date][] = [
-        'booking_id' => (int)$row['booking_id'],
+        'booking_id' => $showPrivateDetails ? (int)$row['booking_id'] : 0,
         'block_id' => 0,
-        'guest_name' => $row['guest_name'],
+        'guest_name' => $showPrivateDetails ? $row['guest_name'] : 'Booked',
         'check_in_date' => $row['check_in_date'],
         'check_out_date' => $row['check_out_date'],
         'booking_time_type' => $row['booking_time_type'],
         'slot' => $row['time_type'],
-        'reservation_fee_status' => $row['reservation_fee_status'],
-        'payment_status' => $row['payment_status'],
+        'reservation_fee_status' => $showPrivateDetails ? $row['reservation_fee_status'] : '',
+        'payment_status' => $showPrivateDetails ? $row['payment_status'] : '',
         'is_blocked' => false,
         'block_reason' => ''
     ];
@@ -100,7 +102,7 @@ if ($blockResult) {
             'booking_time_type' => $block['stay_type'],
             'slot' => $block['stay_type'],
             'is_blocked' => true,
-            'block_reason' => $block['reason'],
+            'block_reason' => $showPrivateDetails ? $block['reason'] : 'Unavailable',
             'reservation_fee_status' => '',
             'payment_status' => ''
         ];

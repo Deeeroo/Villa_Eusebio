@@ -53,16 +53,18 @@ $totalApprovedRevenue = 0;
 $totalPaidRevenue = 0;
 $approvedBookingsCount = 0;
 foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
+    $isCancelled = strtolower($row['status'] ?? '') === 'cancelled';
     $baseStayValue = getStayPrice($row['time_type']);
     $guestsCount = isset($row['guests']) ? (int)$row['guests'] : 0;
-    $extraGuests = max($guestsCount - 30, 0);
+    $extraGuests = $isCancelled ? 0 : max($guestsCount - 30, 0);
     $additionalGuestFee = $extraGuests * 150;
+    $row['base_stay_value'] = $isCancelled ? 0 : $baseStayValue;
     $row['additional_guest_fee'] = $additionalGuestFee;
-    $row['stay_value'] = $baseStayValue + $additionalGuestFee;
+    $row['stay_value'] = $isCancelled ? 0 : $baseStayValue + $additionalGuestFee;
     $row['reservation_fee_amount'] = isset($row['reservation_fee_amount']) ? (float)$row['reservation_fee_amount'] : 2000;
     $row['reservation_fee_status'] = $row['reservation_fee_status'] ?? 'unpaid';
     $row['payment_status'] = $row['payment_status'] ?? 'unpaid';
-    $row['remaining_balance'] = max($row['stay_value'] - $row['reservation_fee_amount'], 0);
+    $row['remaining_balance'] = $isCancelled ? 0 : max($row['stay_value'] - $row['reservation_fee_amount'], 0);
     if (($row['status'] ?? '') === 'approved') {
         $approvedBookingsCount++;
         $totalApprovedRevenue += $row['stay_value'];
@@ -81,6 +83,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
 .balance-cell { font-weight:700; color:#3d3d3d; }
 .sales-pay-btn small, .sales-paid-lock small { display:block; font-size:11px; line-height:1.2; margin-top:2px; }
 .sales-rejected-label { display:inline-flex; align-items:center; justify-content:center; min-width:88px; padding:8px 12px; border-radius:8px; color:#b91c1c; font-weight:800; background:#fff1f1; border:1px solid #f3b5b5; }
+.sales-cancelled-label { display:inline-flex; align-items:center; justify-content:center; min-width:88px; padding:8px 12px; border-radius:8px; color:#b91c1c; font-weight:800; background:#ffe7e7; border:1px solid #f3b5b5; }
 .sales-pay-btn.disabled-payment { background:#c9c3b8; cursor:not-allowed; opacity:.75; }
 .status-paid-text { color:#15803d; font-weight:800; }
 .status-unpaid-text { color:#dc2626; font-weight:800; }
@@ -155,7 +158,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
                 <button type="button" class="filter-search-clear" id="clearSalesSearch" aria-label="Clear sales search">&times;</button>
             </div>
             <select id="salesStayFilter"><option value="all">All stay types</option><option value="day">Day Tour</option><option value="overnight">Overnight</option><option value="22hour">22-Hour</option></select>
-            <select id="salesStatusFilter"><option value="all">All booking status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+            <select id="salesStatusFilter"><option value="all">All booking status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select>
             <select id="salesResFeeFilter"><option value="all">All reservation fee</option><option value="paid">Reservation Fee Paid</option><option value="unpaid">Reservation Fee Unpaid</option></select>
             <select id="salesPaymentStatusFilter"><option value="all">All payment status</option><option value="paid">Balance Paid</option><option value="unpaid">Balance Unpaid</option></select>
             <select id="salesPaymentTypeFilter"><option value="all">All payment types</option><option value="gcash">GCash</option><option value="bdo">BDO</option><option value="unionbank">UnionBank</option><option value="cash">Cash</option></select>
@@ -182,6 +185,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
             <tbody>
             <?php foreach ($rows as $row):
                 $isPastBooking = !empty($row['check_out_date']) && $row['check_out_date'] < $today;
+                $rowStatus = strtolower($row['status'] ?? '');
             ?>
                 <tr class="sales-row <?php echo $isPastBooking ? 'booking-completed-row' : ''; ?>"
                     data-id="<?php echo (int)$row['id']; ?>"
@@ -204,7 +208,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
                     data-status_raw="<?php echo htmlspecialchars(strtolower($row['status'])); ?>"
                     data-payment_status="<?php echo htmlspecialchars(ucfirst($row['payment_status'] ?: 'unpaid')); ?>"
                     data-payment_status_raw="<?php echo htmlspecialchars(strtolower($row['payment_status'] ?: 'unpaid')); ?>"
-                    data-base_stay_value="₱<?php echo number_format($baseStayValue); ?>"
+                    data-base_stay_value="₱<?php echo number_format($row['base_stay_value']); ?>"
                     data-stay_value="₱<?php echo number_format($row['stay_value']); ?>"
                     data-reservation_fee_amount="₱<?php echo number_format((float)$row['reservation_fee_amount']); ?>"
                     data-reservation_fee_status="<?php echo htmlspecialchars(ucfirst($row['reservation_fee_status'] ?: 'unpaid')); ?>"
@@ -228,7 +232,7 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
                     <td><span class="status <?php echo htmlspecialchars($row['status']); ?>"><?php echo ucfirst(htmlspecialchars($row['status'])); ?></span></td>
                     <td class="stay-value-cell">₱<?php echo number_format($row['stay_value']); ?></td>
                     <td>
-                        <?php if (($row['status'] ?? '') === 'rejected'): ?>
+                        <?php if ($rowStatus === 'rejected'): ?>
                             <span class="sales-rejected-label">Rejected</span>
                         <?php elseif (($row['reservation_fee_status'] ?? '') === 'paid'): ?>
                             <button type="button" class="sales-paid-lock" disabled>Paid<br><small>₱<?php echo number_format((float)$row['reservation_fee_amount']); ?></small></button>
@@ -241,8 +245,10 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
                     </td>
                     <td class="balance-cell">₱<?php echo number_format($row['remaining_balance']); ?></td>
                     <td>
-                        <?php if (($row['status'] ?? '') === 'rejected'): ?>
+                        <?php if ($rowStatus === 'rejected'): ?>
                             <span class="sales-rejected-label">Rejected</span>
+                        <?php elseif ($rowStatus === 'cancelled'): ?>
+                            <span class="sales-cancelled-label">Cancelled</span>
                         <?php elseif (($row['payment_status'] ?? '') === 'paid'): ?>
                             <button type="button" class="sales-paid-lock" disabled>Paid</button>
                         <?php elseif (($row['reservation_fee_status'] ?? '') !== 'paid'): ?>
@@ -463,7 +469,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function buildSalesStatusPill(status, type) {
         const raw = String(status || 'unpaid').toLowerCase();
-        const label = raw === 'paid' ? 'Paid' : (raw === 'approved' ? 'Approved' : (raw === 'rejected' ? 'Rejected' : (raw === 'pending' ? 'Pending' : 'Unpaid')));
+        const label = raw === 'paid' ? 'Paid' : (raw === 'approved' ? 'Approved' : (raw === 'rejected' ? 'Rejected' : (raw === 'cancelled' ? 'Cancelled' : (raw === 'pending' ? 'Pending' : 'Unpaid'))));
         return '<span class="sales-status-pill sales-status-' + escapeHtml(raw) + ' sales-status-kind-' + escapeHtml(type || 'payment') + '">' + label + '</span>';
     }
 
@@ -619,7 +625,7 @@ document.addEventListener("DOMContentLoaded", function () {
             salesDetails.innerHTML = buildSalesRecordDetails(data);
             salesDetails.innerHTML += buildOcrPanel(data);
 
-            if (String(data.status || '').toLowerCase() === 'rejected') {
+            if (['rejected', 'cancelled'].includes(String(data.status || '').toLowerCase())) {
                 salesActions.innerHTML = '<button type="button" class="modal-btn btn-cancel-action close-sales-only">Close</button>';
             } else if (String(data.reservation_fee_status_raw || data.reservation_fee_status || '').toLowerCase() !== 'paid') {
                 salesActions.innerHTML =
@@ -762,6 +768,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 errorMessage: 'Booking could not be moved to archive.'
             });
         } else {
+            if (window.VillaAsync) window.VillaAsync.ensureCsrf(form);
             form.submit();
         }
     });

@@ -31,6 +31,26 @@
         return new URL(url, window.location.href).toString();
     }
 
+    function csrfToken() {
+        if (window.VillaAdminCsrfToken) return String(window.VillaAdminCsrfToken);
+        const meta = document.querySelector('meta[name="villa-admin-csrf-token"]');
+        return meta ? String(meta.getAttribute('content') || '') : '';
+    }
+
+    function ensureCsrf(form) {
+        if (!form || String(form.method || 'GET').toUpperCase() !== 'POST') return;
+        const token = csrfToken();
+        if (!token) return;
+        let input = form.querySelector('input[name="csrf_token"]');
+        if (!input) {
+            input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'csrf_token';
+            form.appendChild(input);
+        }
+        input.value = token;
+    }
+
     function cacheKeyFor(url, options) {
         return cachePrefix + (options && options.cacheKey ? options.cacheKey : normalizeUrl(url));
     }
@@ -265,13 +285,18 @@
         setSubmitting(form, true);
         invalidateBookingCaches({ broadcast: false });
 
+        ensureCsrf(form);
+        const token = csrfToken();
+        const headers = {
+            'X-Requested-With': 'fetch'
+        };
+        if (token) headers['X-CSRF-Token'] = token;
+
         return fetch(form.action, {
             method: (form.method || 'POST').toUpperCase(),
             body: new FormData(form),
             credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'fetch'
-            },
+            headers: headers,
             redirect: 'follow'
         })
             .then(function (response) {
@@ -309,14 +334,19 @@
             form.classList.add(settings.optimisticClass, 've-optimistic-pending');
         }
 
+        ensureCsrf(form);
+        const token = csrfToken();
+        const headers = {
+            'Accept': 'application/json',
+            'X-Requested-With': 'fetch'
+        };
+        if (token) headers['X-CSRF-Token'] = token;
+
         return fetch(form.action, {
             method: (form.method || 'POST').toUpperCase(),
             body: new FormData(form),
             credentials: 'same-origin',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'fetch'
-            }
+            headers: headers
         })
             .then(function (response) {
                 if (!response.ok) throw new Error('Request failed with status ' + response.status);
@@ -337,6 +367,7 @@
     document.addEventListener('submit', function (event) {
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) return;
+        ensureCsrf(form);
         window.setTimeout(function () {
             if (event.defaultPrevented || form.dataset.veManaged === 'true') return;
             if (String(form.method || 'GET').toUpperCase() !== 'POST') return;
@@ -354,6 +385,18 @@
         }, 0);
     });
 
+    document.addEventListener('click', function(event) {
+        const logoutLink = event.target.closest('a.logout-btn[href]');
+        if (!logoutLink || !csrfToken()) return;
+        event.preventDefault();
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = logoutLink.href;
+        document.body.appendChild(form);
+        ensureCsrf(form);
+        form.submit();
+    });
+
     window.VillaAsync = {
         cachedJson: cachedJson,
         invalidate: invalidate,
@@ -364,7 +407,8 @@
         renderCalendarSkeleton: renderCalendarSkeleton,
         setSubmitting: setSubmitting,
         submitOptimisticForm: submitOptimisticForm,
-        postFormJson: postFormJson
+        postFormJson: postFormJson,
+        ensureCsrf: ensureCsrf
     };
 
     window.addEventListener('storage', function(event) {

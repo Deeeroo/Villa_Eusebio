@@ -26,7 +26,7 @@ function block_date_label(string $dateValue): string {
     return $time ? date('l, F j, Y', $time) : $dateValue;
 }
 
-admin_require_login(false);
+admin_require_post_csrf();
 include '../includes/db.php';
 require_once '../includes/booking_availability.php';
 ve_ensure_capstone2_schema($conn);

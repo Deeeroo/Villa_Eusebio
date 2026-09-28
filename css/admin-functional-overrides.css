@@ -97,6 +97,11 @@ body.admin-shell-page #rescheduleModal .legend-selected {
     background: #6b8e6b !important;
 }
 
+body.admin-shell-page #rescheduleModal .legend-included {
+    background: #dce8d7 !important;
+    border: 1px solid #6b8e6b !important;
+}
+
 body.admin-shell-page #rescheduleModal .reschedule-calendar-grid {
     display: grid !important;
     grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
@@ -156,6 +161,12 @@ body.admin-shell-page #rescheduleModal .reschedule-calendar-day.selected {
     background: #6b8e6b !important;
     color: #fff !important;
     box-shadow: inset 0 0 0 2px #f8f5ee !important;
+}
+
+body.admin-shell-page #rescheduleModal .reschedule-calendar-day.selected-checkout {
+    background: #dce8d7 !important;
+    color: #2f3f2a !important;
+    box-shadow: inset 0 0 0 2px #6b8e6b !important;
 }
 
 
@@ -482,7 +493,7 @@ body.admin-shell-page.admin-page-exiting .admin-dashboard {
 
 .reservation-summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 14px;
     margin: 18px 0 20px;
 }
@@ -519,7 +530,41 @@ body.admin-shell-page.admin-page-exiting .admin-dashboard {
 }
 
 .reservation-summary-card.rejected { border-left-color: #9ca3af; }
+.reservation-summary-card.cancelled { border-left-color: #b91c1c; }
 .reservation-summary-card.incoming { border-left-color: #d4af37; }
+
+body.admin-shell-page .status.cancelled,
+body.admin-shell-page .reservation-modal-status-pill.status-cancelled,
+body.admin-shell-page .sales-status-cancelled {
+    background: #ffe7e7 !important;
+    color: #b91c1c !important;
+}
+
+body.admin-shell-page .reservation-summary-card.cancelled::before {
+    background: linear-gradient(135deg, #ffe7e7, #f3b5b5) !important;
+}
+
+body.admin-shell-page .reservation-table .status,
+body.admin-shell-page .sales-table .status {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 92px !important;
+    text-align: center !important;
+}
+
+body.admin-shell-page .reservation-table th:nth-child(8),
+body.admin-shell-page .reservation-table td:nth-child(8),
+body.admin-shell-page .sales-table th:nth-child(7),
+body.admin-shell-page .sales-table td:nth-child(7) {
+    text-align: center !important;
+}
+
+body.admin-shell-page .sales-table th:nth-child(7),
+body.admin-shell-page .sales-table td:nth-child(7) {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+}
 
 .filter-dropdown-wrap {
     background: #fffdf9;

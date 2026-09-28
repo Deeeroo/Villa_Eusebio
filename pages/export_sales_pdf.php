@@ -20,11 +20,12 @@ function exportStayPrice($type) {
 $rows = [];
 $total = 0;
 foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
+    $isCancelled = strtolower($row['status'] ?? '') === 'cancelled';
     $guests = (int)($row['guests'] ?? 0);
-    $additional = max($guests - 30, 0) * 150;
-    $row['stay_value'] = exportStayPrice($row['time_type']) + $additional;
+    $additional = $isCancelled ? 0 : max($guests - 30, 0) * 150;
+    $row['stay_value'] = $isCancelled ? 0 : exportStayPrice($row['time_type']) + $additional;
     $row['reservation_fee_amount'] = isset($row['reservation_fee_amount']) ? (float)$row['reservation_fee_amount'] : 2000;
-    $row['remaining_balance'] = max($row['stay_value'] - $row['reservation_fee_amount'], 0);
+    $row['remaining_balance'] = $isCancelled ? 0 : max($row['stay_value'] - $row['reservation_fee_amount'], 0);
     if (($row['status'] ?? '') === 'approved') $total += $row['stay_value'];
     $rows[] = $row;
 }

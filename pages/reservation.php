@@ -56,12 +56,14 @@ $rows = ve_fetch_all_bookings($conn, "bs.booking_id DESC");
 $today = date('Y-m-d');
 $approvedCount = 0;
 $rejectedCount = 0;
+$cancelledCount = 0;
 $incomingCount = 0;
 foreach ($rows as $countRow) {
     $status = strtolower($countRow['status'] ?? '');
     if ($status === 'approved') $approvedCount++;
     if ($status === 'rejected') $rejectedCount++;
-    if ($status !== 'rejected' && ($countRow['check_in_date'] ?? '') >= $today) $incomingCount++;
+    if ($status === 'cancelled') $cancelledCount++;
+    if (!in_array($status, ['rejected', 'cancelled'], true) && ($countRow['check_in_date'] ?? '') >= $today) $incomingCount++;
 }
 ?>
 
@@ -109,7 +111,7 @@ foreach ($rows as $countRow) {
     <div class="admin-page-heading">
         <div>
             <h2>Reservation Management</h2>
-            <p class="reservation-helper-text">Click a reservation row to view complete details and approve or reject the booking.</p>
+            <p class="reservation-helper-text">Click a reservation row to view complete details, approve, reject, reschedule, or cancel a booking.</p>
         </div>
         <a href="export_reservations_pdf.php" target="_blank" class="admin-export-btn">Export PDF</a>
     </div>
@@ -117,6 +119,7 @@ foreach ($rows as $countRow) {
     <div class="reservation-summary-grid">
         <div class="reservation-summary-card approved"><span>Approved</span><strong><?php echo $approvedCount; ?></strong></div>
         <div class="reservation-summary-card rejected"><span>Rejected</span><strong><?php echo $rejectedCount; ?></strong></div>
+        <div class="reservation-summary-card cancelled"><span>Cancelled</span><strong><?php echo $cancelledCount; ?></strong></div>
         <div class="reservation-summary-card incoming"><span>Incoming</span><strong><?php echo $incomingCount; ?></strong></div>
     </div>
 
@@ -127,7 +130,7 @@ foreach ($rows as $countRow) {
                 <button type="button" class="filter-search-clear" id="clearReservationSearch" aria-label="Clear reservation search">&times;</button>
             </div>
             <select id="reservationStayFilter"><option value="all">All stay types</option><option value="day">Day Tour</option><option value="overnight">Overnight</option><option value="22hour">22-Hour</option></select>
-            <select id="reservationStatusFilter"><option value="all">All status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+            <select id="reservationStatusFilter"><option value="all">All status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select>
             <select id="reservationPaymentFilter"><option value="all">All payment types</option><option value="gcash">GCash</option><option value="bdo">BDO</option><option value="unionbank">UnionBank</option><option value="cash">Cash</option></select>
         </div>
     </div>
@@ -237,13 +240,13 @@ foreach ($rows as $countRow) {
                 <input type="hidden" name="status" id="confirmBookingStatus">
                 <input type="hidden" name="redirect" value="reservation">
                 <div id="rejectReasonBox" class="reject-reason-box" style="display:none;">
-                    <label>Reason for rejection</label>
-                    <select name="reject_reason">
+                    <label id="actionReasonLabel">Reason for rejection</label>
+                    <select name="reject_reason" id="actionReasonSelect">
                         <option value="No work">No work</option>
                         <option value="Out">Out</option>
                         <option value="Technical difficulties">Technical difficulties</option>
                     </select>
-                    <textarea name="reject_note" rows="3" placeholder="Custom note (optional)"></textarea>
+                    <textarea name="reject_note" id="actionReasonNote" rows="3" placeholder="Custom note (optional)"></textarea>
                 </div>
             </form>
         </div>
@@ -288,6 +291,7 @@ foreach ($rows as $countRow) {
                         <span><i class="legend-open"></i>Available</span>
                         <span><i class="legend-booked"></i>Booked</span>
                         <span><i class="legend-selected"></i>Selected</span>
+                        <span><i class="legend-included"></i>Included next day</span>
                     </div>
                     <div class="reschedule-calendar-grid" id="rescheduleCalendarGrid"></div>
                 </div>
@@ -319,6 +323,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmBookingId = document.getElementById('confirmBookingId');
     const confirmBookingStatus = document.getElementById('confirmBookingStatus');
     const rejectReasonBox = document.getElementById('rejectReasonBox');
+    const actionReasonLabel = document.getElementById('actionReasonLabel');
+    const actionReasonSelect = document.getElementById('actionReasonSelect');
+    const actionReasonNote = document.getElementById('actionReasonNote');
     const cancelStatusAction = document.getElementById('cancelStatusAction');
     const rescheduleBookingId = document.getElementById('rescheduleBookingId');
     const rescheduleForm = document.getElementById('rescheduleForm');
@@ -483,6 +490,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function buildReservationDetails(data) {
         const stayClass = 'stay-badge ' + (data.stay_class || '');
         const paymentClass = 'payment-badge ' + (data.payment_class || '');
+        const statusRaw = String(data.status || '').toLowerCase();
+        const actionReasonLabel = statusRaw === 'cancelled' ? 'Cancellation Reason' : 'Rejection Reason';
 
         return '<div class="reservation-modern-details">' +
             '<section class="reservation-stay-summary">' +
@@ -514,26 +523,62 @@ document.addEventListener("DOMContentLoaded", function () {
                     '<h4>Additional Details</h4>' +
                     buildReservationRow('Date Booked', data.created_at) +
                     buildReservationRow('Special Requests', data.special_requests || 'No special requests') +
-                    (data.rejection_reason ? buildReservationRow('Rejection Reason', data.rejection_reason) : '') +
+                    (data.rejection_reason ? buildReservationRow(actionReasonLabel, data.rejection_reason) : '') +
                 '</section>' +
             '</div>' +
         '</div>';
     }
 
     function openConfirmModal(id, action) {
-        const actionLabel = action === 'approved' ? 'approve' : 'reject';
-        confirmTitle.textContent = action === 'approved' ? 'Approve this booking?' : 'Reject this booking?';
-        confirmMessage.textContent = 'Are you sure you want to ' + actionLabel + ' this booking request?';
+        const isApprove = action === 'approved';
+        const isCancel = action === 'cancelled';
+        const actionLabel = isApprove ? 'approve' : (isCancel ? 'cancel' : 'reject');
+        confirmTitle.textContent = isApprove ? 'Approve this booking?' : (isCancel ? 'Cancel this booking?' : 'Reject this booking?');
+        confirmMessage.textContent = isCancel
+            ? 'This will release the booked date, remove the remaining balance, and keep the non-refundable reservation fee.'
+            : 'Are you sure you want to ' + actionLabel + ' this booking request?';
         confirmBookingId.value = id;
         confirmBookingStatus.value = action;
-        rejectReasonBox.style.display = action === 'rejected' ? 'block' : 'none';
-        confirmButton.textContent = action === 'approved' ? 'Yes, approve' : 'Yes, reject';
-        confirmButton.className = 'modal-btn ' + (action === 'approved' ? 'btn-approve' : 'btn-reject');
+        rejectReasonBox.style.display = (action === 'rejected' || isCancel) ? 'block' : 'none';
+        if (actionReasonLabel && actionReasonSelect && actionReasonNote) {
+            actionReasonLabel.textContent = isCancel ? 'Reason for cancellation' : 'Reason for rejection';
+            actionReasonSelect.innerHTML = isCancel
+                ? '<option value="Customer requested cancellation">Customer requested cancellation</option>' +
+                    '<option value="Schedule conflict">Schedule conflict</option>' +
+                    '<option value="Emergency reason">Emergency reason</option>' +
+                    '<option value="Other cancellation reason">Other cancellation reason</option>'
+                : '<option value="No work">No work</option>' +
+                    '<option value="Out">Out</option>' +
+                    '<option value="Technical difficulties">Technical difficulties</option>';
+            actionReasonNote.placeholder = isCancel ? 'Custom cancellation note (optional)' : 'Custom note (optional)';
+            actionReasonNote.value = '';
+        }
+        confirmButton.textContent = isApprove ? 'Yes, approve' : (isCancel ? 'Yes, cancel booking' : 'Yes, reject');
+        confirmButton.className = 'modal-btn ' + (isApprove ? 'btn-approve' : 'btn-reject');
         openModal(confirmModal);
     }
 
     function findReservationRow(id) {
         return document.querySelector('.reservation-row[data-id="' + String(id || '').replace(/"/g, '') + '"]');
+    }
+
+    function daysUntilDate(value) {
+        if (!value) return -1;
+        const target = new Date(value + 'T00:00:00');
+        if (Number.isNaN(target.getTime())) return -1;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return Math.floor((target - today) / 86400000);
+    }
+
+    function canRescheduleBooking(data) {
+        const status = String((data && data.status) || '').toLowerCase();
+        return data && data.is_past !== '1' && daysUntilDate(data.check_in_raw) >= 5 && (status === 'pending' || status === 'approved');
+    }
+
+    function canCancelBooking(data) {
+        const status = String((data && data.status) || '').toLowerCase();
+        return data && data.is_past !== '1' && status === 'approved';
     }
 
     function statusLabel(status) {
@@ -749,12 +794,22 @@ document.addEventListener("DOMContentLoaded", function () {
             modalDetails.innerHTML = buildReservationDetails(data);
             modalDetails.innerHTML += buildOcrPanel(data);
 
+            const closeButton = '<button type="button" class="modal-btn btn-cancel-action reservation-inline-action" id="closeDetailsOnly">Close</button>';
+            const rescheduleButton = canRescheduleBooking(data)
+                ? '<button type="button" class="modal-btn btn-cancel-action reservation-inline-action" data-action="reschedule" data-id="' + data.id + '">Reschedule</button>'
+                : '';
+            const cancelButton = canCancelBooking(data)
+                ? '<button type="button" class="modal-btn btn-reject reservation-inline-action" data-action="cancelled" data-id="' + data.id + '">Cancel Booking</button>'
+                : '';
+
             if (data.status === 'pending') {
                 modalActions.innerHTML =
+                    rescheduleButton +
                     '<button type="button" class="modal-btn btn-approve reservation-inline-action" data-action="approved" data-id="' + data.id + '">Approve</button>' +
-                    '<button type="button" class="modal-btn btn-reject reservation-inline-action" data-action="rejected" data-id="' + data.id + '">Reject</button>';
+                    '<button type="button" class="modal-btn btn-reject reservation-inline-action" data-action="rejected" data-id="' + data.id + '">Reject</button>' +
+                    closeButton;
             } else {
-                modalActions.innerHTML = '<button type="button" class="modal-btn btn-cancel-action reservation-inline-action" id="closeDetailsOnly">Close</button>';
+                modalActions.innerHTML = rescheduleButton + cancelButton + closeButton;
             }
 
             openModal(detailModal);
@@ -766,6 +821,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener('click', function (event) {
         const actionBtn = event.target.closest('.reservation-inline-action');
         if (actionBtn && actionBtn.dataset.id) {
+            if (actionBtn.dataset.action === 'reschedule') {
+                const row = findReservationRow(actionBtn.dataset.id);
+                closeModal(detailModal);
+                openRescheduleModal(row);
+                return;
+            }
+
             closeModal(detailModal);
             openConfirmModal(actionBtn.dataset.id, actionBtn.dataset.action);
             return;
@@ -863,10 +925,19 @@ document.addEventListener("DOMContentLoaded", function () {
         return rescheduleBookedDates[dateString] || [];
     }
 
+    function hasCheckoutDayBlock(dateString) {
+        const meta = rescheduleBookedMeta[dateString] || [];
+        return meta.some(function(item) {
+            const blockType = String((item && (item.booking_time_type || item.slot)) || '').toLowerCase();
+            return item && item.is_blocked && (blockType === '22hour' || blockType === 'whole');
+        });
+    }
+
     function isRescheduleUnavailable(dateString) {
         const type = rescheduleStayTypeSelect ? rescheduleStayTypeSelect.value : '';
         const slots = getRescheduleSlots(dateString);
         if (isReschedulePastDate(dateString)) return true;
+        if ((type === 'overnight' || type === '22hour') && hasCheckoutDayBlock(calculateCheckoutDate(dateString, type))) return true;
         if (type === 'day') return slots.includes('day');
         if (type === 'overnight') return slots.includes('overnight');
         if (type === '22hour') return slots.includes('day') || slots.includes('overnight');
@@ -877,6 +948,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!rescheduleCalendarGrid || !rescheduleCurrentMonth) return;
         rescheduleCurrentMonth.textContent = rescheduleMonthNames[rescheduleCalendarMonth] + ' ' + rescheduleCalendarYear;
         rescheduleCalendarGrid.innerHTML = '';
+        const selectedDate = rescheduleDateInput.value;
+        const selectedType = rescheduleStayTypeSelect ? rescheduleStayTypeSelect.value : '';
+        const includedCheckoutDate = selectedDate && (selectedType === 'overnight' || selectedType === '22hour')
+            ? calculateCheckoutDate(selectedDate, selectedType)
+            : '';
 
         ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(function(day) {
             const header = document.createElement('div');
@@ -897,6 +973,8 @@ document.addEventListener("DOMContentLoaded", function () {
         for (let day = 1; day <= daysInMonth; day++) {
             const dateObj = new Date(rescheduleCalendarYear, rescheduleCalendarMonth, day);
             const dateString = formatDate(dateObj);
+            const isSelectedCheckIn = dateString === selectedDate;
+            const isIncludedCheckout = includedCheckoutDate && dateString === includedCheckoutDate && includedCheckoutDate !== selectedDate;
             const cell = document.createElement('div');
             cell.className = 'reschedule-calendar-day';
             cell.innerHTML = '<span>' + day + '</span>';
@@ -920,8 +998,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     renderRescheduleCalendar();
                 });
             }
-            if (dateString === rescheduleDateInput.value) {
+            if (isSelectedCheckIn) {
                 cell.classList.add('selected');
+            }
+            if (isIncludedCheckout) {
+                cell.classList.add('selected-checkout');
+                cell.title = cell.title
+                    ? cell.title + '\nIncluded checkout day for this reschedule'
+                    : 'Included checkout day for this reschedule';
             }
             rescheduleCalendarGrid.appendChild(cell);
         }
@@ -1031,6 +1115,12 @@ document.addEventListener("DOMContentLoaded", function () {
             archiveTargetId = row.dataset.id;
             contextBookingId = row.dataset.id;
             contextRow = row;
+            const rescheduleContextButton = archiveMenu.querySelector('button[data-action="reschedule"]');
+            if (rescheduleContextButton) {
+                const canReschedule = canRescheduleBooking(row.dataset);
+                rescheduleContextButton.disabled = !canReschedule;
+                rescheduleContextButton.title = canReschedule ? '' : 'Rescheduling is only allowed for pending or approved bookings at least 5 days before check-in.';
+            }
             archiveMenu.style.left = e.pageX + 'px';
             archiveMenu.style.top = e.pageY + 'px';
             archiveMenu.classList.add('show');
@@ -1042,7 +1132,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const action = actionButton.dataset.action;
         archiveMenu.classList.remove('show');
         if (action === 'reschedule') {
-            openRescheduleModal(contextRow);
+            if (contextRow && canRescheduleBooking(contextRow.dataset)) {
+                openRescheduleModal(contextRow);
+            }
             return;
         }
         if (!archiveTargetId) return;
@@ -1058,6 +1150,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 errorMessage: 'Booking could not be moved to archive.'
             });
         } else {
+            if (window.VillaAsync) window.VillaAsync.ensureCsrf(form);
             form.submit();
         }
     });

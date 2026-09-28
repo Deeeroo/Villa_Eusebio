@@ -1,6 +1,6 @@
 <?php
 require_once '../includes/admin_auth.php';
-admin_require_login(false);
+admin_require_post_csrf();
 include '../includes/db.php';
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 if ($id > 0) {

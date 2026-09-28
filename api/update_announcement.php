@@ -1,6 +1,6 @@
 <?php
 require_once '../includes/admin_auth.php';
-admin_require_login(true);
+admin_require_post_csrf();
 
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';

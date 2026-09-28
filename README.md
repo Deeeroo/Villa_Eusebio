@@ -32,10 +32,22 @@ Admin-only APIs should call:
 
 ```php
 require_once '../includes/admin_auth.php';
-admin_require_login(false);
+admin_require_post_csrf();
 ```
 
 Admin pages that include `includes/header.php` also get the session timeout check from the shared header.
+
+## Email Automation
+
+Customer approval/rejection emails are sent through Gmail SMTP using the settings in `.env`.
+
+1. Copy `.env.example` to `.env` if `.env` does not exist yet.
+2. Turn on 2-Step Verification in the Gmail sender account.
+3. Create a Google App Password.
+4. Put the app password in `SMTP_PASSWORD`.
+5. Keep `MAIL_ENABLED=true` when email sending should be active.
+
+For deployment, change `APP_URL` to the real website domain and set the same environment values in the hosting dashboard when possible. Do not commit `.env` or share Gmail app passwords.
 
 ## Booking Rules
 

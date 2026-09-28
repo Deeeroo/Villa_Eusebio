@@ -74,6 +74,26 @@ if ($totalResult && $row = mysqli_fetch_assoc($totalResult)) {
         <?php if(isset($_GET['success'])): ?><div class="admin-alert success-alert"><?php echo htmlspecialchars($_GET['success']); ?></div><?php endif; ?>
         <?php if(isset($_GET['error'])): ?><div class="admin-alert error-alert"><?php echo htmlspecialchars($_GET['error']); ?></div><?php endif; ?>
 
+        <section class="settings-card subscriber-broadcast-card">
+            <div class="subscriber-card-header">
+                <div>
+                    <h3>Email Subscribers</h3>
+                    <p>Send one update to every email currently in the subscriber list.</p>
+                </div>
+            </div>
+            <form class="subscriber-broadcast-form" method="POST" action="../api/update_subscriber.php" onsubmit="return confirm('Send this email to all subscribers?');">
+                <input type="hidden" name="action" value="broadcast">
+                <label for="subscriberBroadcastSubject">Subject</label>
+                <input id="subscriberBroadcastSubject" name="subject" maxlength="150" placeholder="Example: New Villa Eusebio announcement" required>
+                <label for="subscriberBroadcastMessage">Message</label>
+                <textarea id="subscriberBroadcastMessage" name="message" rows="7" maxlength="5000" placeholder="Write the update subscribers should receive..." required></textarea>
+                <div class="subscriber-broadcast-actions">
+                    <small><?php echo $totalSubscribers > 0 ? 'Ready to send to ' . (int)$totalSubscribers . ' subscriber' . ($totalSubscribers === 1 ? '' : 's') . '.' : 'No subscribers yet.'; ?></small>
+                    <button class="modal-btn btn-approve" type="submit" <?php echo $totalSubscribers <= 0 ? 'disabled' : ''; ?>>Send Email</button>
+                </div>
+            </form>
+        </section>
+
         <div class="subscriber-count-bar">
             <span>Total Subscribers</span>
             <strong><?php echo $totalSubscribers; ?></strong>

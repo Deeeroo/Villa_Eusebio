@@ -1,6 +1,6 @@
 <?php
 require_once '../includes/admin_auth.php';
-admin_require_login(false);
+admin_require_post_csrf();
 
 include '../includes/db.php';
 include '../includes/booking_availability.php';
@@ -18,6 +18,15 @@ if (!in_array($redirect, $allowedRedirects, true)) {
 function redirect_reschedule($type, $message, $redirect) {
     header("Location: ../pages/{$redirect}.php?{$type}=" . urlencode($message));
     exit;
+}
+
+function days_until_date(string $dateValue): int {
+    $today = new DateTimeImmutable(date('Y-m-d'));
+    $target = DateTimeImmutable::createFromFormat('Y-m-d', $dateValue);
+    if (!$target) {
+        return -1;
+    }
+    return (int)$today->diff($target)->format('%r%a');
 }
 
 if ($id <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $checkIn) || !in_array($timeType, ['day', 'overnight', '22hour'], true)) {
@@ -41,6 +50,17 @@ if ($checkIn < $today) {
 
 $checkOut = ve_checkout_date($checkIn, $timeType);
 $status = strtolower($booking['status'] ?? '');
+$currentCheckIn = (string)($booking['check_in_date'] ?? '');
+$currentCheckout = (string)($booking['check_out_date'] ?? '');
+if (!in_array($status, ['pending', 'approved'], true)) {
+    redirect_reschedule('error', 'Only pending or approved reservations can be rescheduled.', $redirect);
+}
+if (days_until_date($currentCheckIn) < 5) {
+    redirect_reschedule('error', 'Rescheduling is only allowed at least 5 days before the current check-in date.', $redirect);
+}
+if ($currentCheckout !== '' && $currentCheckout < $today) {
+    redirect_reschedule('error', 'Completed reservations cannot be rescheduled.', $redirect);
+}
 
 mysqli_begin_transaction($conn);
 try {

@@ -1,12 +1,12 @@
 <?php
 require_once '../includes/admin_auth.php';
-admin_require_login(false);
+admin_require_post_csrf();
 include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
 ve_ensure_capstone2_schema($conn);
 
-$id = isset($_POST['id']) ? (int)$_POST['id'] : (int)($_GET['id'] ?? 0);
-$redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? 'reservation';
+$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+$redirect = $_POST['redirect'] ?? 'reservation';
 $allowed = ['reservation', 'sales', 'archive'];
 if (!in_array($redirect, $allowed, true)) $redirect = 'reservation';
 

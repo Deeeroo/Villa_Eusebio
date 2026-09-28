@@ -1789,6 +1789,74 @@ body.admin-shell-page .subscriber-clear-btn {
     color: #4f5d47;
 }
 
+body.admin-shell-page .subscriber-broadcast-card {
+    margin: 16px 0 14px;
+    padding: 18px;
+    border: 1px solid #e7dac3;
+    border-radius: 12px;
+    background:
+        linear-gradient(145deg, rgba(255,253,248,.98), rgba(244,239,229,.94));
+    box-shadow: 0 12px 26px rgba(62,54,42,.06);
+}
+
+body.admin-shell-page .subscriber-broadcast-form {
+    display: grid;
+    gap: 10px;
+}
+
+body.admin-shell-page .subscriber-broadcast-form label {
+    color: #536047;
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+body.admin-shell-page .subscriber-broadcast-form input,
+body.admin-shell-page .subscriber-broadcast-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #e2d6c5;
+    border-radius: 12px;
+    background: rgba(255,253,248,.96);
+    color: #2f332c;
+    padding: 13px 14px;
+    font: inherit;
+    font-weight: 700;
+    resize: vertical;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+body.admin-shell-page .subscriber-broadcast-form input:focus,
+body.admin-shell-page .subscriber-broadcast-form textarea:focus {
+    outline: none;
+    border-color: #7d936a;
+    box-shadow: 0 0 0 3px rgba(125,147,106,.16);
+}
+
+body.admin-shell-page .subscriber-broadcast-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+body.admin-shell-page .subscriber-broadcast-actions small {
+    color: #71695c;
+    font-weight: 800;
+}
+
+body.admin-shell-page .subscriber-broadcast-actions .modal-btn {
+    min-width: 140px;
+    margin: 0;
+}
+
+body.admin-shell-page .subscriber-broadcast-actions .modal-btn:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
 .subscriber-count-bar {
     display: flex;
     align-items: center;

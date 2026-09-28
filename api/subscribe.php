@@ -4,7 +4,8 @@ include '../includes/db.php';
 require_once '../includes/capstone2_features.php';
 ve_ensure_capstone2_schema($conn);
 
-const SUBSCRIBER_COOLDOWN_SECONDS = 120;
+const SUBSCRIBER_LIMIT_BEFORE_COOLDOWN = 2;
+const SUBSCRIBER_COOLDOWN_SECONDS = 300;
 
 $email = strtolower(trim($_POST['email'] ?? ''));
 $wantsJson = (
@@ -94,15 +95,20 @@ if ($emailError !== '') {
     subscriber_response(false, $emailError, $wantsJson);
 }
 
-$lastSubscriberAttempt = (int)($_SESSION['subscriber_last_attempt_at'] ?? 0);
-$cooldownRemaining = SUBSCRIBER_COOLDOWN_SECONDS - (time() - $lastSubscriberAttempt);
+$cooldownUntil = (int)($_SESSION['subscriber_cooldown_until'] ?? 0);
+$cooldownRemaining = max(0, $cooldownUntil - time());
 if ($cooldownRemaining > 0) {
     subscriber_response(
         false,
-        'Please wait ' . $cooldownRemaining . ' seconds before subscribing another email.',
+        'Please wait before subscribing another email.',
         $wantsJson,
         ['cooldown_seconds' => $cooldownRemaining]
     );
+}
+
+if ($cooldownUntil > 0) {
+    $_SESSION['subscriber_cooldown_until'] = 0;
+    $_SESSION['subscriber_success_count'] = 0;
 }
 
 $checkStmt = mysqli_prepare($conn, "SELECT subscriber_id FROM email_subscribers WHERE email = ? LIMIT 1");
@@ -116,12 +122,10 @@ $alreadySubscribed = $checkResult && mysqli_num_rows($checkResult) > 0;
 mysqli_stmt_close($checkStmt);
 
 if ($alreadySubscribed) {
-    $_SESSION['subscriber_last_attempt_at'] = time();
     subscriber_response(
         false,
-        'This email is already subscribed. Please wait 2 minutes before trying another email.',
-        $wantsJson,
-        ['cooldown_seconds' => SUBSCRIBER_COOLDOWN_SECONDS]
+        'This email is already subscribed.',
+        $wantsJson
     );
 }
 
@@ -134,14 +138,24 @@ mysqli_stmt_bind_param($stmt, 's', $email);
 $saved = mysqli_stmt_execute($stmt);
 mysqli_stmt_close($stmt);
 
+$cooldownSeconds = 0;
 if ($saved) {
-    $_SESSION['subscriber_last_attempt_at'] = time();
+    $successCount = (int)($_SESSION['subscriber_success_count'] ?? 0) + 1;
+    if ($successCount >= SUBSCRIBER_LIMIT_BEFORE_COOLDOWN) {
+        $_SESSION['subscriber_success_count'] = 0;
+        $_SESSION['subscriber_cooldown_until'] = time() + SUBSCRIBER_COOLDOWN_SECONDS;
+        $cooldownSeconds = SUBSCRIBER_COOLDOWN_SECONDS;
+    } else {
+        $_SESSION['subscriber_success_count'] = $successCount;
+    }
 }
 
 subscriber_response(
     $saved,
-    $saved ? 'Subscribed successfully. Please wait 2 minutes before adding another email.' : 'Unable to save your email right now.',
+    $saved
+        ? ($cooldownSeconds > 0 ? 'Subscribed successfully. You can add another email in 5 minutes.' : 'Subscribed successfully.')
+        : 'Unable to save your email right now.',
     $wantsJson,
-    $saved ? ['cooldown_seconds' => SUBSCRIBER_COOLDOWN_SECONDS] : []
+    $cooldownSeconds > 0 ? ['cooldown_seconds' => $cooldownSeconds] : []
 );
 ?>

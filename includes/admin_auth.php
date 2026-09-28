@@ -120,6 +120,33 @@ function admin_verify_csrf_token(?string $token): bool {
         && hash_equals($_SESSION['admin_csrf_token'], $token);
 }
 
+function admin_submitted_csrf_token(): ?string {
+    if (isset($_POST['csrf_token'])) {
+        return (string)$_POST['csrf_token'];
+    }
+    if (isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+        return (string)$_SERVER['HTTP_X_CSRF_TOKEN'];
+    }
+    return null;
+}
+
+function admin_require_post_csrf(): void {
+    admin_require_login(false);
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && admin_verify_csrf_token(admin_submitted_csrf_token())) {
+        return;
+    }
+
+    if (admin_is_json_request()) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => false, 'message' => 'Invalid security token. Please refresh and try again.']);
+        exit;
+    }
+
+    http_response_code(403);
+    die('Invalid security token. Please refresh and try again.');
+}
 function admin_login_attempts_table(mysqli $conn): void {
     @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS admin_login_attempts (
         attempt_id INT AUTO_INCREMENT PRIMARY KEY,

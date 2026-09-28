@@ -96,7 +96,7 @@ function ve_ensure_booking_schema(mysqli $conn): void {
         guests INT NOT NULL,
         time_type ENUM('day','overnight','22hour') NOT NULL,
         special_requests TEXT NULL,
-        status ENUM('pending','approved','rejected') DEFAULT 'pending',
+        status ENUM('pending','approved','rejected','cancelled') DEFAULT 'pending',
         archived TINYINT(1) NOT NULL DEFAULT 0,
         rejection_reason TEXT NULL,
         archived_at DATETIME NULL,
@@ -168,6 +168,9 @@ function ve_ensure_capstone2_schema(mysqli $conn): void {
     ve_ensure_booking_schema($conn);
 
     if (ve_table_exists($conn, 'bookings')) {
+        if (strpos(ve_column_type($conn, 'bookings', 'status'), "'cancelled'") === false) {
+            @mysqli_query($conn, "ALTER TABLE bookings MODIFY status ENUM('pending','approved','rejected','cancelled') DEFAULT 'pending'");
+        }
         if (!ve_column_exists($conn, 'bookings', 'archived')) {
             @mysqli_query($conn, "ALTER TABLE bookings ADD COLUMN archived TINYINT(1) NOT NULL DEFAULT 0 AFTER status");
         }

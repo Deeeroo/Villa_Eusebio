@@ -808,6 +808,7 @@ document.addEventListener('DOMContentLoaded', function () {
         form.dataset.veManaged = 'true';
         form.innerHTML = '<input type="hidden" name="action" value="delete"><input type="hidden" name="block_id" value="' + selectedBlockDetail.block_id + '">';
         document.body.appendChild(form);
+        if (window.VillaAsync) window.VillaAsync.ensureCsrf(form);
         form.submit();
     });
 

@@ -32,11 +32,15 @@ $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     
     <link rel="icon" href="<?php echo htmlspecialchars($siteIconHref); ?>">
     
-    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('style.css?v=20260927-announcement-close-animation1')); ?>">
-    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('responsive-fixes.css?v=20260927-export-button1')); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('style.css?v=20260928-subscriber-broadcast2')); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('responsive-fixes.css?v=20260928-cancelled-red1')); ?>">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-<script src="<?php echo htmlspecialchars(ve_url('js/async-ui.js?v=20260920-async1')); ?>"></script>
+<?php if (in_array($currentPage, $adminPages, true) && function_exists('admin_csrf_token')): ?>
+<meta name="villa-admin-csrf-token" content="<?php echo htmlspecialchars(admin_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+<script>window.VillaAdminCsrfToken = <?php echo json_encode(admin_csrf_token()); ?>;</script>
+<?php endif; ?>
+<script src="<?php echo htmlspecialchars(ve_url('js/async-ui.js?v=20260928-csrf1')); ?>"></script>
 </head>
 <body class="<?php echo in_array(basename($_SERVER['PHP_SELF']), ['admin-panel.php', 'reservation.php', 'sales.php', 'admin.php', 'archive.php', 'archive_reservation.php', 'archive_sales_record.php', 'archive_announcement.php', 'archive_settings.php', 'settings.php', 'audit_trail.php', 'announcements.php', 'subscribers.php'], true) ? 'admin-shell-page' : ''; ?>">
 

@@ -219,7 +219,7 @@ function handleFooterSubscribe(event, form) {
     const cooldownRemaining = getFooterSubscribeCooldownRemaining();
 
     if (cooldownRemaining > 0) {
-        showFooterSubscribeMessage(form, 'Please wait ' + formatFooterCooldown(cooldownRemaining) + ' before subscribing another email.', true);
+        showFooterSubscribeCooldown(form, cooldownRemaining);
         updateFooterSubscribeCooldown(form);
         return;
     }
@@ -332,6 +332,13 @@ function showFooterSubscribeMessage(form, text, isError) {
     message.classList.toggle('is-error', !!isError);
 }
 
+function showFooterSubscribeCooldown(form, seconds) {
+    const message = form.querySelector('.footer-subscribe-message');
+    if (!message) return;
+    message.textContent = 'You can subscribe again in ' + formatFooterCooldown(seconds) + '.';
+    message.className = 'footer-subscribe-message is-cooldown';
+}
+
 function initFooterSubscribeCooldown(form) {
     const button = form.querySelector('button');
     if (button && !button.dataset.defaultText) {
@@ -357,15 +364,21 @@ function setFooterSubscribeCooldown(seconds) {
 
 function updateFooterSubscribeCooldown(form) {
     const button = form.querySelector('button');
+    const message = form.querySelector('.footer-subscribe-message');
     if (!button) return;
     const remaining = getFooterSubscribeCooldownRemaining();
     const defaultText = button.dataset.defaultText || 'Subscribe';
     if (remaining > 0) {
         button.disabled = true;
-        button.textContent = 'Wait ' + formatFooterCooldown(remaining);
+        button.textContent = defaultText;
+        showFooterSubscribeCooldown(form, remaining);
     } else {
         button.disabled = false;
         button.textContent = defaultText;
+        if (message && message.classList.contains('is-cooldown')) {
+            message.textContent = '';
+            message.className = 'footer-subscribe-message';
+        }
     }
 }
 
@@ -573,12 +586,16 @@ function getBotReply(message) {
         return 'Stay schedules:<br>&bull; Day Tour: 9:00 AM - 5:00 PM<br>&bull; Overnight Stay: 7:00 PM - 7:00 AM next day<br>&bull; 22-Hour Stay: 9:00 AM - 7:00 AM next day';
     }
 
+    if (botMessageHasAny(msg, ['reschedule', 'rescheduling', 'change date', 'change my date', 'move date', 'move my booking', 'change schedule', 'change slot', 'change my slot', 'change stay type', 'change my stay type'])) {
+        return 'To request a reschedule, please contact Villa Eusebio directly with your booking name, current booking date, preferred new date, and preferred stay type. Reschedule requests should be made at least 5 days before the scheduled booking. The admin will still check if the new slot and stay type are available, not blocked, and not already approved for another guest.';
+    }
+
     if (botMessageHasAny(msg, ['available', 'availability', 'calendar', 'date', 'dates', 'schedule', 'slot', 'vacant', 'book', 'booking', 'reservation'])) {
         return 'You can check available dates on our ' + calendarLink + '.<br><br>Choose your stay type first, then the calendar will show which dates are available, booked, blocked, or no longer available for same-day booking.';
     }
 
-    if (botMessageHasAny(msg, ['cancel', 'cancellation', 'refund', 'refundable', 'reschedule', 'change date', 'move date'])) {
-        return 'Please review your details carefully before submitting. The booking page warns that once a booking request is submitted and confirmed, it is not eligible for cancellation or refund. For date changes or special cases, contact the resort directly so the admin can assist you.';
+    if (botMessageHasAny(msg, ['cancel', 'cancellation', 'refund', 'refundable'])) {
+        return 'Please review your details carefully before submitting. The booking page warns that once a booking request is submitted and confirmed, it is not eligible for cancellation or refund. For special cases, contact the resort directly so the admin can assist you.';
     }
 
     if (botMessageHasAny(msg, ['rules', 'policy', 'policies', 'allowed', 'not allowed', 'reminder', 'note'])) {
