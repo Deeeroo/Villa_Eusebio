@@ -1,4 +1,9 @@
 <?php
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../pages/appointment.php');
+    exit;
+}
+
 include "../includes/db.php";
 include "../includes/booking_availability.php";
 require_once "../includes/ocr_helper.php";

@@ -62,8 +62,93 @@ function ve_ensure_admin_schema(mysqli $conn): void {
     }
 }
 
+function ve_ensure_booking_schema(mysqli $conn): void {
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS guests (
+        guest_id INT AUTO_INCREMENT PRIMARY KEY,
+        guest_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        mobile VARCHAR(50) NOT NULL,
+        address TEXT NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS bookings (
+        booking_id INT AUTO_INCREMENT PRIMARY KEY,
+        guest_id INT NOT NULL,
+        check_in_date DATE NOT NULL,
+        check_out_date DATE NOT NULL,
+        guests INT NOT NULL,
+        time_type ENUM('day','overnight','22hour') NOT NULL,
+        special_requests TEXT NULL,
+        status ENUM('pending','approved','rejected') DEFAULT 'pending',
+        archived TINYINT(1) NOT NULL DEFAULT 0,
+        rejection_reason TEXT NULL,
+        archived_at DATETIME NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_bookings_guest (guest_id),
+        INDEX idx_bookings_status (status),
+        INDEX idx_bookings_dates (check_in_date, check_out_date)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS booked_dates (
+        booked_date_id INT AUTO_INCREMENT PRIMARY KEY,
+        booking_id INT NOT NULL,
+        booked_date DATE NOT NULL,
+        time_type ENUM('day','overnight','22hour') NOT NULL,
+        INDEX idx_booked_dates_lookup (booked_date, time_type),
+        INDEX idx_booked_dates_booking (booking_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS payments (
+        payment_id INT AUTO_INCREMENT PRIMARY KEY,
+        booking_id INT NOT NULL,
+        payment_method VARCHAR(100) NOT NULL,
+        proof_of_payment VARCHAR(255) NULL,
+        ocr_text LONGTEXT NULL,
+        ocr_reference VARCHAR(120) NULL,
+        ocr_amount DECIMAL(10,2) NULL,
+        ocr_status VARCHAR(40) NOT NULL DEFAULT 'not_scanned',
+        ocr_notes TEXT NULL,
+        ocr_scanned_at DATETIME NULL,
+        reservation_fee_amount DECIMAL(10,2) DEFAULT 2000.00,
+        reservation_fee_status ENUM('paid','unpaid') DEFAULT 'unpaid',
+        remaining_balance DECIMAL(10,2) DEFAULT 0.00,
+        payment_status ENUM('paid','unpaid') DEFAULT 'unpaid',
+        INDEX idx_payments_booking (booking_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS charges (
+        charge_id INT AUTO_INCREMENT PRIMARY KEY,
+        booking_id INT NOT NULL,
+        base_stay_value DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        extra_guest_count INT NOT NULL DEFAULT 0,
+        extra_guest_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        total_stay_value DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        INDEX idx_charges_booking (booking_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS email_outbox (
+        email_id INT AUTO_INCREMENT PRIMARY KEY,
+        recipient_email VARCHAR(190) NOT NULL,
+        recipient_name VARCHAR(160) NULL,
+        subject VARCHAR(190) NOT NULL,
+        body_text LONGTEXT NOT NULL,
+        body_html LONGTEXT NULL,
+        trigger_key VARCHAR(80) NOT NULL,
+        related_type VARCHAR(60) NULL,
+        related_id INT NULL,
+        delivery_mode VARCHAR(30) NOT NULL DEFAULT 'queue',
+        status VARCHAR(30) NOT NULL DEFAULT 'queued',
+        error_message TEXT NULL,
+        sent_at DATETIME NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_email_outbox_status (status, created_at),
+        INDEX idx_email_outbox_related (related_type, related_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+}
+
 function ve_ensure_capstone2_schema(mysqli $conn): void {
     ve_ensure_admin_schema($conn);
+    ve_ensure_booking_schema($conn);
 
     if (ve_table_exists($conn, 'bookings')) {
         if (!ve_column_exists($conn, 'bookings', 'archived')) {

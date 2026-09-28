@@ -2,9 +2,6 @@
 require_once "../includes/admin_auth.php";
 admin_start_session();
 admin_security_headers();
-include "../includes/db.php";
-require_once "../includes/capstone2_features.php";
-ve_ensure_capstone2_schema($conn);
 
 function admin_login_redirect(string $error, int $wait = 0): void {
     $params = ['error' => $error];
@@ -18,6 +15,10 @@ function admin_login_redirect(string $error, int $wait = 0): void {
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !admin_verify_csrf_token($_POST['csrf_token'] ?? null)) {
     admin_login_redirect('auth');
 }
+
+include "../includes/db.php";
+require_once "../includes/capstone2_features.php";
+ve_ensure_capstone2_schema($conn);
 
 $username = strtolower(trim($_POST['username'] ?? ''));
 $password = (string)($_POST['password'] ?? '');
