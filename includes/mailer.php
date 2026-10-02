@@ -429,7 +429,7 @@ function ve_subscriber_broadcast_content(mysqli $conn, string $subject, string $
     return ['text' => $text, 'html' => $html];
 }
 
-function ve_send_subscriber_broadcast(mysqli $conn, string $subject, string $message): array {
+function ve_send_subscriber_broadcast(mysqli $conn, string $subject, string $message, array $subscriberIds = []): array {
     ve_ensure_capstone2_schema($conn);
     $subject = trim($subject);
     $message = trim($message);
@@ -438,7 +438,14 @@ function ve_send_subscriber_broadcast(mysqli $conn, string $subject, string $mes
         return ['ok' => false, 'total' => 0, 'sent' => 0, 'failed' => 0, 'message' => 'Please add both a subject and message.'];
     }
 
-    $result = mysqli_query($conn, "SELECT subscriber_id, email FROM email_subscribers ORDER BY subscribed_at DESC, subscriber_id DESC");
+    $subscriberIds = array_values(array_unique(array_filter(array_map('intval', $subscriberIds))));
+    $targetLabel = $subscriberIds ? 'selected subscriber' : 'subscriber';
+    if ($subscriberIds) {
+        $idList = implode(',', $subscriberIds);
+        $result = mysqli_query($conn, "SELECT subscriber_id, email FROM email_subscribers WHERE subscriber_id IN ({$idList}) ORDER BY subscribed_at DESC, subscriber_id DESC");
+    } else {
+        $result = mysqli_query($conn, "SELECT subscriber_id, email FROM email_subscribers ORDER BY subscribed_at DESC, subscriber_id DESC");
+    }
     if (!$result) {
         return ['ok' => false, 'total' => 0, 'sent' => 0, 'failed' => 0, 'message' => 'Unable to load subscribers.'];
     }
@@ -450,7 +457,7 @@ function ve_send_subscriber_broadcast(mysqli $conn, string $subject, string $mes
 
     $total = count($subscribers);
     if ($total === 0) {
-        return ['ok' => false, 'total' => 0, 'sent' => 0, 'failed' => 0, 'message' => 'There are no subscribers to email yet.'];
+        return ['ok' => false, 'total' => 0, 'sent' => 0, 'failed' => 0, 'message' => $subscriberIds ? 'None of the selected subscribers were found.' : 'There are no subscribers to email yet.'];
     }
 
     $content = ve_subscriber_broadcast_content($conn, $subject, $message);
@@ -489,10 +496,10 @@ function ve_send_subscriber_broadcast(mysqli $conn, string $subject, string $mes
     }
 
     if ($sent > 0 && $failed === 0) {
-        return ['ok' => true, 'total' => $total, 'sent' => $sent, 'failed' => $failed, 'message' => "Email sent to {$sent} subscriber" . ($sent === 1 ? '.' : 's.')];
+        return ['ok' => true, 'total' => $total, 'sent' => $sent, 'failed' => $failed, 'message' => "Email sent to {$sent} {$targetLabel}" . ($sent === 1 ? '.' : 's.')];
     }
     if ($sent > 0) {
-        return ['ok' => true, 'total' => $total, 'sent' => $sent, 'failed' => $failed, 'message' => "Email sent to {$sent} subscriber" . ($sent === 1 ? '' : 's') . ", but {$failed} failed."];
+        return ['ok' => true, 'total' => $total, 'sent' => $sent, 'failed' => $failed, 'message' => "Email sent to {$sent} {$targetLabel}" . ($sent === 1 ? '' : 's') . ", but {$failed} failed."];
     }
 
     return ['ok' => false, 'total' => $total, 'sent' => $sent, 'failed' => $failed, 'message' => 'Subscriber email was not sent: ' . ($firstError ?: 'Unknown email error.')];

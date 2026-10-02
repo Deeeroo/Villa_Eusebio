@@ -64,6 +64,43 @@ function ve_fetch_all_bookings(mysqli $conn, string $orderBy = 'bs.booking_id DE
     return $rows;
 }
 
+function ve_booking_is_past(array $booking, ?string $today = null): bool {
+    $today = $today ?: date('Y-m-d');
+    return !empty($booking['check_out_date']) && $booking['check_out_date'] < $today;
+}
+
+function ve_sort_bookings_active_first(array $rows, ?string $today = null): array {
+    $today = $today ?: date('Y-m-d');
+    usort($rows, function(array $left, array $right) use ($today): int {
+        $leftPast = ve_booking_is_past($left, $today) ? 1 : 0;
+        $rightPast = ve_booking_is_past($right, $today) ? 1 : 0;
+
+        if ($leftPast !== $rightPast) {
+            return $leftPast <=> $rightPast;
+        }
+
+        if ($leftPast === 0) {
+            $leftDate = $left['check_in_date'] ?? '9999-12-31';
+            $rightDate = $right['check_in_date'] ?? '9999-12-31';
+            $dateCompare = strcmp($leftDate, $rightDate);
+            if ($dateCompare !== 0) {
+                return $dateCompare;
+            }
+        } else {
+            $leftDate = $left['check_out_date'] ?? '0000-00-00';
+            $rightDate = $right['check_out_date'] ?? '0000-00-00';
+            $dateCompare = strcmp($rightDate, $leftDate);
+            if ($dateCompare !== 0) {
+                return $dateCompare;
+            }
+        }
+
+        return ((int)($right['id'] ?? 0)) <=> ((int)($left['id'] ?? 0));
+    });
+
+    return $rows;
+}
+
 function ve_fetch_booking_by_id(mysqli $conn, int $bookingId): ?array {
     ve_ensure_capstone2_schema($conn);
     $sql = "

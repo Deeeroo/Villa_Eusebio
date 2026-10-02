@@ -10,7 +10,7 @@
 
 /* Admin calendar split colors */
 #adminCalendar .fc-daygrid-day {
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
 }
 #adminCalendar .fc-daygrid-day.fc-day-today {
     box-shadow: inset 0 0 0 2px rgba(61,61,61,0.12);
@@ -18,38 +18,98 @@
 
 #adminCalendar .fc-daygrid-day.admin-day-tour-day,
 #adminCalendar .fc-daygrid-day.admin-day-tour-day.fc-day-today {
-    background: #f59e0b !important;
+    background: #fff3cf !important;
 }
 
 #adminCalendar .fc-daygrid-day.admin-overnight-day,
 #adminCalendar .fc-daygrid-day.admin-overnight-day.fc-day-today {
-    background: #1e3a8a !important;
+    background: #eef4ff !important;
 }
 
 #adminCalendar .fc-daygrid-day.admin-full-day,
 #adminCalendar .fc-daygrid-day.admin-full-day.fc-day-today {
-    background: linear-gradient(to bottom, #1e3a8a 0 50%, #f59e0b 50% 100%) !important;
+    background: linear-gradient(to bottom, #fff3cf 0 50%, #eef4ff 50% 100%) !important;
 }
 
 #adminCalendar .fc-daygrid-day.admin-22hour-day,
 #adminCalendar .fc-daygrid-day.admin-22hour-day.fc-day-today {
-    background: #d4af37 !important;
+    background: #fff3cf !important;
 }
 
 #adminCalendar .fc-daygrid-day.admin-day-tour-day.fc-day-today,
 #adminCalendar .fc-daygrid-day.admin-overnight-day.fc-day-today,
 #adminCalendar .fc-daygrid-day.admin-full-day.fc-day-today,
 #adminCalendar .fc-daygrid-day.admin-22hour-day.fc-day-today {
-    box-shadow: inset 0 0 0 3px rgba(255, 253, 248, .72) !important;
+    box-shadow: inset 0 0 0 3px rgba(15, 81, 50, .18) !important;
 }
 
 #adminCalendar .fc-daygrid-day.admin-day-tour-day .fc-daygrid-day-number,
 #adminCalendar .fc-daygrid-day.admin-overnight-day .fc-daygrid-day-number,
 #adminCalendar .fc-daygrid-day.admin-full-day .fc-daygrid-day-number,
 #adminCalendar .fc-daygrid-day.admin-22hour-day .fc-daygrid-day-number {
-    color: #fffdf8 !important;
+    color: #11241c !important;
     font-weight: 900 !important;
     text-decoration: none !important;
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past:not(.fc-day-today) {
+    background: #f3f1ea !important;
+    filter: saturate(.72);
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past.admin-day-tour-day:not(.fc-day-today) {
+    background: #f3eedf !important;
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past.admin-overnight-day:not(.fc-day-today) {
+    background: #edf1f5 !important;
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past.admin-full-day:not(.fc-day-today) {
+    background: linear-gradient(to bottom, #f3eedf 0 50%, #edf1f5 50% 100%) !important;
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past.admin-22hour-day:not(.fc-day-today) {
+    background: #f3eedf !important;
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past:not(.fc-day-today) .fc-daygrid-day-number {
+    color: #8a8f89 !important;
+}
+
+#adminCalendar .fc-event.dashboard-calendar-chip {
+    border: 1px solid rgba(16, 36, 27, .08) !important;
+    color: #10241b !important;
+}
+
+#adminCalendar .fc-event.dashboard-calendar-chip .fc-event-main,
+#adminCalendar .fc-event.dashboard-calendar-chip .fc-event-title {
+    color: inherit !important;
+}
+
+#adminCalendar .fc-event.dashboard-calendar-day {
+    background: #fff0be !important;
+    color: #7a530b !important;
+}
+
+#adminCalendar .fc-event.dashboard-calendar-overnight {
+    background: #dce8ff !important;
+    color: #184fb0 !important;
+}
+
+#adminCalendar .fc-event.dashboard-calendar-22hour {
+    background: #fff0be !important;
+    color: #7a530b !important;
+}
+
+#adminCalendar .fc-event.dashboard-calendar-blocked,
+#adminCalendar .fc-event.dashboard-calendar-whole {
+    background: rgba(49, 64, 57, .92) !important;
+    color: #ffffff !important;
+}
+
+#adminCalendar .fc-daygrid-day.fc-day-past:not(.fc-day-today) .fc-event.dashboard-calendar-chip {
+    opacity: .76;
 }
 
 /* Booking, reservation, and sales refinements */

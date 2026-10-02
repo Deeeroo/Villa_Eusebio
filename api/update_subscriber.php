@@ -33,10 +33,16 @@ if ($action === 'broadcast') {
         redirect_subscribers('Please keep the message under 5,000 characters.', true);
     }
 
-    $result = ve_send_subscriber_broadcast($conn, $subject, $message);
+    $selectedSubscriberIds = $_POST['subscriber_ids'] ?? [];
+    if (!is_array($selectedSubscriberIds)) {
+        $selectedSubscriberIds = [$selectedSubscriberIds];
+    }
+    $selectedSubscriberIds = array_values(array_unique(array_filter(array_map('intval', $selectedSubscriberIds))));
+
+    $result = ve_send_subscriber_broadcast($conn, $subject, $message, $selectedSubscriberIds);
     save_subscriber_log(
         $conn,
-        'Sent subscriber email "' . ve_audit_text($subject, 80) . '" to ' . (int)$result['sent'] . ' of ' . (int)$result['total'] . ' subscribers.'
+        'Sent subscriber email "' . ve_audit_text($subject, 80) . '" to ' . (int)$result['sent'] . ' of ' . (int)$result['total'] . ($selectedSubscriberIds ? ' selected subscribers.' : ' subscribers.')
     );
     redirect_subscribers($result['message'], !$result['ok']);
 }

@@ -30,7 +30,7 @@ if ($result) $counts['settings'] = (int)(mysqli_fetch_assoc($result)['total'] ??
     <a href="settings.php" class="nav-link"><span class="nav-icon">ST</span><span>Settings</span></a>
 </div>
 <div class="admin-dashboard">
-    <div class="admin-topbar"><div class="admin-brand"><button id="menuToggle" class="menu-btn">Menu</button><div><h1>Villa Eusebio</h1><p>Archive</p></div></div><div class="admin-userbar"><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div></div>
+    <div class="admin-topbar"><div class="admin-brand"><button id="menuToggle" class="menu-btn">Menu</button><div><h1>Villa Eusebio</h1><p>Archive</p></div></div><div class="admin-userbar"><a href="settings.php" class="admin-avatar-link" aria-label="Open settings" title="Open settings"></a><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div></div>
     <div class="main-content">
         <h2>Archive</h2>
         <p class="reservation-helper-text">Choose the archive category you want to review. Deleted items are stored here for organization and recovery.</p>

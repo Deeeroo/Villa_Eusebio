@@ -1,0 +1,756 @@
+/*
+  Dashboard home
+  ------------------------------------------------------------
+  Scoped overview layout for the main admin dashboard.
+*/
+
+body.admin-shell-page .admin-dashboard > .dashboard-review-alert {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    border: 1px solid #f1dfb6;
+    border-radius: 10px !important;
+    background: linear-gradient(90deg, #fff8e8, #fffdf8) !important;
+    color: #684711 !important;
+    box-shadow: 0 10px 24px rgba(113, 77, 16, .08) !important;
+    cursor: pointer;
+}
+
+body.admin-shell-page .dashboard-review-icon {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #f2d28d;
+    color: #7b4e06;
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-review-alert strong,
+body.admin-shell-page .dashboard-review-alert small {
+    display: block;
+}
+
+body.admin-shell-page .dashboard-review-alert strong {
+    color: #704808;
+    font-size: .9rem;
+    line-height: 1.2;
+}
+
+body.admin-shell-page .dashboard-review-alert small {
+    margin-top: 2px;
+    color: #8a6c32;
+    font-size: .73rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .dashboard-review-alert button {
+    min-height: 34px;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #a36e12, #8b5b07);
+    color: #fffaf0;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(139, 91, 7, .16);
+}
+
+body.admin-shell-page .dashboard-metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin: 0 0 12px !important;
+}
+
+body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card {
+    min-height: 94px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px 16px 15px 88px !important;
+    border: 1px solid #e5eae6 !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,.78) !important;
+    box-shadow: 0 10px 28px rgba(27,39,33,.055) !important;
+}
+
+body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card::before,
+body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card::after {
+    content: none !important;
+    display: none !important;
+}
+
+body.admin-shell-page .dashboard-card-icon {
+    position: absolute;
+    left: 20px;
+    top: 22px;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #e3f4e8;
+    color: #0f5132;
+}
+
+body.admin-shell-page .dashboard-card-icon::after {
+    font-size: 1.28rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+body.admin-shell-page .dashboard-icon-calendar::after { content: "\25A1"; }
+body.admin-shell-page .dashboard-icon-clock::after { content: "\25CB"; }
+body.admin-shell-page .dashboard-icon-check::after { content: "\2713"; }
+body.admin-shell-page .dashboard-icon-peso::after { content: "\20B1"; }
+
+body.admin-shell-page .dashboard-metrics-grid .pending-card .dashboard-card-icon {
+    background: #fff1d6;
+    color: #b46505;
+}
+
+body.admin-shell-page .dashboard-metrics-grid .revenue-card .dashboard-card-icon {
+    background: #dff3e7;
+    color: #105d3a;
+}
+
+body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card .stat-label {
+    color: #34443b !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2;
+}
+
+body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card .stat-value {
+    color: #061b13 !important;
+    font-size: clamp(1.65rem, 2.5vw, 2rem) !important;
+    line-height: .95;
+}
+
+body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card .stat-trend {
+    color: #718077;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .dashboard-home-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+    gap: 12px;
+    align-items: start;
+}
+
+body.admin-shell-page .dashboard-home-grid .dashboard-panel,
+body.admin-shell-page .dashboard-home-grid .admin-calendar-wrapper {
+    border: 1px solid #e5eae6 !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,.78) !important;
+    box-shadow: 0 10px 28px rgba(27,39,33,.055) !important;
+}
+
+body.admin-shell-page .dashboard-home-grid .dashboard-side-column,
+body.admin-shell-page .dashboard-home-grid .dashboard-primary-column {
+    display: grid;
+    gap: 12px;
+}
+
+body.admin-shell-page .dashboard-calendar-panel {
+    overflow: hidden !important;
+}
+
+body.admin-shell-page .dashboard-calendar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px 10px !important;
+    border-bottom: 0 !important;
+    background: transparent !important;
+}
+
+body.admin-shell-page .dashboard-calendar-head h2,
+body.admin-shell-page .dashboard-panel-head h2 {
+    color: #10241b;
+    font-family: Inter, Arial, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+    color: #5f6d64;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .dashboard-calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.admin-shell-page .dashboard-calendar-legend span::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+body.admin-shell-page .dashboard-calendar-legend .legend-day { color: #d19a23; }
+body.admin-shell-page .dashboard-calendar-legend .legend-overnight { color: #2b6ce3; }
+body.admin-shell-page .dashboard-calendar-legend .legend-22hour { color: #d19a23; }
+body.admin-shell-page .dashboard-calendar-legend .legend-blocked { color: #747c83; }
+
+body.admin-shell-page .dashboard-calendar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.admin-shell-page .dashboard-light-btn,
+body.admin-shell-page .dashboard-calendar-panel .calendar-block-help-btn {
+    min-height: 36px;
+    border-radius: 8px !important;
+    padding: 8px 14px;
+    font-size: .78rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+body.admin-shell-page .dashboard-light-btn {
+    border: 1px solid #b9ccc0;
+    background: rgba(255,255,255,.88);
+    color: #0f5132;
+}
+
+body.admin-shell-page .dashboard-calendar-panel .calendar-block-help-btn {
+    border: 1px solid #0f5132 !important;
+    background: #0f5132 !important;
+    color: #fff !important;
+    box-shadow: 0 10px 20px rgba(15,81,50,.14) !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar {
+    padding: 0 18px 16px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc {
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-header-toolbar {
+    margin: 0 0 10px !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-toolbar-title {
+    color: #10241b !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 1.02rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-button {
+    min-width: 34px;
+    min-height: 34px;
+    border: 1px solid #e1e7e3 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #34443b !important;
+    box-shadow: none !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-col-header-cell {
+    background: #f1f4f1 !important;
+    color: #476156 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-col-header-cell-cushion {
+    padding: 8px 4px !important;
+    font-size: .72rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-daygrid-day-frame {
+    min-height: 78px !important;
+    padding: 2px 4px 4px;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-daygrid-day {
+    background: #fffdfa;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-day-today {
+    background: #f2fbf5 !important;
+    box-shadow: inset 0 0 0 2px rgba(15,81,50,.18);
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-daygrid-day-number {
+    color: #26352f !important;
+    font-size: .8rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-bg-event.dashboard-calendar-bg-event {
+    opacity: 0 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event.dashboard-calendar-chip {
+    margin: 2px 3px !important;
+    padding: 4px 6px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    color: #123024 !important;
+    font-size: .62rem !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event.dashboard-calendar-day {
+    background: #fff0c9 !important;
+    color: #94600a !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event.dashboard-calendar-overnight {
+    background: #dfeaff !important;
+    color: #1f5cc9 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event.dashboard-calendar-22hour {
+    background: #fff0c9 !important;
+    color: #94600a !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event.dashboard-calendar-blocked,
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event.dashboard-calendar-whole {
+    background: #edf0f1 !important;
+    color: #4f5b61 !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-event-title {
+    white-space: normal !important;
+}
+
+body.admin-shell-page .dashboard-calendar-panel #adminCalendar .fc-daygrid-day.admin-blocked-day {
+    background: #f1f2f1 !important;
+}
+
+body.admin-shell-page .dashboard-upcoming-card,
+body.admin-shell-page .dashboard-status-card,
+body.admin-shell-page .dashboard-announcement-card {
+    padding: 12px !important;
+}
+
+body.admin-shell-page .dashboard-upcoming-card .dashboard-panel-head,
+body.admin-shell-page .dashboard-status-card .dashboard-panel-head,
+body.admin-shell-page .dashboard-announcement-card .dashboard-panel-head {
+    margin-bottom: 12px;
+}
+
+body.admin-shell-page .dashboard-upcoming-card .panel-link-btn,
+body.admin-shell-page .dashboard-announcement-card .panel-link-btn {
+    border: 0 !important;
+    background: transparent !important;
+    color: #0f5132 !important;
+    padding: 0 !important;
+    font-size: .72rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+body.admin-shell-page .upcoming-stay-layout {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+body.admin-shell-page .upcoming-date-box {
+    min-height: 86px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    border-radius: 10px;
+    background: #fffaf0;
+    border: 1px solid #eee3d2;
+    color: #12241d;
+}
+
+body.admin-shell-page .upcoming-date-box span,
+body.admin-shell-page .upcoming-date-box small {
+    color: #40534a;
+    font-size: .68rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .upcoming-date-box strong {
+    margin: 2px 0;
+    color: #071b16;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: .95;
+}
+
+body.admin-shell-page .upcoming-days-pill {
+    display: inline-flex;
+    border-radius: 999px;
+    background: #fff1cf;
+    color: #8f650e;
+    padding: 4px 8px;
+    font-size: .68rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .upcoming-stay-info h3 {
+    margin: 6px 0 6px;
+    color: #10241b;
+    font-size: .92rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .upcoming-stay-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+body.admin-shell-page .upcoming-stay-item {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid #eadfce;
+    border-radius: 8px;
+    background: #fffdf8;
+    color: inherit;
+    text-decoration: none;
+}
+
+body.admin-shell-page .upcoming-stay-item:hover {
+    border-color: #b8cdbf;
+    background: #f8fbf7;
+}
+
+body.admin-shell-page .upcoming-stay-item h3 {
+    margin-top: 0;
+}
+
+body.admin-shell-page .upcoming-stay-info p {
+    margin: 6px 0 0;
+    color: #647067;
+    font-size: .74rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .dashboard-primary-link {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #0f5132;
+    color: #fff;
+    text-decoration: none;
+    font-size: .82rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-status-card .dashboard-panel-head strong {
+    color: #536259;
+    font-size: .76rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-status-stack {
+    height: 12px;
+    display: flex;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #edf1ee;
+}
+
+body.admin-shell-page .dashboard-status-stack span {
+    min-width: 0;
+}
+
+body.admin-shell-page .dashboard-status-stack .approved,
+body.admin-shell-page .status-dot.approved { background: #0f7850; }
+body.admin-shell-page .dashboard-status-stack .pending,
+body.admin-shell-page .status-dot.pending { background: #f0c15a; }
+body.admin-shell-page .dashboard-status-stack .rejected,
+body.admin-shell-page .status-dot.rejected { background: #ef7a2d; }
+body.admin-shell-page .dashboard-status-stack .cancelled,
+body.admin-shell-page .status-dot.cancelled { background: #e04242; }
+
+body.admin-shell-page .dashboard-status-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+body.admin-shell-page .dashboard-status-list div {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto auto;
+    gap: 8px;
+    align-items: center;
+    color: #536259;
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+}
+
+body.admin-shell-page .dashboard-status-list strong {
+    color: #26352f;
+}
+
+body.admin-shell-page .dashboard-status-list b,
+body.admin-shell-page .dashboard-status-list em {
+    color: #26352f;
+    font-style: normal;
+}
+
+body.admin-shell-page .dashboard-announcement-card {
+    border-left: 0 !important;
+}
+
+body.admin-shell-page .dashboard-announcement-body {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0 14px;
+    border-bottom: 1px solid #e7ece8;
+}
+
+body.admin-shell-page .dashboard-mini-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #e3f4e8;
+    color: #0f5132;
+}
+
+body.admin-shell-page .dashboard-mini-icon::after {
+    content: "\25B7";
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-mini-icon.subscriber::after {
+    content: "\25CF";
+}
+
+body.admin-shell-page .dashboard-announcement-body h3 {
+    margin: 0;
+    color: #10241b;
+    font-size: .86rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-announcement-body p {
+    margin: 4px 0 0;
+    color: #647067;
+    font-size: .72rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+body.admin-shell-page .dashboard-subscriber-link {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+    color: #10241b;
+    text-decoration: none;
+}
+
+body.admin-shell-page .dashboard-subscriber-link strong {
+    display: block;
+    font-size: .82rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .dashboard-subscriber-link strong b {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.35rem;
+}
+
+body.admin-shell-page .dashboard-subscriber-link em {
+    color: #0f5132;
+    font-size: .72rem;
+    font-style: normal;
+    font-weight: 900;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+body.admin-shell-page .dashboard-activity-panel {
+    padding: 14px 18px 12px !important;
+    min-height: 365px;
+}
+
+body.admin-shell-page .dashboard-activity-head {
+    align-items: flex-start;
+}
+
+body.admin-shell-page .dashboard-activity-head .calendar-helper-text {
+    margin: 4px 0 0;
+    color: #6d7971 !important;
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .dashboard-chart-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    padding: 3px;
+    border: 1px solid #dfe6e2;
+    border-radius: 8px;
+    background: #fbfcfb;
+}
+
+body.admin-shell-page .dashboard-chart-toggle button {
+    min-width: 92px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #4f5d55;
+    padding: 8px 10px;
+    font-size: .74rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+body.admin-shell-page .dashboard-chart-toggle button.active {
+    background: #0f5132;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(15,81,50,.14);
+}
+
+body.admin-shell-page .dashboard-bar-chart {
+    width: 100%;
+    height: 285px;
+    min-height: 285px;
+    display: none;
+}
+
+body.admin-shell-page .dashboard-bar-chart.active {
+    display: block;
+}
+
+body.admin-shell-page .dashboard-bar-chart line {
+    stroke: #e5ebe7;
+    stroke-width: 1;
+}
+
+body.admin-shell-page .dashboard-bar-chart rect {
+    rx: 3;
+}
+
+body.admin-shell-page .dashboard-bar-chart .bar-bookings,
+body.admin-shell-page .dashboard-bar-chart .bar-value {
+    fill: #9ac9ad;
+}
+
+body.admin-shell-page .dashboard-bar-chart text {
+    fill: #65736a;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+body.admin-shell-page .dashboard-bar-chart .axis-label {
+    text-anchor: end;
+}
+
+body.admin-shell-page .dashboard-bar-chart .month-label,
+body.admin-shell-page .dashboard-bar-chart .value-label {
+    text-anchor: middle;
+}
+
+body.admin-shell-page .dashboard-bar-chart .value-label {
+    fill: #23382f;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+@media (max-width: 1180px) {
+    body.admin-shell-page .dashboard-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    body.admin-shell-page .dashboard-home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.admin-shell-page .dashboard-home-grid .dashboard-side-column {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 860px) {
+    body.admin-shell-page .admin-dashboard > .dashboard-review-alert,
+    body.admin-shell-page .dashboard-calendar-head,
+    body.admin-shell-page .dashboard-activity-head {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    body.admin-shell-page .dashboard-review-alert button,
+    body.admin-shell-page .dashboard-calendar-actions,
+    body.admin-shell-page .dashboard-chart-toggle {
+        width: 100%;
+    }
+
+    body.admin-shell-page .dashboard-calendar-actions,
+    body.admin-shell-page .dashboard-chart-toggle {
+        display: flex;
+    }
+
+    body.admin-shell-page .dashboard-calendar-actions > *,
+    body.admin-shell-page .dashboard-chart-toggle button {
+        flex: 1 1 0;
+    }
+
+    body.admin-shell-page .dashboard-home-grid .dashboard-side-column {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 620px) {
+    body.admin-shell-page .dashboard-metrics-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.admin-shell-page .dashboard-metrics-grid .dashboard-metric-card {
+        min-height: 86px !important;
+        padding-left: 78px !important;
+    }
+
+    body.admin-shell-page .dashboard-card-icon {
+        left: 16px;
+        width: 44px;
+        height: 44px;
+    }
+}

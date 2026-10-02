@@ -605,6 +605,222 @@ body.admin-shell-page .sales-table td:nth-child(7) {
     text-align: center;
 }
 
+/* Unified sales and reservation table polish */
+body.admin-shell-page .sales-page .table-container,
+body.admin-shell-page .reservation-page .table-container {
+    padding: 16px !important;
+    border-radius: 16px !important;
+    background: rgba(255,253,248,.96) !important;
+    overflow-x: auto;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table,
+body.admin-shell-page .reservation-page .table-container .reservation-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    overflow: visible !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th,
+body.admin-shell-page .reservation-page .table-container .reservation-table th {
+    background: #6f8f6b !important;
+    color: #fff !important;
+    padding: 16px 14px !important;
+    border-bottom: 0 !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+    line-height: 1.25 !important;
+    text-align: left !important;
+    white-space: normal !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:first-child,
+body.admin-shell-page .reservation-page .table-container .reservation-table th:first-child {
+    border-top-left-radius: 8px;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:last-child,
+body.admin-shell-page .reservation-page .table-container .reservation-table th:last-child {
+    border-top-right-radius: 8px;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table td,
+body.admin-shell-page .reservation-page .table-container .reservation-table td {
+    padding: 15px 14px !important;
+    border-bottom: 1px solid rgba(230,220,205,.86) !important;
+    color: #15271f !important;
+    font-size: .88rem !important;
+    line-height: 1.35 !important;
+    vertical-align: middle !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table tbody tr:last-child td,
+body.admin-shell-page .reservation-page .table-container .reservation-table tbody tr:last-child td {
+    border-bottom: 0 !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table tbody tr:hover,
+body.admin-shell-page .reservation-page .table-container .reservation-table tbody tr:hover {
+    background: rgba(15,61,43,.055) !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(5),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(5),
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(7),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(7) {
+    text-align: center !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table {
+    min-width: 1340px !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table {
+    min-width: 1120px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(1),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(1) {
+    width: 64px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(2),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(2) {
+    width: 150px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(3),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(3),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(4),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(4) {
+    width: 120px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(6),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(6) {
+    width: 150px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(7),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(7) {
+    width: 124px !important;
+    text-align: center !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(8),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(8),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(10),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(10) {
+    width: 120px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(9),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(9),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(11),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(11) {
+    width: 142px !important;
+    text-align: center !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(8),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(8),
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(9),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(9) {
+    width: 132px !important;
+    text-align: center !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table .sales-pay-btn,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-rejected-label,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-cancelled-label {
+    min-width: 112px !important;
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+/* Fit sales and reservation tables inside the page without horizontal scrolling. */
+body.admin-shell-page .sales-page .table-container,
+body.admin-shell-page .reservation-page .table-container {
+    overflow-x: visible !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table,
+body.admin-shell-page .reservation-page .table-container .reservation-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th,
+body.admin-shell-page .sales-page .table-container .sales-table td,
+body.admin-shell-page .reservation-page .table-container .reservation-table th,
+body.admin-shell-page .reservation-page .table-container .reservation-table td {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: .78rem !important;
+    line-height: 1.28 !important;
+    overflow-wrap: anywhere;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(1),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(1) {
+    width: 4% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(2),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(2) {
+    width: 12% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(3),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(3),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(4),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(4) {
+    width: 8.5% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(5),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(5) {
+    width: 5% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(6),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(6) {
+    width: 11% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(7),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(7) {
+    width: 9% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(8),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(8),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(10),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(10) {
+    width: 8.5% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(9),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(9),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(11),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(11) {
+    width: 10% !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table .sales-pay-btn,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-rejected-label,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-cancelled-label {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 5px !important;
+    font-size: .72rem !important;
+}
+
 @media (max-width: 900px) {
     .reservation-summary-grid {
         grid-template-columns: 1fr;

@@ -1857,6 +1857,30 @@ body.admin-shell-page .subscriber-broadcast-actions .modal-btn:disabled {
     opacity: .55;
 }
 
+body.admin-shell-page .subscriber-select-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+body.admin-shell-page .subscriber-select-actions button {
+    min-height: 36px;
+    border: 1px solid #d8cbb9;
+    border-radius: 999px;
+    background: #fffdf8;
+    color: #355830;
+    padding: 0 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+body.admin-shell-page .subscriber-select-actions button:hover {
+    border-color: #6f8d6b;
+    background: #eef5e8;
+}
+
 .subscriber-count-bar {
     display: flex;
     align-items: center;
@@ -1927,13 +1951,37 @@ body.admin-shell-page .subscriber-table {
 
 body.admin-shell-page .subscriber-row {
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-columns: auto 40px minmax(0, 1fr) auto;
     gap: 12px;
     align-items: center;
     padding: 12px;
     border: 1px solid #eadfce;
     border-radius: 10px;
     background: rgba(255,253,248,.78);
+}
+
+body.admin-shell-page .subscriber-select-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    min-height: 38px;
+    border: 1px solid #e2d6c5;
+    border-radius: 10px;
+    background: #fffdf8;
+    padding: 0;
+    color: #536047;
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+body.admin-shell-page .subscriber-select-wrap input {
+    width: 16px;
+    height: 16px;
+    accent-color: #0f4a35;
 }
 
 body.admin-shell-page .subscriber-avatar {
@@ -2014,10 +2062,14 @@ body.admin-shell-page .subscriber-empty-state strong {
         margin-left: 0;
     }
     body.admin-shell-page .subscriber-row {
-        grid-template-columns: 40px minmax(0, 1fr);
+        grid-template-columns: auto 40px minmax(0, 1fr);
     }
     body.admin-shell-page .subscriber-delete-form {
         grid-column: 1 / -1;
+    }
+    body.admin-shell-page .subscriber-select-actions {
+        justify-content: flex-start;
+        width: 100%;
     }
     body.admin-shell-page .subscriber-delete-form,
     body.admin-shell-page .subscriber-delete-form .modal-btn {

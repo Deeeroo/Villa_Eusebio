@@ -52,19 +52,106 @@ function getCheckOutTime($type) {
     return '-';
 }
 
-$rows = ve_fetch_all_bookings($conn, "bs.booking_id DESC");
 $today = date('Y-m-d');
+$rows = ve_sort_bookings_active_first(ve_fetch_all_bookings($conn, "bs.booking_id DESC"), $today);
+$pendingCount = 0;
 $approvedCount = 0;
 $rejectedCount = 0;
 $cancelledCount = 0;
-$incomingCount = 0;
+$reservationMonthDays = [];
+$reservationYearMonths = [];
+$reservationAnalyticsSeries = [
+    'month_counts' => [],
+    'year_labels' => [],
+    'year_counts' => [],
+];
+$reservationBookingYearOptions = [];
+$reservationBookingMonthsByYear = [];
+$currentMonthStart = new DateTimeImmutable('first day of this month 00:00:00');
+$currentYear = (int)date('Y');
+$daysInCurrentMonth = (int)$currentMonthStart->format('t');
+
+for ($filterYear = 2024; $filterYear <= $currentYear; $filterYear++) {
+    $reservationBookingYearOptions[(string)$filterYear] = (string)$filterYear;
+}
+
+for ($day = 1; $day <= $daysInCurrentMonth; $day++) {
+    $dayDate = $currentMonthStart->modify('+' . ($day - 1) . ' days');
+    $reservationMonthDays[$dayDate->format('Y-m-d')] = [
+        'label' => (string)$day,
+        'count' => 0,
+    ];
+}
+
+for ($month = 1; $month <= 12; $month++) {
+    $monthDate = DateTimeImmutable::createFromFormat('!Y-n-j', $currentYear . '-' . $month . '-1');
+    if (!$monthDate) {
+        continue;
+    }
+    $reservationYearMonths[$monthDate->format('Y-m')] = [
+        'label' => $monthDate->format('M'),
+        'count' => 0,
+    ];
+}
+
 foreach ($rows as $countRow) {
     $status = strtolower($countRow['status'] ?? '');
+    if ($status === 'pending') $pendingCount++;
     if ($status === 'approved') $approvedCount++;
     if ($status === 'rejected') $rejectedCount++;
     if ($status === 'cancelled') $cancelledCount++;
-    if (!in_array($status, ['rejected', 'cancelled'], true) && ($countRow['check_in_date'] ?? '') >= $today) $incomingCount++;
+
+    $checkInTime = strtotime($countRow['check_in_date'] ?? '');
+    if ($checkInTime) {
+        $bookingYear = date('Y', $checkInTime);
+        $bookingMonth = date('m', $checkInTime);
+        $reservationBookingYearOptions[$bookingYear] = $bookingYear;
+        $reservationBookingMonthsByYear[$bookingYear][$bookingMonth] = true;
+    }
+
+    $createdAt = strtotime($countRow['created_at'] ?? '');
+    if ($createdAt) {
+        $dayKey = date('Y-m-d', $createdAt);
+        $monthKey = date('Y-m', $createdAt);
+        if (isset($reservationMonthDays[$dayKey])) {
+            $reservationMonthDays[$dayKey]['count']++;
+        }
+        if (isset($reservationYearMonths[$monthKey])) {
+            $reservationYearMonths[$monthKey]['count']++;
+        }
+    }
 }
+
+krsort($reservationBookingYearOptions);
+
+foreach ($reservationMonthDays as $dayData) {
+    $reservationAnalyticsSeries['month_counts'][] = (int)$dayData['count'];
+}
+
+foreach ($reservationYearMonths as $monthData) {
+    $reservationAnalyticsSeries['year_labels'][] = $monthData['label'];
+    $reservationAnalyticsSeries['year_counts'][] = (int)$monthData['count'];
+}
+
+function reservationChartMax(array $values): int {
+    $maxValue = max(array_map('intval', $values ?: [0]));
+    if ($maxValue <= 4) return 4;
+    if ($maxValue <= 10) return (int)(ceil($maxValue / 2) * 2);
+    return (int)(ceil($maxValue / 5) * 5);
+}
+
+$reservationThisMonthTotal = array_sum($reservationAnalyticsSeries['month_counts']);
+$reservationThisYearTotal = array_sum($reservationAnalyticsSeries['year_counts']);
+$reservationMonthlyChartMax = reservationChartMax($reservationAnalyticsSeries['year_counts']);
+$reservationMonthlyAxisValues = [
+    $reservationMonthlyChartMax,
+    (int)($reservationMonthlyChartMax * .75),
+    (int)($reservationMonthlyChartMax * .5),
+    (int)($reservationMonthlyChartMax * .25),
+    0,
+];
+$reservationChartBase = 200;
+$reservationChartHeight = 158;
 ?>
 
 <div id="sidebar" class="sidebar">
@@ -92,13 +179,14 @@ foreach ($rows as $countRow) {
     </div>
 
     <div class="admin-userbar">
+        <a href="settings.php" class="admin-avatar-link" aria-label="Open settings" title="Open settings"></a>
         <strong>Owner</strong>
         <button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button>
         <a href="../api/logout.php" class="logout-btn">Logout</a>
     </div>
 </div>
 
-<div class="main-content">
+<div class="main-content reservation-page">
 
     <?php if (isset($_GET['error']) && $_GET['error'] !== ''): ?>
     <div class="admin-alert error-alert"><?php echo htmlspecialchars($_GET['error']); ?></div>
@@ -116,12 +204,93 @@ foreach ($rows as $countRow) {
         <a href="export_reservations_pdf.php" target="_blank" class="admin-export-btn">Export PDF</a>
     </div>
 
-    <div class="reservation-summary-grid">
-        <div class="reservation-summary-card approved"><span>Approved</span><strong><?php echo $approvedCount; ?></strong></div>
-        <div class="reservation-summary-card rejected"><span>Rejected</span><strong><?php echo $rejectedCount; ?></strong></div>
-        <div class="reservation-summary-card cancelled"><span>Cancelled</span><strong><?php echo $cancelledCount; ?></strong></div>
-        <div class="reservation-summary-card incoming"><span>Incoming</span><strong><?php echo $incomingCount; ?></strong></div>
+    <div class="reservation-summary-grid reservation-report-summary" aria-label="Reservation summary">
+        <div class="reservation-summary-card pending reservation-metric-card">
+            <div class="reservation-card-icon reservation-icon-pending" aria-hidden="true"></div>
+            <div>
+                <span>Pending Review</span>
+                <strong><?php echo $pendingCount; ?></strong>
+                <small>Requests for review</small>
+            </div>
+        </div>
+        <div class="reservation-summary-card approved reservation-metric-card">
+            <div class="reservation-card-icon reservation-icon-approved" aria-hidden="true"></div>
+            <div>
+                <span>Approved</span>
+                <strong><?php echo $approvedCount; ?></strong>
+                <small>Confirmed bookings</small>
+            </div>
+        </div>
+        <div class="reservation-summary-card rejected reservation-metric-card">
+            <div class="reservation-card-icon reservation-icon-rejected" aria-hidden="true"></div>
+            <div>
+                <span>Rejected</span>
+                <strong><?php echo $rejectedCount; ?></strong>
+                <small>Declined requests</small>
+            </div>
+        </div>
+        <div class="reservation-summary-card cancelled reservation-metric-card">
+            <div class="reservation-card-icon reservation-icon-cancelled" aria-hidden="true"></div>
+            <div>
+                <span>Cancelled</span>
+                <strong><?php echo $cancelledCount; ?></strong>
+                <small>Cancelled reservations</small>
+            </div>
+        </div>
     </div>
+
+    <section class="reservation-activity-panel">
+        <div class="reservation-activity-main">
+            <div class="reservation-activity-head">
+                <div>
+                    <h3>Reservation Activity</h3>
+                    <p>Monthly reservation requests for <?php echo htmlspecialchars((string)$currentYear); ?>.</p>
+                </div>
+            </div>
+
+            <svg class="reservation-bar-chart active" viewBox="0 0 760 292" role="img" aria-label="Monthly reservation requests for <?php echo htmlspecialchars((string)$currentYear); ?>">
+                <?php foreach ($reservationMonthlyAxisValues as $axisIndex => $axisValue):
+                    $axisY = 42 + ((158 / 4) * $axisIndex);
+                ?>
+                    <line x1="58" y1="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>" x2="720" y2="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>"></line>
+                    <text class="axis-label" x="24" y="<?php echo htmlspecialchars((string)round($axisY + 4, 2)); ?>"><?php echo htmlspecialchars((string)$axisValue); ?></text>
+                <?php endforeach; ?>
+                <?php
+                $monthlyLabels = $reservationAnalyticsSeries['year_labels'];
+                $monthlyCount = max(count($monthlyLabels), 1);
+                $monthlySlot = 662 / $monthlyCount;
+                $monthlyBarWidth = min(46, max(22, $monthlySlot * .42));
+                foreach ($monthlyLabels as $index => $label):
+                    $value = $reservationAnalyticsSeries['year_counts'][$index] ?? 0;
+                    $barHeight = ($value / $reservationMonthlyChartMax) * $reservationChartHeight;
+                    $x = 58 + ($monthlySlot * $index) + (($monthlySlot - $monthlyBarWidth) / 2);
+                    $y = $reservationChartBase - $barHeight;
+                ?>
+                    <rect class="bar-monthly" x="<?php echo htmlspecialchars((string)round($x, 2)); ?>" y="<?php echo htmlspecialchars((string)round($y, 2)); ?>" width="<?php echo htmlspecialchars((string)round($monthlyBarWidth, 2)); ?>" height="<?php echo htmlspecialchars((string)max(1, round($barHeight, 2))); ?>"></rect>
+                    <text class="month-label" x="<?php echo htmlspecialchars((string)round($x + ($monthlyBarWidth / 2), 2)); ?>" y="235"><?php echo htmlspecialchars($label); ?></text>
+                <?php endforeach; ?>
+            </svg>
+        </div>
+
+        <aside class="reservation-activity-stats" aria-label="Reservation activity totals">
+            <div class="reservation-activity-stat month-total">
+                <span class="reservation-activity-icon" aria-hidden="true"></span>
+                <div>
+                    <small>This month</small>
+                    <strong><?php echo (int)$reservationThisMonthTotal; ?></strong>
+                    <p><?php echo (int)$reservationThisMonthTotal === 1 ? 'request' : 'requests'; ?></p>
+                </div>
+            </div>
+            <div class="reservation-activity-stat year-total">
+                <span class="reservation-activity-icon" aria-hidden="true"></span>
+                <div>
+                    <small>This year</small>
+                    <strong><?php echo (int)$reservationThisYearTotal; ?></strong>
+                    <p><?php echo (int)$reservationThisYearTotal === 1 ? 'request' : 'requests'; ?></p>
+                </div>
+            </div>
+        </aside>
+    </section>
 
     <div class="filter-dropdown-wrap">
         <div class="reservation-filters smart-filters filter-panel always-visible-filter-panel" id="reservationFilterPanel">
@@ -129,6 +298,23 @@ foreach ($rows as $countRow) {
                 <input type="text" id="reservationSearch" placeholder="Search name or ID">
                 <button type="button" class="filter-search-clear" id="clearReservationSearch" aria-label="Clear reservation search">&times;</button>
             </div>
+            <select id="reservationMonthFilter">
+                <option value="all">All months</option>
+                <?php for ($filterMonth = 1; $filterMonth <= 12; $filterMonth++):
+                    $filterMonthDate = DateTimeImmutable::createFromFormat('!n', (string)$filterMonth);
+                    if (!$filterMonthDate) {
+                        continue;
+                    }
+                ?>
+                    <option value="<?php echo htmlspecialchars($filterMonthDate->format('m')); ?>" data-month-label="<?php echo htmlspecialchars($filterMonthDate->format('F')); ?>"><?php echo htmlspecialchars($filterMonthDate->format('F')); ?></option>
+                <?php endfor; ?>
+            </select>
+            <select id="reservationYearFilter">
+                <option value="all">All years</option>
+                <?php foreach ($reservationBookingYearOptions as $yearValue): ?>
+                    <option value="<?php echo htmlspecialchars($yearValue); ?>"><?php echo htmlspecialchars($yearValue); ?></option>
+                <?php endforeach; ?>
+            </select>
             <select id="reservationStayFilter"><option value="all">All stay types</option><option value="day">Day Tour</option><option value="overnight">Overnight</option><option value="22hour">22-Hour</option></select>
             <select id="reservationStatusFilter"><option value="all">All status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select>
             <select id="reservationPaymentFilter"><option value="all">All payment types</option><option value="gcash">GCash</option><option value="bdo">BDO</option><option value="unionbank">UnionBank</option><option value="cash">Cash</option></select>
@@ -170,6 +356,8 @@ foreach ($rows as $countRow) {
                     data-payment_method="<?php echo htmlspecialchars(formatPaymentMethod($row['payment_method'])); ?>"
                     data-payment_method_raw="<?php echo htmlspecialchars($row['payment_method']); ?>"
                     data-payment_class="<?php echo htmlspecialchars(paymentMethodClass($row['payment_method'])); ?>"
+                    data-booking_month="<?php echo htmlspecialchars(date('m', strtotime($row['check_in_date']))); ?>"
+                    data-booking_year="<?php echo htmlspecialchars(date('Y', strtotime($row['check_in_date']))); ?>"
                     data-check_in_date="<?php echo htmlspecialchars(date('F d, Y', strtotime($row['check_in_date']))); ?>"
                     data-check_in_raw="<?php echo htmlspecialchars($row['check_in_date']); ?>"
                     data-check_in_time="<?php echo htmlspecialchars(getCheckInTime($row['time_type'])); ?>"
@@ -854,24 +1042,60 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    const reservationBookingMonthsByYear = <?php echo json_encode($reservationBookingMonthsByYear, JSON_UNESCAPED_SLASHES); ?>;
+
+    function reservationMonthHasBookings(monthValue, yearValue) {
+        if (!monthValue || monthValue === 'all') return false;
+        if (!yearValue || yearValue === 'all') {
+            return Object.keys(reservationBookingMonthsByYear || {}).some(function(yearKey) {
+                return reservationBookingMonthsByYear[yearKey] && reservationBookingMonthsByYear[yearKey][monthValue];
+            });
+        }
+        return Boolean(reservationBookingMonthsByYear[yearValue] && reservationBookingMonthsByYear[yearValue][monthValue]);
+    }
+
+    function updateReservationMonthDots() {
+        const monthSelect = document.getElementById('reservationMonthFilter');
+        const yearSelect = document.getElementById('reservationYearFilter');
+        if (!monthSelect || !yearSelect) return;
+        const selectedYear = yearSelect.value || 'all';
+        Array.from(monthSelect.options).forEach(function(option) {
+            if (option.value === 'all') {
+                option.textContent = 'All months';
+                return;
+            }
+            const label = option.dataset.monthLabel || option.textContent.replace(/^•\s*/, '');
+            option.textContent = (reservationMonthHasBookings(option.value, selectedYear) ? '• ' : '') + label;
+        });
+    }
+
     function applyReservationFilters() {
         const search = (document.getElementById('reservationSearch').value || '').toLowerCase();
+        const bookingMonth = document.getElementById('reservationMonthFilter').value;
+        const bookingYear = document.getElementById('reservationYearFilter').value;
         const stay = document.getElementById('reservationStayFilter').value;
         const status = document.getElementById('reservationStatusFilter').value;
         const payment = document.getElementById('reservationPaymentFilter').value;
         document.querySelectorAll('#reservationTable tr').forEach(row => {
             const matchesSearch = !search || (row.dataset.guest_name || '').toLowerCase().includes(search) || String(row.dataset.id || '').includes(search);
+            const matchesMonth = bookingMonth === 'all' || row.dataset.booking_month === bookingMonth;
+            const matchesYear = bookingYear === 'all' || row.dataset.booking_year === bookingYear;
             const matchesStay = stay === 'all' || row.dataset.time_type_raw === stay;
             const matchesStatus = status === 'all' || row.dataset.status === status;
             const matchesPayment = payment === 'all' || row.dataset.payment_method_raw === payment;
-            row.style.display = (matchesSearch && matchesStay && matchesStatus && matchesPayment) ? '' : 'none';
+            row.style.display = (matchesSearch && matchesMonth && matchesYear && matchesStay && matchesStatus && matchesPayment) ? '' : 'none';
         });
     }
-    ['reservationSearch','reservationStayFilter','reservationStatusFilter','reservationPaymentFilter'].forEach(id => {
+    ['reservationSearch','reservationMonthFilter','reservationYearFilter','reservationStayFilter','reservationStatusFilter','reservationPaymentFilter'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', applyReservationFilters);
         if (el) el.addEventListener('change', applyReservationFilters);
     });
+    const reservationYearFilter = document.getElementById('reservationYearFilter');
+    if (reservationYearFilter) {
+        reservationYearFilter.addEventListener('change', updateReservationMonthDots);
+    }
+    updateReservationMonthDots();
     document.getElementById('clearReservationSearch').addEventListener('click', function(){
         const searchInput = document.getElementById('reservationSearch');
         searchInput.value = '';

@@ -76,7 +76,7 @@ $editingDurationMonth = (!empty($editing['expires_at']) && strtotime($editing['e
             
             <div><h1>Villa Eusebio</h1><p>Announcements</p></div>
         </div>
-        <div class="admin-userbar"><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div>
+        <div class="admin-userbar"><a href="settings.php" class="admin-avatar-link" aria-label="Open settings" title="Open settings"></a><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div>
     </div>
 
     <div class="main-content announcements-page">

@@ -33,112 +33,202 @@ function stayTypeColorClass($type) {
 
 $pendingCount = 0;
 $approvedCount = 0;
-$totalRevenue = 0;
-$monthlyRevenue = 0;
-$monthlyReservations = 0;
-$rescheduledCount = 0;
+$rejectedCount = 0;
+$cancelledCount = 0;
+$bookingValueThisMonth = 0;
+$totalSubscribers = 0;
 
 $currentMonth = date('Y-m');
 $totalReservations = count($appointments);
-$recentAppointments = array_slice($appointments, 0, 5);
-$latestReservation = $appointments[0] ?? null;
 $todayDate = new DateTimeImmutable('today');
-$nextBookedDate = null;
-$nextBookedStayLabel = 'Calendar clear';
-$nextBookedStayClass = 'next-booking-default';
-$nextBookedStayPills = [];
+$todayString = $todayDate->format('Y-m-d');
+$upcomingStayDate = null;
+$upcomingStays = [];
 $activeAnnouncement = null;
 $announcementResult = mysqli_query($conn, "SELECT title, message, updated_at, expires_at FROM announcements WHERE is_active = 1 AND archived_at IS NULL AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY updated_at DESC, announcement_id DESC LIMIT 1");
 if ($announcementResult) {
     $activeAnnouncement = mysqli_fetch_assoc($announcementResult);
 }
 
-$nextBookedRows = [];
-$todayString = $todayDate->format('Y-m-d');
-$nextBookedStmt = mysqli_prepare($conn, "
-    SELECT bd.booked_date, bd.time_type, bs.time_type AS booking_time_type
-    FROM booked_dates bd
-    INNER JOIN bookings bs ON bs.booking_id = bd.booking_id
-    WHERE bs.status = 'approved'
-        AND COALESCE(bs.archived, 0) = 0
-        AND bd.booked_date >= ?
-    ORDER BY bd.booked_date ASC, FIELD(bd.time_type, 'day', 'overnight'), bs.booking_id ASC
-");
-if ($nextBookedStmt) {
-    mysqli_stmt_bind_param($nextBookedStmt, 's', $todayString);
-    mysqli_stmt_execute($nextBookedStmt);
-    $nextBookedResult = mysqli_stmt_get_result($nextBookedStmt);
-    $nextBookedDateString = null;
-    while ($nextBookedResult && ($row = mysqli_fetch_assoc($nextBookedResult))) {
-        if ($nextBookedDateString === null) {
-            $nextBookedDateString = $row['booked_date'];
-        }
-        if ($row['booked_date'] !== $nextBookedDateString) {
-            break;
-        }
-        $nextBookedRows[] = $row;
-    }
-    mysqli_stmt_close($nextBookedStmt);
+$analyticsMonths = [];
+$analyticsSeries = [
+    'labels' => [],
+    'bookings' => [],
+    'revenue' => [],
+];
+$monthCursor = new DateTimeImmutable('first day of this month 00:00:00');
+for ($i = 5; $i >= 0; $i--) {
+    $monthDate = $monthCursor->modify("-{$i} months");
+    $monthKey = $monthDate->format('Y-m');
+    $analyticsMonths[$monthKey] = [
+        'label' => $monthDate->format('M'),
+        'bookings' => 0,
+        'revenue' => 0.0,
+    ];
+}
 
-    if ($nextBookedDateString !== null) {
-        $nextBookedDate = new DateTimeImmutable($nextBookedDateString . ' 00:00:00');
-        $nextSlots = [];
-        $has22Hour = false;
-        foreach ($nextBookedRows as $nextRow) {
-            $nextSlots[] = $nextRow['time_type'];
-            if (($nextRow['booking_time_type'] ?? '') === '22hour') {
-                $has22Hour = true;
-            }
-        }
-        $nextSlots = array_values(array_unique($nextSlots));
-        if ($has22Hour) {
-            $nextBookedStayLabel = '22-Hour Stay';
-            $nextBookedStayClass = stayTypeColorClass('22hour');
-            $nextBookedStayPills = [
-                ['label' => $nextBookedStayLabel, 'class' => $nextBookedStayClass],
-            ];
-        } elseif (in_array('day', $nextSlots, true) && in_array('overnight', $nextSlots, true)) {
-            $nextBookedStayLabel = 'Day Tour + Overnight';
-            $nextBookedStayClass = stayTypeColorClass('full');
-            $nextBookedStayPills = [
-                ['label' => 'Day Tour', 'class' => stayTypeColorClass('day')],
-                ['label' => 'Overnight', 'class' => stayTypeColorClass('overnight')],
-            ];
-        } elseif (in_array('overnight', $nextSlots, true)) {
-            $nextBookedStayLabel = 'Overnight Stay';
-            $nextBookedStayClass = stayTypeColorClass('overnight');
-            $nextBookedStayPills = [
-                ['label' => $nextBookedStayLabel, 'class' => $nextBookedStayClass],
-            ];
-        } elseif (in_array('day', $nextSlots, true)) {
-            $nextBookedStayLabel = 'Day Tour';
-            $nextBookedStayClass = stayTypeColorClass('day');
-            $nextBookedStayPills = [
-                ['label' => $nextBookedStayLabel, 'class' => $nextBookedStayClass],
-            ];
-        }
-    }
+$totalSubscriberResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM email_subscribers");
+if ($totalSubscriberResult && $totalSubscriberRow = mysqli_fetch_assoc($totalSubscriberResult)) {
+    $totalSubscribers = (int)($totalSubscriberRow['total'] ?? 0);
+}
+
+$subscriberNotificationRows = [];
+$subscriberNotificationResult = mysqli_query($conn, "SELECT subscriber_id, email, subscribed_at FROM email_subscribers ORDER BY subscribed_at DESC, subscriber_id DESC LIMIT 8");
+while ($subscriberNotificationResult && ($subscriberRow = mysqli_fetch_assoc($subscriberNotificationResult))) {
+    $subscriberNotificationRows[] = $subscriberRow;
 }
 
 foreach ($appointments as $appointment) {
     $status = $appointment['status'] ?? '';
     $month = date('Y-m', strtotime($appointment['created_at']));
+    $checkInMonth = !empty($appointment['check_in_date']) ? date('Y-m', strtotime($appointment['check_in_date'])) : '';
+    $stayValue = isset($appointment['total_stay_value']) ? (float)$appointment['total_stay_value'] : 0.0;
+    if ($stayValue <= 0) {
+        $stayValue = getBasePrice($appointment['time_type']);
+    }
+    $reservationFeePaid = strtolower($appointment['reservation_fee_status'] ?? 'unpaid') === 'paid';
+    $balancePaid = strtolower($appointment['payment_status'] ?? 'unpaid') === 'paid';
+    $isCompletedPaidBooking = $status === 'approved' && $reservationFeePaid && $balancePaid;
 
     if ($status === 'pending') $pendingCount++;
+    if ($status === 'rejected') $rejectedCount++;
+    if ($status === 'cancelled') $cancelledCount++;
     if ($status === 'approved') {
         $approvedCount++;
-        $totalRevenue += getBasePrice($appointment['time_type']);
+        if ($isCompletedPaidBooking && $checkInMonth === $currentMonth) {
+            $bookingValueThisMonth += $stayValue;
+        }
+
+        $checkInDate = $appointment['check_in_date'] ?? '';
+        if ($checkInDate >= $todayString) {
+            if ($upcomingStayDate === null || $checkInDate < $upcomingStayDate) {
+                $upcomingStayDate = $checkInDate;
+                $upcomingStays = [$appointment];
+            } elseif ($checkInDate === $upcomingStayDate) {
+                $upcomingStays[] = $appointment;
+            }
+        }
     }
 
-    if ($status === 'rescheduled') $rescheduledCount++;
-
-    if ($month === $currentMonth) {
-        $monthlyReservations++;
-        if ($status === 'approved') {
-            $monthlyRevenue += getBasePrice($appointment['time_type']);
+    if (isset($analyticsMonths[$month])) {
+        $analyticsMonths[$month]['bookings']++;
+        if ($isCompletedPaidBooking) {
+            $analyticsMonths[$month]['revenue'] += $stayValue;
         }
     }
 }
+
+foreach ($analyticsMonths as $monthData) {
+    $analyticsSeries['labels'][] = $monthData['label'];
+    $analyticsSeries['bookings'][] = (int)$monthData['bookings'];
+    $analyticsSeries['revenue'][] = (float)$monthData['revenue'];
+}
+
+function dashboardChartMax(array $values): int {
+    $maxValue = max(array_map('intval', $values ?: [0]));
+    if ($maxValue <= 4) return 4;
+    if ($maxValue <= 10) return (int)(ceil($maxValue / 2) * 2);
+    if ($maxValue <= 100000) return (int)(ceil($maxValue / 10000) * 10000);
+    return (int)(ceil($maxValue / 25000) * 25000);
+}
+
+function dashboardAxisValues(int $maxValue): array {
+    return [
+        $maxValue,
+        (int)($maxValue * .75),
+        (int)($maxValue * .5),
+        (int)($maxValue * .25),
+        0,
+    ];
+}
+
+$dashboardBookingChartMax = dashboardChartMax($analyticsSeries['bookings']);
+$dashboardRevenueChartMax = dashboardChartMax($analyticsSeries['revenue']);
+$dashboardBookingAxisValues = dashboardAxisValues($dashboardBookingChartMax);
+$dashboardRevenueAxisValues = dashboardAxisValues($dashboardRevenueChartMax);
+$dashboardMonthLabel = date('F Y');
+$dashboardStatusTotal = max($pendingCount + $approvedCount + $rejectedCount + $cancelledCount, 1);
+$dashboardStatusRows = [
+    ['key' => 'approved', 'label' => 'Approved', 'count' => $approvedCount, 'class' => 'approved'],
+    ['key' => 'pending', 'label' => 'Pending', 'count' => $pendingCount, 'class' => 'pending'],
+    ['key' => 'rejected', 'label' => 'Rejected', 'count' => $rejectedCount, 'class' => 'rejected'],
+    ['key' => 'cancelled', 'label' => 'Cancelled', 'count' => $cancelledCount, 'class' => 'cancelled'],
+];
+
+$notificationItems = [];
+foreach ($appointments as $appointment) {
+    if (($appointment['status'] ?? '') !== 'pending') {
+        continue;
+    }
+    $bookingDedupeKey = strtolower(implode('|', [
+        'booking',
+        trim((string)($appointment['guest_name'] ?? '')),
+        trim((string)($appointment['email'] ?? '')),
+        trim((string)($appointment['mobile'] ?? '')),
+        trim((string)($appointment['time_type'] ?? '')),
+        trim((string)($appointment['check_in_date'] ?? '')),
+        trim((string)($appointment['check_out_date'] ?? '')),
+        trim((string)($appointment['guests'] ?? '')),
+    ]));
+    $notificationItems[] = [
+        'uid' => 'booking-' . (int)$appointment['id'] . '-' . md5((string)($appointment['created_at'] ?? '')),
+        'dedupe_key' => $bookingDedupeKey,
+        'type' => 'booking',
+        'title' => 'New booking request',
+        'summary' => ($appointment['guest_name'] ?? 'Guest') . ' requested ' . formatStayType($appointment['time_type'] ?? ''),
+        'time' => strtotime($appointment['created_at'] ?? 'now') ?: time(),
+        'time_label' => date('M d, Y h:i A', strtotime($appointment['created_at'] ?? 'now')),
+        'url' => 'reservation.php?highlight=booking&id=' . (int)$appointment['id'],
+        'details' => [
+            'Guest' => $appointment['guest_name'] ?? 'Guest',
+            'Email' => $appointment['email'] ?? '',
+            'Mobile' => $appointment['mobile'] ?? '',
+            'Stay Type' => formatStayType($appointment['time_type'] ?? ''),
+            'Check-in' => date('M d, Y', strtotime($appointment['check_in_date'] ?? 'now')),
+            'Check-out' => date('M d, Y', strtotime($appointment['check_out_date'] ?? 'now')),
+            'Guests' => (string)($appointment['guests'] ?? ''),
+        ],
+    ];
+}
+
+foreach ($subscriberNotificationRows as $subscriber) {
+    $email = $subscriber['email'] ?? '';
+    $notificationItems[] = [
+        'uid' => 'subscriber-' . (int)($subscriber['subscriber_id'] ?? 0) . '-' . md5((string)($subscriber['subscribed_at'] ?? '') . $email),
+        'dedupe_key' => 'subscriber|' . strtolower(trim($email)),
+        'type' => 'subscriber',
+        'title' => 'New subscriber',
+        'summary' => $email . ' joined the email list',
+        'time' => strtotime($subscriber['subscribed_at'] ?? 'now') ?: time(),
+        'time_label' => date('M d, Y h:i A', strtotime($subscriber['subscribed_at'] ?? 'now')),
+        'url' => 'subscribers.php?q=' . urlencode($email),
+        'details' => [
+            'Email' => $email,
+            'Subscribed' => date('M d, Y h:i A', strtotime($subscriber['subscribed_at'] ?? 'now')),
+        ],
+    ];
+}
+
+$seenNotificationKeys = [];
+$uniqueNotificationItems = [];
+foreach ($notificationItems as $notificationItem) {
+    $dedupeKey = $notificationItem['dedupe_key'] ?? $notificationItem['uid'] ?? '';
+    if ($dedupeKey !== '' && isset($seenNotificationKeys[$dedupeKey])) {
+        continue;
+    }
+    if ($dedupeKey !== '') {
+        $seenNotificationKeys[$dedupeKey] = true;
+    }
+    unset($notificationItem['dedupe_key']);
+    $uniqueNotificationItems[] = $notificationItem;
+}
+$notificationItems = $uniqueNotificationItems;
+
+usort($notificationItems, function($a, $b) {
+    return ($b['time'] ?? 0) <=> ($a['time'] ?? 0);
+});
+$notificationItems = array_slice($notificationItems, 0, 10);
+$notificationCount = count($notificationItems);
 ?>
 
 <div id="sidebar" class="sidebar">
@@ -167,6 +257,32 @@ foreach ($appointments as $appointment) {
     </div>
 
     <div class="admin-userbar">
+        <a href="settings.php" class="admin-avatar-link" aria-label="Open settings" title="Open settings"></a>
+        <div class="admin-notification-center" id="adminNotificationCenter">
+            <button type="button" class="admin-notification-toggle" id="adminNotificationToggle" aria-expanded="false">
+                <img src="../assets/menu-notification.svg" alt="" aria-hidden="true">
+                Notifications
+                <span id="adminNotificationBadge" hidden>0</span>
+            </button>
+            <div class="admin-notification-menu" id="adminNotificationMenu" aria-hidden="true">
+                <div class="admin-notification-menu-head">
+                    <strong>Notifications</strong>
+                    <small><?php echo $notificationCount > 0 ? (int)$notificationCount . ' recent update' . ($notificationCount === 1 ? '' : 's') : 'All clear'; ?></small>
+                </div>
+                <?php if ($notificationItems): ?>
+                    <?php foreach ($notificationItems as $index => $item): ?>
+                        <button type="button" class="admin-notification-item" data-notification-index="<?php echo (int)$index; ?>">
+                            <span class="notification-type-pill <?php echo htmlspecialchars($item['type']); ?>"><?php echo htmlspecialchars($item['type'] === 'booking' ? 'Booking' : 'Subscriber'); ?></span>
+                            <strong><?php echo htmlspecialchars($item['title']); ?></strong>
+                            <em><?php echo htmlspecialchars($item['summary']); ?></em>
+                            <small><?php echo htmlspecialchars($item['time_label']); ?></small>
+                        </button>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="admin-notification-empty">No new bookings or subscribers yet.</div>
+                <?php endif; ?>
+            </div>
+        </div>
         <strong>Owner</strong>
         <button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button>
         <a href="../api/logout.php" class="logout-btn">Logout</a>
@@ -174,8 +290,13 @@ foreach ($appointments as $appointment) {
 </div>
 
 <?php if ($pendingCount > 0): ?>
-<div class="admin-notice-bar" onclick="goToNewReservations()">
-    You have <?php echo $pendingCount; ?> new booking request<?php echo $pendingCount > 1 ? 's' : ''; ?> - Click to view
+<div class="admin-notice-bar dashboard-review-alert" onclick="goToNewReservations()">
+    <span class="dashboard-review-icon" aria-hidden="true">!</span>
+    <div>
+        <strong><?php echo $pendingCount; ?> booking request<?php echo $pendingCount > 1 ? 's' : ''; ?> need review.</strong>
+        <small>Review and approve pending reservations to keep your calendar up to date.</small>
+    </div>
+    <button type="button">Review requests -></button>
 </div>
 <?php endif; ?>
 
@@ -191,142 +312,217 @@ foreach ($appointments as $appointment) {
 </div>
 <?php endif; ?>
 
-    <div class="admin-stats-grid">
-
-        <div class="admin-stat-card total-card">
+    <div class="admin-stats-grid dashboard-metrics-grid">
+        <article class="admin-stat-card dashboard-metric-card total-card">
+            <span class="dashboard-card-icon dashboard-icon-calendar" aria-hidden="true"></span>
             <div class="stat-label">Total Reservations</div>
             <div class="stat-value"><?php echo $totalReservations; ?></div>
-            <div class="stat-trend">All booking records</div>
-        </div>
+            <div class="stat-trend">All time</div>
+        </article>
 
-        <div class="admin-stat-card pending-card">
-            <div class="stat-label">Pending</div>
+        <article class="admin-stat-card dashboard-metric-card pending-card">
+            <span class="dashboard-card-icon dashboard-icon-clock" aria-hidden="true"></span>
+            <div class="stat-label">Pending Approval</div>
             <div class="stat-value"><?php echo $pendingCount; ?></div>
-            <div class="stat-trend">Needs approval</div>
-        </div>
+            <div class="stat-trend">All time</div>
+        </article>
 
-        <div class="admin-stat-card confirmed-card">
-            <div class="stat-label">Approved</div>
+        <article class="admin-stat-card dashboard-metric-card confirmed-card">
+            <span class="dashboard-card-icon dashboard-icon-check" aria-hidden="true"></span>
+            <div class="stat-label">Approved Bookings</div>
             <div class="stat-value"><?php echo $approvedCount; ?></div>
-            <div class="stat-trend"><?php echo $totalReservations ? round(($approvedCount / $totalReservations) * 100) : 0; ?>% of total</div>
-        </div>
+            <div class="stat-trend">All time</div>
+        </article>
 
-        <div class="admin-stat-card revenue-card">
-            <div class="stat-label">Monthly Revenue</div>
-            <div class="stat-trend"><?php echo $monthlyReservations; ?> reservations this month</div>
-            <div class="stat-value">&#8369;<?php echo number_format($monthlyRevenue); ?></div>
-        </div>
-
+        <article class="admin-stat-card dashboard-metric-card revenue-card">
+            <span class="dashboard-card-icon dashboard-icon-peso" aria-hidden="true"></span>
+            <div class="stat-label">Completed Booking Value</div>
+            <div class="stat-value">&#8369;<?php echo number_format($bookingValueThisMonth); ?></div>
+            <div class="stat-trend"><?php echo htmlspecialchars($dashboardMonthLabel); ?></div>
+        </article>
     </div>
 
-    <div class="dashboard-workspace-grid">
-    <div class="dashboard-primary-column">
-    <div class="admin-calendar-wrapper">
-    <div class="calendar-admin-head">
-        <div>
-            <h2>Booking Calendar</h2>
-        </div>
-        <div class="calendar-next-booking-card">
-            <span>Next Booked Day</span>
-            <?php if ($nextBookedDate):
-                $daysRemaining = (int)$todayDate->diff($nextBookedDate)->format('%a');
-                $dayLabel = $daysRemaining === 0 ? 'Today' : $daysRemaining . ' day' . ($daysRemaining === 1 ? '' : 's') . ' remaining';
-            ?>
-                <strong><?php echo htmlspecialchars($dayLabel); ?></strong>
-                <small>
-                    <span class="next-booking-stay-pills">
-                        <?php foreach ($nextBookedStayPills as $stayPill): ?>
-                            <b class="next-booking-stay-pill <?php echo htmlspecialchars($stayPill['class']); ?>"><?php echo htmlspecialchars($stayPill['label']); ?></b>
-                        <?php endforeach; ?>
-                    </span>
-                    <em><?php echo htmlspecialchars($nextBookedDate->format('M d, Y')); ?></em>
-                </small>
-            <?php else: ?>
-                <strong>No upcoming bookings</strong>
-                <small><b class="next-booking-default">Calendar clear</b></small>
-            <?php endif; ?>
-        </div>
-        <button type="button" class="calendar-block-help-btn" id="calendarBlockHelp">Right-click a day to block</button>
-    </div>
-    <div id="adminCalendar"></div>
-</div>
+    <div class="dashboard-home-grid">
+        <div class="dashboard-primary-column">
+            <section class="admin-calendar-wrapper dashboard-calendar-panel">
+                <div class="calendar-admin-head dashboard-calendar-head">
+                    <div>
+                        <h2>Booking Calendar</h2>
+                        <div class="dashboard-calendar-legend" aria-label="Calendar legend">
+                            <span class="legend-day">Day tour</span>
+                            <span class="legend-overnight">Overnight</span>
+                            <span class="legend-22hour">22-hour stay</span>
+                            <span class="legend-blocked">Blocked</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="adminCalendar"></div>
+            </section>
 
-<div class="dashboard-panel recent-reservations-panel">
-    <div class="dashboard-panel-head">
-        <div>
-            <h2>Recent Reservations</h2>
-            <p class="calendar-helper-text">Latest booking activity</p>
-        </div>
-        <a href="reservation.php" class="panel-link-btn">View All</a>
-    </div>
-    <div class="recent-table-wrap">
-        <table class="recent-reservations-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Guest</th>
-                    <th>Stay</th>
-                    <th>Check-in</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($recentAppointments as $recent): ?>
-                <tr>
-                    <td>#<?php echo (int)$recent['id']; ?></td>
-                    <td><?php echo htmlspecialchars($recent['guest_name']); ?></td>
-                    <td><?php echo htmlspecialchars(formatStayType($recent['time_type'])); ?></td>
-                    <td><?php echo htmlspecialchars(date('M d, Y', strtotime($recent['check_in_date']))); ?></td>
-                    <td><span class="status <?php echo htmlspecialchars($recent['status']); ?>"><?php echo htmlspecialchars(ucfirst($recent['status'])); ?></span></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-</div>
+            <section class="dashboard-panel dashboard-activity-panel" aria-label="Booking activity">
+                <div class="dashboard-panel-head dashboard-activity-head">
+                    <div>
+                        <h2>Booking Activity</h2>
+                        <p class="calendar-helper-text">Monthly bookings and fully paid booking value.</p>
+                    </div>
+                    <div class="dashboard-chart-toggle" aria-label="Chart view">
+                        <button type="button" class="active" data-dashboard-chart="bookings">Bookings</button>
+                        <button type="button" data-dashboard-chart="value">Completed Value</button>
+                    </div>
+                </div>
 
-<aside class="dashboard-side-column">
-    <div class="dashboard-panel dashboard-announcement-card">
-        <div class="dashboard-panel-head">
-            <div>
-                <h2>Announcement</h2>
-                <p class="calendar-helper-text">Homepage notice</p>
-            </div>
-            <a href="announcements.php" class="panel-link-btn">Manage</a>
-        </div>
-        <?php if ($activeAnnouncement): ?>
-            <span class="announcement-status-dot">Active</span>
-            <h3><?php echo htmlspecialchars($activeAnnouncement['title']); ?></h3>
-            <p><?php echo nl2br(htmlspecialchars($activeAnnouncement['message'])); ?></p>
-            <small>Updated <?php echo htmlspecialchars(date('M d, Y h:i A', strtotime($activeAnnouncement['updated_at']))); ?></small>
-        <?php else: ?>
-            <span class="announcement-status-dot muted">No active notice</span>
-            <h3>No announcement yet</h3>
-            <p>Announcement Here</p>
-        <?php endif; ?>
-    </div>
+                <svg class="dashboard-bar-chart active" data-dashboard-chart-view="bookings" viewBox="0 0 720 230" role="img" aria-label="Monthly bookings">
+                    <?php foreach ($dashboardBookingAxisValues as $axisIndex => $axisValue):
+                        $axisY = 28 + ((128 / 4) * $axisIndex);
+                    ?>
+                        <line x1="64" y1="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>" x2="684" y2="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>"></line>
+                        <text class="axis-label" x="44" y="<?php echo htmlspecialchars((string)round($axisY + 4, 2)); ?>"><?php echo htmlspecialchars((string)(int)$axisValue); ?></text>
+                    <?php endforeach; ?>
+                    <?php
+                    $dashboardLabels = $analyticsSeries['labels'];
+                    $dashboardCount = max(count($dashboardLabels), 1);
+                    $dashboardSlot = 620 / $dashboardCount;
+                    $dashboardBase = 156;
+                    $dashboardHeight = 128;
+                    foreach ($dashboardLabels as $index => $label):
+                        $value = $analyticsSeries['bookings'][$index] ?? 0;
+                        $barHeight = ($value / $dashboardBookingChartMax) * $dashboardHeight;
+                        $barWidth = min(44, max(20, $dashboardSlot * .42));
+                        $x = 64 + ($dashboardSlot * $index) + (($dashboardSlot - $barWidth) / 2);
+                        $y = $dashboardBase - $barHeight;
+                    ?>
+                        <rect class="bar-bookings" x="<?php echo htmlspecialchars((string)round($x, 2)); ?>" y="<?php echo htmlspecialchars((string)round($y, 2)); ?>" width="<?php echo htmlspecialchars((string)round($barWidth, 2)); ?>" height="<?php echo htmlspecialchars((string)max(1, round($barHeight, 2))); ?>"></rect>
+                        <?php if ((int)$value > 0): ?>
+                            <text class="value-label" x="<?php echo htmlspecialchars((string)round($x + ($barWidth / 2), 2)); ?>" y="<?php echo htmlspecialchars((string)round($y - 8, 2)); ?>"><?php echo htmlspecialchars((string)(int)$value); ?></text>
+                        <?php endif; ?>
+                        <text class="month-label" x="<?php echo htmlspecialchars((string)round(64 + ($dashboardSlot * $index) + ($dashboardSlot / 2), 2)); ?>" y="196"><?php echo htmlspecialchars($label); ?></text>
+                    <?php endforeach; ?>
+                </svg>
 
-    <div class="dashboard-panel reservation-details-card">
-        <div class="dashboard-panel-head">
-            <div>
-                <h2>Reservation Details</h2>
-                <p class="calendar-helper-text">Latest booking</p>
-            </div>
+                <svg class="dashboard-bar-chart" data-dashboard-chart-view="value" viewBox="0 0 720 230" role="img" aria-label="Monthly completed booking value">
+                    <?php foreach ($dashboardRevenueAxisValues as $axisIndex => $axisValue):
+                        $axisY = 28 + ((128 / 4) * $axisIndex);
+                    ?>
+                        <line x1="76" y1="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>" x2="684" y2="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>"></line>
+                        <text class="axis-label" x="58" y="<?php echo htmlspecialchars((string)round($axisY + 4, 2)); ?>">&#8369;<?php echo htmlspecialchars(number_format($axisValue)); ?></text>
+                    <?php endforeach; ?>
+                    <?php
+                    $valueSlot = 608 / $dashboardCount;
+                    foreach ($dashboardLabels as $index => $label):
+                        $value = $analyticsSeries['revenue'][$index] ?? 0;
+                        $barHeight = ($value / $dashboardRevenueChartMax) * $dashboardHeight;
+                        $barWidth = min(44, max(20, $valueSlot * .42));
+                        $x = 76 + ($valueSlot * $index) + (($valueSlot - $barWidth) / 2);
+                        $y = $dashboardBase - $barHeight;
+                    ?>
+                        <rect class="bar-value" x="<?php echo htmlspecialchars((string)round($x, 2)); ?>" y="<?php echo htmlspecialchars((string)round($y, 2)); ?>" width="<?php echo htmlspecialchars((string)round($barWidth, 2)); ?>" height="<?php echo htmlspecialchars((string)max(1, round($barHeight, 2))); ?>"></rect>
+                        <text class="month-label" x="<?php echo htmlspecialchars((string)round(76 + ($valueSlot * $index) + ($valueSlot / 2), 2)); ?>" y="196"><?php echo htmlspecialchars($label); ?></text>
+                    <?php endforeach; ?>
+                </svg>
+            </section>
         </div>
-        <?php if ($latestReservation): ?>
-            <div class="detail-mini-row"><span>Reservation ID</span><strong>#<?php echo (int)$latestReservation['id']; ?></strong></div>
-            <div class="detail-mini-row"><span>Guest</span><strong><?php echo htmlspecialchars($latestReservation['guest_name']); ?></strong></div>
-            <div class="detail-mini-row"><span>Stay Type</span><strong><?php echo htmlspecialchars(formatStayType($latestReservation['time_type'])); ?></strong></div>
-            <div class="detail-mini-row"><span>Check-in</span><strong><?php echo htmlspecialchars(date('M d, Y', strtotime($latestReservation['check_in_date']))); ?></strong></div>
-            <div class="detail-mini-row"><span>Status</span><strong><span class="status <?php echo htmlspecialchars($latestReservation['status']); ?>"><?php echo htmlspecialchars(ucfirst($latestReservation['status'])); ?></span></strong></div>
-            <a href="reservation.php?highlight=booking&id=<?php echo (int)$latestReservation['id']; ?>" class="panel-link-btn reservation-detail-link">Go to Reservation</a>
-        <?php else: ?>
-            <p class="muted-text">No reservations yet.</p>
-        <?php endif; ?>
+
+        <aside class="dashboard-side-column">
+            <section class="dashboard-panel dashboard-upcoming-card">
+                <div class="dashboard-panel-head">
+                    <h2>Upcoming Stay</h2>
+                    <a href="reservation.php" class="panel-link-btn">View all</a>
+                </div>
+                <?php if ($upcomingStays):
+                    usort($upcomingStays, function($a, $b) {
+                        $order = ['day' => 1, '22hour' => 2, 'overnight' => 3];
+                        return ($order[$a['time_type'] ?? ''] ?? 9) <=> ($order[$b['time_type'] ?? ''] ?? 9);
+                    });
+                    $upcomingDate = new DateTimeImmutable(($upcomingStayDate ?? $todayString) . ' 00:00:00');
+                    $upcomingDays = (int)$todayDate->diff($upcomingDate)->format('%a');
+                    $upcomingDayLabel = $upcomingDays === 0 ? 'Today' : 'In ' . $upcomingDays . ' day' . ($upcomingDays === 1 ? '' : 's');
+                ?>
+                    <div class="upcoming-stay-layout">
+                        <div class="upcoming-date-box">
+                            <span><?php echo htmlspecialchars(strtoupper($upcomingDate->format('M'))); ?></span>
+                            <strong><?php echo htmlspecialchars($upcomingDate->format('j')); ?></strong>
+                            <small><?php echo htmlspecialchars($upcomingDate->format('Y')); ?></small>
+                        </div>
+                        <div class="upcoming-stay-info">
+                            <span class="upcoming-days-pill"><?php echo htmlspecialchars($upcomingDayLabel); ?></span>
+                            <div class="upcoming-stay-list">
+                                <?php foreach ($upcomingStays as $upcomingStay):
+                                    $upcomingType = $upcomingStay['time_type'] ?? '';
+                                    $upcomingStayValue = (float)($upcomingStay['total_stay_value'] ?: getBasePrice($upcomingType));
+                                ?>
+                                    <a class="upcoming-stay-item" href="reservation.php?highlight=booking&id=<?php echo (int)$upcomingStay['id']; ?>">
+                                        <h3><?php echo htmlspecialchars($upcomingStay['guest_name'] ?? 'Guest'); ?></h3>
+                                        <b class="next-booking-stay-pill <?php echo htmlspecialchars(stayTypeColorClass($upcomingType)); ?>"><?php echo htmlspecialchars(formatStayType($upcomingType)); ?></b>
+                                        <p><?php if ($upcomingStayValue > 0): ?>Booking value &#8369;<?php echo number_format($upcomingStayValue); ?><?php else: ?>Approved booking<?php endif; ?></p>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="reservation.php?date=<?php echo htmlspecialchars($upcomingDate->format('Y-m-d')); ?>" class="dashboard-primary-link">View reservations</a>
+                <?php else: ?>
+                    <p class="muted-text">No upcoming approved stays.</p>
+                    <a href="reservation.php" class="dashboard-primary-link">Open reservations</a>
+                <?php endif; ?>
+            </section>
+
+            <section class="dashboard-panel dashboard-status-card">
+                <div class="dashboard-panel-head">
+                    <h2>Booking Status</h2>
+                    <strong>Total <?php echo (int)($pendingCount + $approvedCount + $rejectedCount + $cancelledCount); ?></strong>
+                </div>
+                <div class="dashboard-status-stack" aria-hidden="true">
+                    <?php foreach ($dashboardStatusRows as $statusRow):
+                        $percent = ($statusRow['count'] / $dashboardStatusTotal) * 100;
+                    ?>
+                        <span class="<?php echo htmlspecialchars($statusRow['class']); ?>" style="width: <?php echo htmlspecialchars((string)round($percent, 2)); ?>%;"></span>
+                    <?php endforeach; ?>
+                </div>
+                <div class="dashboard-status-list">
+                    <?php foreach ($dashboardStatusRows as $statusRow):
+                        $percent = $dashboardStatusTotal > 0 ? round(($statusRow['count'] / $dashboardStatusTotal) * 100) : 0;
+                    ?>
+                        <div>
+                            <span class="status-dot <?php echo htmlspecialchars($statusRow['class']); ?>"></span>
+                            <strong><?php echo htmlspecialchars($statusRow['label']); ?></strong>
+                            <b><?php echo (int)$statusRow['count']; ?></b>
+                            <em><?php echo (int)$percent; ?>%</em>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+
+            <section class="dashboard-panel dashboard-announcement-card">
+                <div class="dashboard-panel-head">
+                    <h2>Announcement</h2>
+                    <a href="announcements.php" class="panel-link-btn">Manage announcement</a>
+                </div>
+                <div class="dashboard-announcement-body">
+                    <span class="dashboard-mini-icon" aria-hidden="true"></span>
+                    <div>
+                        <?php if ($activeAnnouncement): ?>
+                            <?php
+                            $announcementPreview = trim(strip_tags($activeAnnouncement['message'] ?? ''));
+                            if (strlen($announcementPreview) > 90) {
+                                $announcementPreview = substr($announcementPreview, 0, 87) . '...';
+                            }
+                            ?>
+                            <h3><?php echo htmlspecialchars($activeAnnouncement['title']); ?></h3>
+                            <p><?php echo htmlspecialchars($announcementPreview); ?></p>
+                        <?php else: ?>
+                            <h3>No active announcement</h3>
+                            <p>Create an announcement to inform your guests.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <a class="dashboard-subscriber-link" href="subscribers.php">
+                    <span class="dashboard-mini-icon subscriber" aria-hidden="true"></span>
+                    <strong>Subscribers <b><?php echo (int)$totalSubscribers; ?></b></strong>
+                    <em>View subscribers</em>
+                </a>
+            </section>
+        </aside>
     </div>
-</aside>
-</div>
 <div id="adminTooltip" class="admin-tooltip"></div>
 
 <div id="calendarContextMenu" class="calendar-context-menu">
@@ -523,6 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
         calendar.getEvents().forEach(function(event) {
             const start = event.start;
             if (!start) return;
+            if (event.extendedProps && event.extendedProps.isCalendarChip) return;
             const dateKey = start.toLocaleDateString('en-CA');
             eventMap[dateKey] = event.extendedProps || {};
         });
@@ -537,16 +734,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 cell.dataset.adminDayLabel = 'Blocked';
             } else if (props.type === '22hour') {
                 cell.classList.add('admin-22hour-day');
-                cell.style.background = '#d4af37';
             } else if (Array.isArray(props.slots) && props.slots.includes('day') && props.slots.includes('overnight')) {
                 cell.classList.add('admin-full-day');
-                cell.style.background = 'linear-gradient(to bottom, #1e3a8a 0 50%, #f59e0b 50% 100%)';
             } else if (props.type === 'overnight') {
                 cell.classList.add('admin-overnight-day');
-                cell.style.background = '#1e3a8a';
             } else if (props.type === 'day') {
                 cell.classList.add('admin-day-tour-day');
-                cell.style.background = '#f59e0b';
             }
         });
     }
@@ -581,6 +774,55 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    function calendarStayLabel(type) {
+        if (type === 'day') return 'Day tour';
+        if (type === 'overnight') return 'Overnight';
+        if (type === '22hour') return '22-hour stay';
+        if (type === 'whole' || type === 'blocked') return 'Blocked';
+        if (type === 'full') return 'Booked';
+        return 'Booked';
+    }
+
+    function calendarFirstName(name) {
+        const first = String(name || '').trim().split(/\s+/)[0] || '';
+        return first.length > 14 ? first.slice(0, 13) + '...' : first;
+    }
+
+    function dashboardCalendarEvents(events) {
+        const output = [];
+        (events || []).forEach(function(event) {
+            const aggregate = Object.assign({}, event, {
+                display: 'background',
+                classNames: ['dashboard-calendar-bg-event']
+            });
+            output.push(aggregate);
+
+            const props = event.extendedProps || {};
+            const details = uniqueTooltipDetails(props.details || []);
+            const visibleDetails = details.length ? details.slice(0, 3) : [props];
+            visibleDetails.forEach(function(detail) {
+                const type = getTooltipType(detail) || props.type || '';
+                const isBlocked = !!detail.is_blocked || type === 'whole' || type === 'blocked';
+                const guest = isBlocked ? '' : calendarFirstName(detail.guest_name || props.guest_name);
+                const title = calendarStayLabel(type) + (guest ? ' ' + guest : '');
+                output.push(Object.assign({}, event, {
+                    title: title,
+                    display: 'block',
+                    backgroundColor: 'transparent',
+                    borderColor: 'transparent',
+                    classNames: ['dashboard-calendar-chip', 'dashboard-calendar-' + (type || 'default')],
+                    extendedProps: Object.assign({}, props, {
+                        isCalendarChip: true,
+                        chipType: type,
+                        details: props.details || [],
+                        display_detail: detail
+                    })
+                }));
+            });
+        });
+        return output;
+    }
+
     function loadCalendarEvents(fetchInfo, successCallback, failureCallback) {
         const eventsUrl = '../api/get_booked_dates.php?mode=events';
         calendarEl.classList.add('is-loading');
@@ -593,7 +835,9 @@ document.addEventListener('DOMContentLoaded', function () {
             : fetch(eventsUrl).then(response => response.json());
 
         eventRequest
-            .then(successCallback)
+            .then(function(events) {
+                successCallback(dashboardCalendarEvents(events));
+            })
             .catch(failureCallback)
             .finally(function() {
                 calendarEl.classList.remove('is-loading');
@@ -869,114 +1113,164 @@ function goToNewReservations() {
 }
 </script>
 
-<div id="notifModal" class="notif-modal">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartButtons = document.querySelectorAll('[data-dashboard-chart]');
+    const chartViews = document.querySelectorAll('[data-dashboard-chart-view]');
+    chartButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            const target = button.dataset.dashboardChart || 'bookings';
+            chartButtons.forEach(function(item) {
+                item.classList.toggle('active', item === button);
+            });
+            chartViews.forEach(function(view) {
+                view.classList.toggle('active', view.dataset.dashboardChartView === target);
+            });
+        });
+    });
+});
+</script>
 
-    <div class="notif-card">
-
-        <span class="close-btn" onclick="closeNotifModal()">&times;</span>
-
-        <h2>New Booking</h2>
-
-        <div id="notifContent"></div>
-
+<div id="notificationDetailModal" class="notif-modal admin-notification-detail-modal" aria-hidden="true">
+    <div class="notif-card admin-notification-detail-card">
+        <button type="button" class="close-btn admin-notification-close" id="notificationDetailClose">&times;</button>
+        <span class="notification-type-pill" id="notificationDetailType">Update</span>
+        <h2 id="notificationDetailTitle">Notification</h2>
+        <p id="notificationDetailSummary" class="notification-detail-summary"></p>
+        <div id="notificationDetailRows" class="notification-detail-rows"></div>
         <div class="notif-actions">
-            <button onclick="prevBooking()">← Prev</button>
-            <button onclick="nextBooking()">Next →</button>
+            <a href="#" class="panel-link-btn" id="notificationDetailLink">Open</a>
         </div>
-
     </div>
-
 </div>
 
 <script>
-let currentIndex = 0;
+const adminNotifications = <?php echo json_encode($notificationItems, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
 
-function openNotifModal() {
-    if (pendingBookings.length === 0) return;
+document.addEventListener('DOMContentLoaded', function() {
+    const center = document.getElementById('adminNotificationCenter');
+    const toggle = document.getElementById('adminNotificationToggle');
+    const menu = document.getElementById('adminNotificationMenu');
+    const modal = document.getElementById('notificationDetailModal');
+    const closeBtn = document.getElementById('notificationDetailClose');
+    const detailType = document.getElementById('notificationDetailType');
+    const detailTitle = document.getElementById('notificationDetailTitle');
+    const detailSummary = document.getElementById('notificationDetailSummary');
+    const detailRows = document.getElementById('notificationDetailRows');
+    const detailLink = document.getElementById('notificationDetailLink');
+    const badge = document.getElementById('adminNotificationBadge');
+    const seenStorageKey = 'villaEusebioSeenAdminNotificationsV1';
 
-    document.getElementById('notifModal').style.display = 'flex';
-    currentIndex = 0;
-    showBooking();
-}
-
-function closeNotifModal() {
-    document.getElementById('notifModal').style.display = 'none';
-}
-
-function nextBooking() {
-    if (currentIndex < pendingBookings.length - 1) {
-        currentIndex++;
-        showBooking();
+    function escapeText(value) {
+        return String(value || '').replace(/[&<>"']/g, function(match) {
+            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[match];
+        });
     }
-}
 
-function prevBooking() {
-    if (currentIndex > 0) {
-        currentIndex--;
-        showBooking();
+    function notificationUid(item) {
+        return String(item && item.uid ? item.uid : '');
     }
-}
-</script>
 
-<script>
-function formatStay(type) {
-    if (type === 'day') return 'Day Tour (9:00 AM – 5:00 PM)';
-    if (type === 'overnight') return 'Overnight Stay (7:00 PM – 7:00 AM)';
-    if (type === '22hour') return '22-Hour Stay (9:00 AM – 7:00 AM)';
-    return type;
-}
+    function readSeenNotifications() {
+        try {
+            const stored = JSON.parse(localStorage.getItem(seenStorageKey) || '[]');
+            return Array.isArray(stored) ? stored : [];
+        } catch (error) {
+            return [];
+        }
+    }
 
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+    function writeSeenNotifications(ids) {
+        try {
+            localStorage.setItem(seenStorageKey, JSON.stringify(ids.slice(0, 80)));
+        } catch (error) {
+            return;
+        }
+    }
+
+    function currentNotificationIds() {
+        return adminNotifications.map(notificationUid).filter(Boolean);
+    }
+
+    function updateNotificationBadge() {
+        if (!badge) return;
+        const seen = new Set(readSeenNotifications());
+        const unreadCount = currentNotificationIds().filter(function(id) {
+            return !seen.has(id);
+        }).length;
+        badge.textContent = String(unreadCount);
+        badge.hidden = unreadCount === 0;
+    }
+
+    function markCurrentNotificationsSeen() {
+        const merged = new Set(readSeenNotifications());
+        currentNotificationIds().forEach(function(id) {
+            merged.add(id);
+        });
+        writeSeenNotifications(Array.from(merged));
+        updateNotificationBadge();
+    }
+
+    function closeMenu() {
+        if (!menu || !toggle) return;
+        menu.classList.remove('show');
+        menu.setAttribute('aria-hidden', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function openNotification(index) {
+        const item = adminNotifications[index];
+        if (!item || !modal) return;
+        detailType.textContent = item.type === 'booking' ? 'Booking' : 'Subscriber';
+        detailType.className = 'notification-type-pill ' + (item.type || 'update');
+        detailTitle.textContent = item.title || 'Notification';
+        detailSummary.textContent = item.summary || '';
+        detailLink.href = item.url || '#';
+        detailLink.textContent = item.type === 'booking' ? 'Open Reservation' : 'Open Subscriber';
+        const rows = item.details || {};
+        detailRows.innerHTML = Object.keys(rows).map(function(key) {
+            return '<div class="notification-detail-row"><span>' + escapeText(key) + '</span><strong>' + escapeText(rows[key]) + '</strong></div>';
+        }).join('');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        closeMenu();
+    }
+
+    if (toggle && menu) {
+        toggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            const willOpen = !menu.classList.contains('show');
+            menu.classList.toggle('show', willOpen);
+            menu.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+            toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            if (willOpen) markCurrentNotificationsSeen();
+        });
+    }
+
+    document.querySelectorAll('.admin-notification-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            openNotification(Number(this.dataset.notificationIndex || 0));
+        });
     });
-}
 
-function formatFullDate(dateStr) {
-    const date = new Date(dateStr);
-
-    return date.toLocaleDateString('en-US', {
-        weekday: 'long',   
-        month: 'long',    
-        day: 'numeric',   
-        year: 'numeric'   
+    document.addEventListener('click', function(event) {
+        if (center && !center.contains(event.target)) closeMenu();
     });
-}
 
-function showBooking() {
-    if (pendingBookings.length === 0) return;
+    function closeModal() {
+        if (!modal) return;
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+    }
 
-    let b = pendingBookings[currentIndex];
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) closeModal();
+        });
+    }
 
-    document.getElementById('notifContent').innerHTML = `
-        <div class="notif-detail">
-            <strong>${b.guest_name}</strong>
-            <p>${b.email}</p>
-            <p>${b.mobile}</p>
-        </div>
-
-        <div class="notif-detail">
-            <p><strong>Stay Type:</strong> ${formatStay(b.time_type)}</p>
-            <p><strong>Check-in:</strong> ${formatFullDate(b.check_in_date)}</p>
-            <p><strong>Check-out:</strong> ${formatFullDate(b.check_out_date)}</p>
-            <p><strong>Guests:</strong> ${b.guests}</p>
-        </div>
-
-        <div class="notif-detail">
-            <p><strong>Submitted:</strong> ${formatDate(b.created_at)}</p>
-        </div>
-    `;
-}
+    updateNotificationBadge();
+});
 </script>
-
-
-
-
-
-
-
 

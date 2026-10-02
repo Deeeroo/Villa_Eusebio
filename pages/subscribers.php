@@ -52,7 +52,7 @@ if ($totalResult && $row = mysqli_fetch_assoc($totalResult)) {
             <button id="menuToggle" class="menu-btn">Menu</button>
             <div><h1>Villa Eusebio</h1><p>Email Subscribers</p></div>
         </div>
-        <div class="admin-userbar"><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div>
+        <div class="admin-userbar"><a href="settings.php" class="admin-avatar-link" aria-label="Open settings" title="Open settings"></a><strong>Owner</strong><button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button><a href="../api/logout.php" class="logout-btn">Logout</a></div>
     </div>
 
     <div class="main-content subscribers-page">
@@ -78,18 +78,18 @@ if ($totalResult && $row = mysqli_fetch_assoc($totalResult)) {
             <div class="subscriber-card-header">
                 <div>
                     <h3>Email Subscribers</h3>
-                    <p>Send one update to every email currently in the subscriber list.</p>
+                    <p>Send one update to all subscribers, or choose specific emails from the list below.</p>
                 </div>
             </div>
-            <form class="subscriber-broadcast-form" method="POST" action="../api/update_subscriber.php" onsubmit="return confirm('Send this email to all subscribers?');">
+            <form id="subscriberBroadcastForm" class="subscriber-broadcast-form" method="POST" action="../api/update_subscriber.php" data-total-subscribers="<?php echo (int)$totalSubscribers; ?>">
                 <input type="hidden" name="action" value="broadcast">
                 <label for="subscriberBroadcastSubject">Subject</label>
                 <input id="subscriberBroadcastSubject" name="subject" maxlength="150" placeholder="Example: New Villa Eusebio announcement" required>
                 <label for="subscriberBroadcastMessage">Message</label>
                 <textarea id="subscriberBroadcastMessage" name="message" rows="7" maxlength="5000" placeholder="Write the update subscribers should receive..." required></textarea>
                 <div class="subscriber-broadcast-actions">
-                    <small><?php echo $totalSubscribers > 0 ? 'Ready to send to ' . (int)$totalSubscribers . ' subscriber' . ($totalSubscribers === 1 ? '' : 's') . '.' : 'No subscribers yet.'; ?></small>
-                    <button class="modal-btn btn-approve" type="submit" <?php echo $totalSubscribers <= 0 ? 'disabled' : ''; ?>>Send Email</button>
+                    <small id="subscriberSelectionHint"><?php echo $totalSubscribers > 0 ? 'No specific emails selected. This will send to all ' . (int)$totalSubscribers . ' subscriber' . ($totalSubscribers === 1 ? '' : 's') . '.' : 'No subscribers yet.'; ?></small>
+                    <button id="subscriberSendButton" class="modal-btn btn-approve" type="submit" <?php echo $totalSubscribers <= 0 ? 'disabled' : ''; ?>>Send Email</button>
                 </div>
             </form>
         </section>
@@ -105,12 +105,21 @@ if ($totalResult && $row = mysqli_fetch_assoc($totalResult)) {
                     <h3>Subscriber List</h3>
                     <p><?php echo $search !== '' ? count($subscriberRows) . ' search result' . (count($subscriberRows) === 1 ? '' : 's') . ' found.' : 'Emails collected from the website subscribe form.'; ?></p>
                 </div>
+                <?php if ($subscriberRows): ?>
+                    <div class="subscriber-select-actions">
+                        <button type="button" id="selectAllSubscribers">Select All</button>
+                        <button type="button" id="clearSubscriberSelection">Unselect All</button>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <?php if ($subscriberRows): ?>
                 <div class="subscriber-table">
                     <?php foreach ($subscriberRows as $subscriber): ?>
                         <article class="subscriber-row">
+                            <label class="subscriber-select-wrap">
+                                <input form="subscriberBroadcastForm" class="subscriber-select-checkbox" type="checkbox" name="subscriber_ids[]" value="<?php echo (int)$subscriber['subscriber_id']; ?>">
+                            </label>
                             <span class="subscriber-avatar"><?php echo htmlspecialchars(strtoupper(substr($subscriber['email'], 0, 1))); ?></span>
                             <div class="subscriber-readonly">
                                 <strong><?php echo htmlspecialchars($subscriber['email']); ?></strong>
@@ -134,4 +143,61 @@ if ($totalResult && $row = mysqli_fetch_assoc($totalResult)) {
     </div>
 </div>
 
-<script>document.addEventListener('DOMContentLoaded',function(){const btn=document.getElementById('menuToggle'),sidebar=document.getElementById('sidebar'),dash=document.querySelector('.admin-dashboard');if(localStorage.getItem('sidebar')==='collapsed'){sidebar.classList.add('active');dash.classList.add('shift');}if(btn){btn.onclick=function(){sidebar.classList.toggle('active');dash.classList.toggle('shift');localStorage.setItem('sidebar',sidebar.classList.contains('active')?'collapsed':'expanded');};}});</script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const btn=document.getElementById('menuToggle'),sidebar=document.getElementById('sidebar'),dash=document.querySelector('.admin-dashboard');
+    if(localStorage.getItem('sidebar')==='collapsed'){sidebar.classList.add('active');dash.classList.add('shift');}
+    if(btn){btn.onclick=function(){sidebar.classList.toggle('active');dash.classList.toggle('shift');localStorage.setItem('sidebar',sidebar.classList.contains('active')?'collapsed':'expanded');};}
+
+    const broadcastForm = document.getElementById('subscriberBroadcastForm');
+    const selectionHint = document.getElementById('subscriberSelectionHint');
+    const selectAllBtn = document.getElementById('selectAllSubscribers');
+    const clearBtn = document.getElementById('clearSubscriberSelection');
+    const checkboxes = Array.from(document.querySelectorAll('.subscriber-select-checkbox'));
+    const totalSubscribers = broadcastForm ? Number(broadcastForm.dataset.totalSubscribers || 0) : 0;
+
+    function updateSelectionHint() {
+        const selected = checkboxes.filter(function(input) { return input.checked; }).length;
+        if (!selectionHint) return;
+        if (selected > 0) {
+            selectionHint.textContent = selected + ' selected. Email will only be sent to selected subscriber' + (selected === 1 ? '.' : 's.');
+        } else if (totalSubscribers > 0) {
+            selectionHint.textContent = 'No specific emails selected. This will send to all ' + totalSubscribers + ' subscriber' + (totalSubscribers === 1 ? '.' : 's.');
+        } else {
+            selectionHint.textContent = 'No subscribers yet.';
+        }
+    }
+
+    checkboxes.forEach(function(input) {
+        input.addEventListener('change', updateSelectionHint);
+    });
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            checkboxes.forEach(function(input) { input.checked = true; });
+            updateSelectionHint();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            checkboxes.forEach(function(input) { input.checked = false; });
+            updateSelectionHint();
+        });
+    }
+
+    if (broadcastForm) {
+        broadcastForm.addEventListener('submit', function(event) {
+            const selected = checkboxes.filter(function(input) { return input.checked; }).length;
+            const message = selected > 0
+                ? 'Send this email to ' + selected + ' selected subscriber' + (selected === 1 ? '?' : 's?')
+                : 'Send this email to all subscribers?';
+            if (!confirm(message)) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    updateSelectionHint();
+});
+</script>

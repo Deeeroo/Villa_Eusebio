@@ -17,6 +17,749 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
+body.admin-shell-page .sales-page .admin-page-heading {
+    min-height: 0;
+    margin-bottom: 16px;
+    padding: 18px 22px !important;
+    align-items: center;
+}
+
+body.admin-shell-page .sales-page .admin-page-heading h2 {
+    font-size: clamp(1.9rem, 2.5vw, 2.55rem) !important;
+    line-height: .95;
+    margin-bottom: 4px;
+}
+
+body.admin-shell-page .sales-page .admin-page-heading p {
+    font-size: .88rem !important;
+    line-height: 1.35;
+    margin: 0;
+}
+
+body.admin-shell-page .reservation-page .admin-page-heading {
+    min-height: 0;
+    margin-bottom: 16px;
+    padding: 18px 22px !important;
+    align-items: center;
+}
+
+body.admin-shell-page .reservation-page .admin-page-heading h2 {
+    font-size: clamp(1.9rem, 2.5vw, 2.55rem) !important;
+    line-height: .95;
+    margin-bottom: 4px;
+}
+
+body.admin-shell-page .reservation-page .admin-page-heading p {
+    font-size: .88rem !important;
+    line-height: 1.35;
+    margin: 0;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    margin: 0 0 18px !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card {
+    position: relative;
+    isolation: isolate;
+    min-height: 122px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    overflow: hidden;
+    padding: 18px 16px 16px 84px !important;
+    border: 1px solid #e5d8c1 !important;
+    border-radius: 16px !important;
+    background:
+        linear-gradient(135deg, rgba(255,255,252,.98), rgba(248,243,233,.9)) !important;
+    box-shadow:
+        0 14px 28px rgba(53, 45, 34, .065),
+        inset 0 1px 0 rgba(255,255,255,.84) !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card::before {
+    left: 20px !important;
+    top: 22px !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #e7f4e8, #cde8d5) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(15,61,43,.06),
+        0 10px 22px rgba(15,61,43,.08) !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card::after {
+    position: absolute;
+    left: 20px;
+    top: 22px;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    color: #155e3a;
+    font-size: 1.12rem;
+    font-weight: 900;
+    line-height: 1;
+    z-index: 1;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .approved::after {
+    content: "\2713";
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .rejected::after,
+body.admin-shell-page .reservation-page .reservation-summary-grid .cancelled::after {
+    content: "\00D7";
+    color: #8d2020;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .incoming::after {
+    content: "!";
+    color: #8a4b0f;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .rejected::before,
+body.admin-shell-page .reservation-page .reservation-summary-grid .cancelled::before {
+    background: linear-gradient(135deg, #ffe1e1, #f5b5b5) !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .incoming::before {
+    background: linear-gradient(135deg, #fff3d7, #f3d29a) !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card span {
+    color: #1d2b22 !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+    letter-spacing: .02em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card strong {
+    color: #061b13 !important;
+    font-size: clamp(2rem, 2.8vw, 2.7rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: 0;
+    line-height: .98;
+}
+
+body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card small {
+    color: #556455 !important;
+    font-size: .78rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+@media (max-width: 1280px) {
+    body.admin-shell-page .reservation-page .reservation-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 680px) {
+    body.admin-shell-page .reservation-page .reservation-summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card {
+        min-height: 112px !important;
+        padding: 16px 15px 15px 76px !important;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card::before,
+    body.admin-shell-page .reservation-page .reservation-summary-grid .reservation-metric-card::after {
+        left: 18px !important;
+        top: 18px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+}
+
+body.admin-shell-page .reservation-page .reservation-report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0 0 14px;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-header h2 {
+    margin: 0 0 4px;
+    color: #071b16;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: clamp(1.7rem, 2.4vw, 2.3rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-header p {
+    margin: 0;
+    color: #68746d;
+    font-size: .88rem;
+    font-weight: 700;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+body.admin-shell-page .reservation-page .reservation-range-pill,
+body.admin-shell-page .reservation-page .reservation-export-report {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 8px;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: .82rem;
+    font-weight: 900;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body.admin-shell-page .reservation-page .reservation-range-pill {
+    border: 1px solid #dfe7e1;
+    background: #fff;
+    color: #21332c;
+    padding: 0 14px;
+    box-shadow: 0 8px 20px rgba(30,43,36,.055);
+    cursor: default;
+}
+
+body.admin-shell-page .reservation-page .reservation-range-icon {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #5d6c64;
+    border-radius: 4px;
+    position: relative;
+}
+
+body.admin-shell-page .reservation-page .reservation-range-icon::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 4px;
+    height: 2px;
+    background: #5d6c64;
+}
+
+body.admin-shell-page .reservation-page .reservation-range-caret {
+    color: #68746d;
+    font-size: .72rem;
+}
+
+body.admin-shell-page .reservation-page .reservation-export-report {
+    border: 1px solid #0f5132;
+    background: #0f5132;
+    color: #fff;
+    padding: 0 18px;
+    box-shadow: 0 12px 26px rgba(15,81,50,.18);
+}
+
+body.admin-shell-page .reservation-page .reservation-export-report::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg) translateY(-1px);
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin: 0 0 12px !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card {
+    min-height: 104px !important;
+    display: grid !important;
+    grid-template-columns: 54px minmax(0, 1fr);
+    align-items: center;
+    gap: 13px;
+    overflow: hidden;
+    padding: 14px 16px !important;
+    border: 1px solid #e5eae6 !important;
+    border-radius: 9px !important;
+    background: #fff !important;
+    box-shadow: 0 10px 28px rgba(27,39,33,.055) !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card.pending {
+    background: linear-gradient(135deg, #fffaf0, #fff) !important;
+    border-color: #f1dfbd !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card::before,
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card::after {
+    content: none !important;
+    display: none !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-card-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    position: relative;
+}
+
+body.admin-shell-page .reservation-page .reservation-card-icon::after {
+    color: currentColor;
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-pending {
+    background: #fff1d6;
+    color: #c36a09;
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-pending::after {
+    content: "!";
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-approved {
+    background: #ddf6e5;
+    color: #12613d;
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-approved::after {
+    content: "\2713";
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-rejected {
+    background: #ffdfe1;
+    color: #b91c1c;
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-rejected::after {
+    content: "\00D7";
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-cancelled {
+    background: #eef0f1;
+    color: #4f5b61;
+}
+
+body.admin-shell-page .reservation-page .reservation-icon-cancelled::after {
+    content: "\2298";
+    font-size: 1.22rem;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card span {
+    display: block;
+    color: #1c2b25 !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0;
+    line-height: 1.2;
+    text-transform: none;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card strong {
+    display: block;
+    margin-top: 4px;
+    color: #071b16 !important;
+    font-size: 2.1rem !important;
+    font-weight: 900 !important;
+    line-height: .88;
+}
+
+body.admin-shell-page .reservation-page .reservation-report-summary .reservation-metric-card small {
+    display: block;
+    margin-top: 7px;
+    color: #65736a !important;
+    font-size: .76rem !important;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 0;
+    margin: 0 0 18px;
+    overflow: hidden;
+    border: 1px solid #e5eae6;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(27,39,33,.055);
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-main {
+    min-width: 0;
+    padding: 16px 18px 12px;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-head h3 {
+    margin: 0 0 4px;
+    color: #10241b;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-head p {
+    margin: 0;
+    color: #6d7971;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+body.admin-shell-page .reservation-page .reservation-chart-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    padding: 3px;
+    border: 1px solid #e1e7e3;
+    border-radius: 8px;
+    background: #fbfcfb;
+}
+
+body.admin-shell-page .reservation-page .reservation-chart-toggle button {
+    min-width: 76px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #4f5d55;
+    padding: 8px 10px;
+    font-size: .74rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+body.admin-shell-page .reservation-page .reservation-chart-toggle button.active {
+    background: #0f5132;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(15,81,50,.14);
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart {
+    width: 100%;
+    height: 230px;
+    display: none;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart.active {
+    display: block;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart line {
+    stroke: #e7ece8;
+    stroke-width: 1;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart rect {
+    rx: 2;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart .bar-monthly,
+body.admin-shell-page .reservation-page .reservation-bar-chart .bar-daily {
+    fill: #b8dcca;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart text {
+    fill: #6d7971;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart .axis-label {
+    text-anchor: end;
+}
+
+body.admin-shell-page .reservation-page .reservation-bar-chart .month-label {
+    font-size: 11px;
+    text-anchor: middle;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-stats {
+    display: grid;
+    align-content: center;
+    gap: 0;
+    border-left: 1px solid #e7ece8;
+    padding: 18px;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-stat {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    padding: 8px 0 20px;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-stat + .reservation-activity-stat {
+    border-top: 1px solid #e7ece8;
+    padding-top: 20px;
+    padding-bottom: 8px;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #e7f3ec;
+    color: #0f5132;
+    position: relative;
+}
+
+body.admin-shell-page .reservation-page .month-total .reservation-activity-icon::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-radius: 4px;
+    background:
+        linear-gradient(currentColor, currentColor) 3px 6px / 12px 2px no-repeat;
+}
+
+body.admin-shell-page .reservation-page .year-total .reservation-activity-icon::after {
+    content: "";
+    width: 22px;
+    height: 22px;
+    background:
+        linear-gradient(currentColor, currentColor) 3px 11px / 4px 8px no-repeat,
+        linear-gradient(currentColor, currentColor) 9px 6px / 4px 13px no-repeat,
+        linear-gradient(currentColor, currentColor) 15px 2px / 4px 17px no-repeat;
+    border-radius: 3px;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-stat small {
+    display: block;
+    color: #5f6d64;
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-stat strong {
+    display: block;
+    margin-top: 3px;
+    color: #071b16;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: .95;
+}
+
+body.admin-shell-page .reservation-page .reservation-activity-stat p {
+    margin: 4px 0 0;
+    color: #65736a;
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+@media (max-width: 1180px) {
+    body.admin-shell-page .reservation-page .reservation-report-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-activity-panel {
+        grid-template-columns: 1fr;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-activity-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-left: 0;
+        border-top: 1px solid #e7ece8;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-activity-stat + .reservation-activity-stat {
+        border-top: 0;
+        border-left: 1px solid #e7ece8;
+        padding-top: 8px;
+        padding-left: 18px;
+    }
+}
+
+@media (max-width: 780px) {
+    body.admin-shell-page .reservation-page .reservation-report-header,
+    body.admin-shell-page .reservation-page .reservation-activity-head {
+        flex-direction: column;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-report-actions,
+    body.admin-shell-page .reservation-page .reservation-range-pill,
+    body.admin-shell-page .reservation-page .reservation-export-report,
+    body.admin-shell-page .reservation-page .reservation-chart-toggle {
+        width: 100%;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-chart-toggle button {
+        flex: 1 1 0;
+    }
+}
+
+@media (max-width: 620px) {
+    body.admin-shell-page .reservation-page .reservation-report-summary,
+    body.admin-shell-page .reservation-page .reservation-activity-stats {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.admin-shell-page .reservation-page .reservation-activity-stat + .reservation-activity-stat {
+        border-left: 0;
+        border-top: 1px solid #e7ece8;
+        padding-left: 0;
+        padding-top: 20px;
+    }
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    margin: 0 0 18px !important;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card {
+    position: relative;
+    isolation: isolate;
+    min-height: 132px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    overflow: hidden;
+    padding: 20px 18px 18px 86px !important;
+    border: 1px solid #e5d8c1 !important;
+    border-radius: 16px !important;
+    background:
+        linear-gradient(135deg, rgba(255,255,252,.98), rgba(248,243,233,.9)) !important;
+    box-shadow:
+        0 16px 34px rgba(53, 45, 34, .07),
+        inset 0 1px 0 rgba(255,255,255,.84) !important;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card::before {
+    left: 20px !important;
+    top: 22px !important;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #e7f4e8, #cde8d5) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(15,61,43,.06),
+        0 10px 22px rgba(15,61,43,.08) !important;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card::after {
+    position: absolute;
+    left: 20px;
+    top: 22px;
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-items: center;
+    color: #155e3a;
+    font-size: 1.25rem;
+    font-weight: 900;
+    line-height: 1;
+    z-index: 1;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-earned-card::after,
+body.admin-shell-page .sales-page .sales-summary-grid .sales-paid-card::after {
+    content: "\20B1";
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-approved-card::after {
+    content: "\2713";
+    color: #1d4f84;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-incomplete-card::after {
+    content: "!";
+    color: #9a4d0f;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-approved-card::before {
+    background: linear-gradient(135deg, #e7f0f8, #c8dded) !important;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-paid-card::before {
+    background: linear-gradient(135deg, #def3e7, #bce1cd) !important;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-incomplete-card::before {
+    background: linear-gradient(135deg, #fff3d7, #f3d29a) !important;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card .stat-label {
+    color: #1d2b22 !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+    letter-spacing: .01em;
+    line-height: 1.2;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card .stat-value {
+    color: #061b13 !important;
+    font-size: clamp(2rem, 2.8vw, 2.75rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: 0;
+    line-height: .98;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card .stat-trend {
+    color: #556455 !important;
+    font-size: .78rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+body.admin-shell-page .sales-page .sales-summary-grid .sales-incomplete-card .stat-trend {
+    color: #8a4b0f !important;
+}
+
+@media (max-width: 1280px) {
+    body.admin-shell-page .sales-page .sales-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 680px) {
+    body.admin-shell-page .sales-page .sales-summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card {
+        min-height: 118px !important;
+        padding: 18px 16px 16px 76px !important;
+    }
+
+    body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card::before,
+    body.admin-shell-page .sales-page .sales-summary-grid .sales-metric-card::after {
+        left: 18px !important;
+        top: 20px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+}
+
 .sales-table {
     width: 100%;
     border-collapse: collapse;
@@ -37,6 +780,898 @@
 
 .sales-table tr:hover {
     background: #f9fafb;
+}
+
+.sales-analytics-panel,
+.reservation-analytics-panel {
+    margin: 16px 0 18px;
+    border: 1px solid #e7dac3;
+    border-radius: 12px;
+    background:
+        linear-gradient(145deg, rgba(255,253,248,.96), rgba(247,241,230,.9));
+    box-shadow: 0 12px 28px rgba(62,54,42,.06);
+    padding: 16px;
+}
+
+.sales-analytics-head,
+.reservation-analytics-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.sales-analytics-head h3,
+.reservation-analytics-head h3 {
+    margin: 0 0 4px;
+    color: #2f3f2a;
+    font-family: "Playfair Display", serif;
+    font-size: 1.35rem;
+}
+
+.sales-analytics-head p,
+.reservation-analytics-head p {
+    margin: 0;
+    color: #71695c;
+    line-height: 1.45;
+}
+
+.sales-analytics-grid,
+.reservation-analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.sales-linegraph-card,
+.reservation-linegraph-card {
+    min-width: 0;
+    border: 1px solid #e3d5bd;
+    border-radius: 12px;
+    background: rgba(255,253,248,.82);
+    padding: 14px 14px 10px;
+}
+
+.approved-bookings-graph {
+    border-top: 4px solid #2563eb;
+}
+
+.paid-amount-graph {
+    border-top: 4px solid #0f5132;
+}
+
+.reservation-month-graph {
+    border-top: 4px solid #2563eb;
+}
+
+.reservation-year-graph {
+    border-top: 4px solid #0f5132;
+}
+
+.sales-linegraph-head,
+.reservation-linegraph-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.sales-linegraph-head span,
+.reservation-linegraph-head span {
+    display: block;
+    color: #68735f;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.sales-linegraph-head strong,
+.reservation-linegraph-head strong {
+    display: block;
+    margin-top: 5px;
+    color: #071f17;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.sales-linegraph-head small,
+.reservation-linegraph-head small {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: rgba(113,132,98,.1);
+    color: #536047;
+    padding: 7px 9px;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.sales-linegraph,
+.reservation-linegraph {
+    width: 100%;
+    height: 190px;
+    display: block;
+}
+
+.sales-linegraph line,
+.reservation-linegraph line {
+    stroke: #d8cab0;
+    stroke-width: 1.2;
+}
+
+.sales-linegraph polyline,
+.reservation-linegraph polyline {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sales-linegraph .line-approved-bookings {
+    stroke: #2563eb;
+}
+
+.sales-linegraph .line-paid-amount {
+    stroke: #0f5132;
+}
+
+.reservation-linegraph .line-month-reservations {
+    stroke: #2563eb;
+}
+
+.reservation-linegraph .line-year-reservations {
+    stroke: #0f5132;
+}
+
+.sales-linegraph text,
+.reservation-linegraph text {
+    fill: #746955;
+    font-size: 12px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+@media (max-width: 900px) {
+    .sales-analytics-grid,
+    .reservation-analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sales-linegraph-head,
+    .reservation-linegraph-head {
+        flex-direction: column;
+    }
+
+    .sales-linegraph-head small,
+    .reservation-linegraph-head small {
+        white-space: normal;
+    }
+}
+
+/* Sales report dashboard layout */
+body.admin-shell-page .sales-page .sales-report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0 0 16px;
+}
+
+body.admin-shell-page .sales-page .sales-report-header h2 {
+    margin: 0 0 4px;
+    color: #061b13;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+body.admin-shell-page .sales-page .sales-report-header p {
+    margin: 0;
+    color: #66726c;
+    font-size: .92rem;
+    font-weight: 700;
+}
+
+body.admin-shell-page .sales-page .sales-report-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+body.admin-shell-page .sales-page .sales-range-pill {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    border: 1px solid #dfe5e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f2f28;
+    box-shadow: 0 6px 18px rgba(31,47,40,.06);
+    font-size: .86rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .sales-page .sales-range-icon {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #53645b;
+    border-radius: 4px;
+    position: relative;
+}
+
+body.admin-shell-page .sales-page .sales-range-icon::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 4px;
+    height: 2px;
+    background: #53645b;
+}
+
+body.admin-shell-page .sales-page .sales-range-caret {
+    color: #66726c;
+    font-size: .74rem;
+}
+
+body.admin-shell-page .sales-page .sales-export-report {
+    min-height: 44px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px !important;
+    border-radius: 8px !important;
+    background: #0f5132 !important;
+    box-shadow: 0 10px 24px rgba(15,81,50,.16) !important;
+    font-family: "Inter", Arial, sans-serif !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .sales-page .sales-report-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+}
+
+body.admin-shell-page .sales-page .sales-report-summary .sales-metric-card {
+    min-height: 118px !important;
+    padding: 16px 92px 16px 76px !important;
+    border: 1px solid #e7ece8 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    box-shadow: 0 10px 30px rgba(30,43,36,.055) !important;
+}
+
+body.admin-shell-page .sales-page .sales-report-summary .sales-metric-card::before,
+body.admin-shell-page .sales-page .sales-report-summary .sales-metric-card::after {
+    content: none !important;
+}
+
+body.admin-shell-page .sales-page .sales-card-icon {
+    position: absolute;
+    left: 16px;
+    top: 18px;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #e1f5e9;
+    color: #0f6a41;
+    font-size: 1.35rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sales-page .sales-icon-peso::after {
+    content: "\20B1";
+}
+
+body.admin-shell-page .sales-page .sales-icon-wallet::after {
+    content: "";
+    width: 20px;
+    height: 16px;
+    border-radius: 5px;
+    background: #0f6a41;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.18);
+}
+
+body.admin-shell-page .sales-page .sales-icon-clock {
+    background: #fff1d8;
+    color: #d97706;
+}
+
+body.admin-shell-page .sales-page .sales-icon-clock::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 3px solid currentColor;
+    border-radius: 50%;
+    background:
+        linear-gradient(currentColor, currentColor) center 4px / 2px 7px no-repeat,
+        linear-gradient(currentColor, currentColor) 12px 10px / 6px 2px no-repeat;
+}
+
+body.admin-shell-page .sales-page .sales-icon-group {
+    background: #e8f1ff;
+    color: #2563eb;
+}
+
+body.admin-shell-page .sales-page .sales-icon-group::after {
+    content: "";
+    width: 24px;
+    height: 18px;
+    background:
+        radial-gradient(circle at 50% 25%, currentColor 0 4px, transparent 4.5px),
+        radial-gradient(circle at 25% 42%, currentColor 0 3.5px, transparent 4px),
+        radial-gradient(circle at 75% 42%, currentColor 0 3.5px, transparent 4px),
+        linear-gradient(currentColor, currentColor) center bottom / 18px 8px no-repeat;
+    border-radius: 999px;
+}
+
+body.admin-shell-page .sales-page .sales-report-summary .stat-label {
+    color: #1e2924 !important;
+    font-size: .79rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2;
+}
+
+body.admin-shell-page .sales-page .sales-report-summary .stat-value {
+    margin-top: 2px;
+    color: #061b13 !important;
+    font-size: 2rem !important;
+    line-height: 1 !important;
+}
+
+body.admin-shell-page .sales-page .sales-report-summary .stat-trend {
+    max-width: 210px;
+    color: #748078 !important;
+    font-size: .74rem !important;
+    font-weight: 800;
+}
+
+body.admin-shell-page .sales-page .sales-card-spark {
+    position: absolute;
+    right: 14px;
+    bottom: 16px;
+    width: 58px;
+    height: 32px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+body.admin-shell-page .sales-page .sales-card-spark span {
+    flex: 1;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, #8bd7a8, #dff5e7);
+}
+
+body.admin-shell-page .sales-page .sales-card-spark span:nth-child(1) { height: 28%; }
+body.admin-shell-page .sales-page .sales-card-spark span:nth-child(2) { height: 48%; }
+body.admin-shell-page .sales-page .sales-card-spark span:nth-child(3) { height: 78%; }
+body.admin-shell-page .sales-page .sales-card-spark.warning span { background: linear-gradient(180deg, #f4a62a, #fff0d2); }
+body.admin-shell-page .sales-page .sales-card-spark.blue span { background: linear-gradient(180deg, #75a7ff, #e2edff); }
+
+body.admin-shell-page .sales-page .sales-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(340px, .9fr);
+    gap: 12px;
+    margin: 0 0 12px;
+}
+
+body.admin-shell-page .sales-page .sales-dashboard-panel,
+body.admin-shell-page .sales-page .booking-payments-panel {
+    border: 1px solid #e7ece8 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    box-shadow: 0 10px 30px rgba(30,43,36,.055) !important;
+}
+
+body.admin-shell-page .sales-page .sales-dashboard-panel {
+    padding: 16px !important;
+}
+
+body.admin-shell-page .sales-page .sales-panel-head,
+body.admin-shell-page .sales-page .booking-payments-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+body.admin-shell-page .sales-page .sales-panel-head h3,
+body.admin-shell-page .sales-page .booking-payments-head h3 {
+    margin: 0 0 4px;
+    color: #10241b;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sales-page .sales-panel-head p,
+body.admin-shell-page .sales-page .booking-payments-head p {
+    margin: 0;
+    color: #6d7971;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+body.admin-shell-page .sales-page .sales-segmented-control {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid #e3e8e4;
+    border-radius: 8px;
+    background: #fbfcfb;
+}
+
+body.admin-shell-page .sales-page .sales-segmented-control button {
+    min-width: 92px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #4f5d55;
+    padding: 7px 10px;
+    font-size: .76rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sales-page .sales-segmented-control button.active {
+    background: #0f5132;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(15,81,50,.14);
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart {
+    width: 100%;
+    height: 250px;
+    display: block;
+    margin-top: 8px;
+}
+
+body.admin-shell-page .sales-page .sales-chart-view:not(.active),
+body.admin-shell-page .sales-page .sales-chart-legend:not(.active) {
+    display: none;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart line {
+    stroke: #e6ece8;
+    stroke-width: 1;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart rect {
+    rx: 3;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart .bar-collected {
+    fill: #0f5132;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart .bar-approved-value {
+    fill: #b8dfc5;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart .bar-bookings {
+    fill: #3b82f6;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart text {
+    fill: #6d7971;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart .axis-label {
+    text-anchor: start;
+}
+
+body.admin-shell-page .sales-page .sales-bar-chart .month-label {
+    text-anchor: middle;
+}
+
+body.admin-shell-page .sales-page .sales-chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    color: #53645b;
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .sales-page .sales-chart-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+body.admin-shell-page .sales-page .sales-chart-legend span::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+body.admin-shell-page .sales-page .legend-collected::before {
+    background: #0f5132;
+}
+
+body.admin-shell-page .sales-page .legend-approved::before {
+    background: #b8dfc5;
+}
+
+body.admin-shell-page .sales-page .legend-bookings::before {
+    background: #3b82f6;
+}
+
+body.admin-shell-page .sales-page .payment-overview-layout {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+    margin-top: 14px;
+}
+
+body.admin-shell-page .sales-page .payment-donut {
+    --paid-percent: 0%;
+    position: relative;
+    width: 190px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(#0f5132 0 var(--paid-percent), #f2a42a var(--paid-percent) 100%);
+    box-shadow: inset 0 0 0 1px rgba(16,36,27,.04);
+}
+
+body.admin-shell-page .sales-page .payment-donut::before {
+    content: "";
+    position: absolute;
+    inset: 38px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px #edf1ee;
+}
+
+body.admin-shell-page .sales-page .payment-donut > div {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+body.admin-shell-page .sales-page .payment-donut strong {
+    display: block;
+    color: #061b13;
+    font-size: clamp(1rem, 1.3vw, 1.12rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1.05;
+    white-space: nowrap;
+}
+
+body.admin-shell-page .sales-page .payment-donut span {
+    color: #6d7971;
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .sales-page .payment-overview-cards {
+    display: grid;
+    gap: 10px;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card {
+    padding: 12px;
+    border: 1px solid #e7ece8;
+    border-radius: 8px;
+    background: #fff;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #26352f;
+    font-size: .8rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card span strong {
+    margin-left: auto;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card .dot.collected {
+    background: #0f5132;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card .dot.outstanding {
+    background: #f2a42a;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card b {
+    display: block;
+    margin: 8px 0 3px 20px;
+    color: #061b13;
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sales-page .payment-overview-card small {
+    display: block;
+    margin-left: 20px;
+    color: #7a857e;
+    font-size: .74rem;
+    font-weight: 800;
+}
+
+body.admin-shell-page .sales-page .booking-payments-panel {
+    padding: 14px !important;
+    margin-top: 12px;
+}
+
+body.admin-shell-page .sales-page .booking-payments-head {
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+body.admin-shell-page .sales-page .sales-table-tools {
+    flex: 1 1 680px;
+    display: grid !important;
+    grid-template-columns: minmax(230px, 1.3fr) repeat(5, minmax(128px, .7fr)) !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.admin-shell-page .sales-page .sales-table-tools input,
+body.admin-shell-page .sales-page .sales-table-tools select {
+    min-height: 42px !important;
+    border: 1px solid #e1e6e2 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    box-shadow: 0 5px 14px rgba(31,47,40,.04) !important;
+}
+
+body.admin-shell-page .sales-page .sales-booking-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #edf1ee;
+    border-radius: 10px;
+}
+
+body.admin-shell-page .sales-page .sales-table {
+    min-width: 980px !important;
+    table-layout: auto !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+body.admin-shell-page .sales-page .sales-table th {
+    background: #f7faf8 !important;
+    color: #34433b !important;
+    padding: 12px 14px !important;
+    font-size: .76rem !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+}
+
+body.admin-shell-page .sales-page .sales-table td {
+    padding: 11px 14px !important;
+    color: #1e2924 !important;
+    font-size: .86rem;
+    vertical-align: middle;
+}
+
+body.admin-shell-page .sales-page .sales-table td:nth-child(5),
+body.admin-shell-page .sales-page .sales-table td:nth-child(6),
+body.admin-shell-page .sales-page .sales-table td:nth-child(7) {
+    font-weight: 900;
+    white-space: nowrap !important;
+}
+
+body.admin-shell-page .sales-page .sales-row-link {
+    border: 0;
+    background: transparent;
+    color: #10241b;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    padding: 0;
+}
+
+body.admin-shell-page .sales-page .sales-guest-name {
+    display: block;
+    color: #10241b;
+}
+
+body.admin-shell-page .sales-page .sales-table td small {
+    display: block;
+    margin-top: 3px;
+    color: #78837c;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+body.admin-shell-page .sales-page .sales-payment-state {
+    min-width: 84px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: .78rem;
+    font-weight: 900;
+}
+
+body.admin-shell-page .sales-page .sales-payment-paid {
+    background: #dcf6e5;
+    color: #14733e;
+}
+
+body.admin-shell-page .sales-page .sales-payment-partial,
+body.admin-shell-page .sales-page .sales-payment-unpaid {
+    background: #fff0d9;
+    color: #a45c05;
+}
+
+body.admin-shell-page .sales-page .sales-payment-rejected,
+body.admin-shell-page .sales-page .sales-payment-cancelled {
+    background: #ffe7e7;
+    color: #b91c1c;
+}
+
+body.admin-shell-page .sales-page .sales-actions-cell {
+    text-align: right !important;
+}
+
+body.admin-shell-page .sales-page .sales-pay-btn,
+body.admin-shell-page .sales-page .sales-paid-lock,
+body.admin-shell-page .sales-page .sales-rejected-label,
+body.admin-shell-page .sales-page .sales-cancelled-label {
+    min-width: 96px !important;
+    border-radius: 8px !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table {
+    width: 100% !important;
+    min-width: 1120px !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    font-size: 13px !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th {
+    background: #6B8E6B !important;
+    color: #fff !important;
+    padding: 12px !important;
+    text-align: left !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    white-space: normal !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table td {
+    padding: 10px !important;
+    border-bottom: 1px solid #eee !important;
+    color: inherit !important;
+    font-size: 13px !important;
+    vertical-align: middle;
+    white-space: normal !important;
+    overflow-wrap: break-word;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(1),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(1) {
+    width: 54px;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(2),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(2) {
+    width: 13%;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(3),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(3),
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(4),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(4) {
+    width: 10%;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table th:nth-child(5),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(5) {
+    width: 86px;
+    text-align: center !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(5),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(6),
+body.admin-shell-page .sales-page .table-container .sales-table td:nth-child(7) {
+    font-weight: inherit;
+    white-space: normal !important;
+}
+
+body.admin-shell-page .sales-page .table-container .sales-table .sales-pay-btn small,
+body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock small {
+    display: block;
+    margin: 2px 0 0;
+    color: inherit;
+    font-size: .72em;
+    font-weight: 800;
+}
+
+@media (max-width: 1280px) {
+    body.admin-shell-page .sales-page .sales-report-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    body.admin-shell-page .sales-page .sales-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.admin-shell-page .sales-page .booking-payments-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 900px) {
+    body.admin-shell-page .sales-page .sales-report-header,
+    body.admin-shell-page .sales-page .sales-panel-head {
+        flex-direction: column;
+    }
+
+    body.admin-shell-page .sales-page .sales-report-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    body.admin-shell-page .sales-page .sales-range-pill,
+    body.admin-shell-page .sales-page .sales-export-report {
+        flex: 1 1 auto;
+    }
+
+    body.admin-shell-page .sales-page .payment-overview-layout {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    body.admin-shell-page .sales-page .payment-overview-cards {
+        width: 100%;
+    }
+
+    body.admin-shell-page .sales-page .sales-table-tools {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 680px) {
+    body.admin-shell-page .sales-page .sales-report-summary {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.admin-shell-page .sales-page .sales-report-summary .sales-metric-card {
+        padding-right: 78px !important;
+    }
 }
 
 .sales-table tr.booking-completed-row,

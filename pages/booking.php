@@ -59,6 +59,8 @@ endif;
     z-index: 9999;
     justify-content: center;
     align-items: center;
+    padding: 14px;
+    box-sizing: border-box;
 }
 
 .booking-modal.show {
@@ -68,16 +70,35 @@ endif;
 .booking-modal-box {
     background: #F5F3EF;
     width: 100%;
-    max-width: 900px;
+    max-width: 1080px;
+    max-height: calc(100vh - 28px);
+    overflow: hidden;
     border-radius: 20px;
-    padding: 35px;
+    padding: 24px 28px 20px;
     box-shadow: 0 20px 80px rgba(0,0,0,0.25);
     border: 1px solid rgba(0,0,0,0.05);
+    position: relative;
+    box-sizing: border-box;
+}
+
+.booking-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #e2d8ca;
+    border-radius: 50%;
+    background: #fffdf8;
+    color: #3b332b;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
 }
 
 .booking-modal-title {
     text-align: center;
-    font-size: 28px;
+    font-size: clamp(28px, 3vw, 38px);
     margin-bottom: 5px;
 }
 
@@ -85,26 +106,54 @@ endif;
     text-align: center;
     font-size: 13px;
     color: #777;
-    margin-bottom: 25px;
+    margin: 0 34px 16px;
+    line-height: 1.45;
+}
+
+.booking-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
 }
 
 .booking-modal-card {
     background: white;
     border-radius: 12px;
-    padding: 18px;
+    padding: 16px 18px;
     border: 1px solid #eee;
+}
+
+.booking-modal-card h3 {
+    margin: 0 0 10px;
+    font-size: 21px;
+    line-height: 1.2;
 }
 
 .booking-modal-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
+    gap: 14px;
+    padding: 7px 0;
     font-size: 14px;
     border-bottom: 1px solid #eee;
 }
 
+.booking-modal-row span:first-child {
+    flex: 0 0 auto;
+    color: #2d332f;
+}
+
+.booking-modal-row span:last-child {
+    min-width: 0;
+    max-width: 62%;
+    text-align: right;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
 .booking-modal-actions {
-    margin-top: 25px;
+    margin-top: 12px;
     display: flex;
     justify-content: center;
     gap: 15px;
@@ -123,16 +172,36 @@ endif;
     border-radius: 20px;
 }
 
+.booking-modal-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
 
 .booking-modal-warning {
-    margin-top: 22px;
-    padding: 16px 18px;
+    margin-top: 12px;
+    padding: 10px 14px;
     border-radius: 14px;
     background: linear-gradient(135deg, #f7efe3, #efe4d3);
     border: 1px solid #e3d2b8;
     color: #5d4331;
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.booking-modal-proof-wrap {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.booking-modal-proof-wrap img {
+    max-width: 180px;
+    max-height: 72px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 1px solid #e7decf;
+    background: #fff;
 }
 
 
@@ -188,11 +257,11 @@ endif;
 
 .cash-payment-reminder {
     display: none;
-    grid-template-columns: 56px minmax(0, 1fr);
-    gap: 14px;
-    margin-top: 18px;
-    padding: 18px;
-    border-radius: 18px;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 14px;
     border: 2px solid #d4af37;
     background:
         linear-gradient(135deg, rgba(255, 249, 220, .98), rgba(255, 244, 202, .96)),
@@ -206,36 +275,37 @@ endif;
 }
 
 .cash-reminder-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     background: #2f5d34;
     color: #fff8df;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
+    font-size: 22px;
     font-weight: 900;
     box-shadow: 0 10px 24px rgba(47, 93, 52, .22);
 }
 
 .cash-reminder-content h3 {
-    margin: 0 0 8px;
+    margin: 0 0 5px;
     color: #2f3f2a;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .cash-reminder-content p {
     margin: 0;
     color: #60491b;
-    line-height: 1.65;
+    line-height: 1.35;
+    font-size: 13px;
 }
 
 .cash-reminder-highlight {
     display: inline-flex;
     align-items: center;
-    margin-top: 10px;
-    padding: 8px 12px;
+    margin-top: 6px;
+    padding: 5px 9px;
     border-radius: 999px;
     background: #fff;
     border: 1px solid rgba(212, 175, 55, .55);
@@ -244,11 +314,11 @@ endif;
 }
 
 .cash-reminder-points {
-    margin: 12px 0 0;
+    margin: 8px 0 0;
     padding-left: 18px;
     color: #4f3a12;
-    line-height: 1.6;
-    font-size: 14px;
+    line-height: 1.35;
+    font-size: 12px;
 }
 
 .cash-reminder-points strong {
@@ -260,8 +330,15 @@ endif;
 }
 
 @media (max-width: 768px) {
+    .booking-modal {
+        align-items: flex-start;
+        overflow-y: auto;
+    }
+
     .booking-modal-box {
         padding: 24px 18px;
+        max-height: none;
+        overflow: visible;
     }
 
     .booking-modal-grid {
@@ -352,7 +429,6 @@ endif;
                     autocomplete="name"
                     required
                 >
-                <small class="field-help">Letters and spaces only.</small>
             </div>
 
             <div class="form-group">
@@ -452,8 +528,8 @@ endif;
 
             <div class="form-group">
                 <label for="special_requests">Notes</label>
-                <textarea id="special_requests" name="special_requests" rows="4" placeholder="Enter notes or requests here..."></textarea>
-                <small class="field-help">Room capacity guide: each room can fit around 10 to 15 people.</small>
+                <textarea id="special_requests" name="special_requests" rows="4" maxlength="120" placeholder="Request Here..."></textarea>
+                <small class="field-help">Maximum 120 characters. Room guide: each room can fit around 10 to 15 people.</small>
             </div>
 
             <button type="submit" class="btn-complete">SUBMIT BOOKING REQUEST</button>
@@ -640,6 +716,7 @@ const cancelFinalConfirmBtn = document.getElementById("cancelFinalConfirmBtn");
 const submitFinalBookingBtn = document.getElementById("submitFinalBookingBtn");
 const guestLimitModal = document.getElementById("guestLimitModal");
 const closeGuestLimitModal = document.getElementById("closeGuestLimitModal");
+let isBookingSubmitting = false;
 
 const paymentPreview = document.getElementById("paymentPreview");
 const paymentPreviewTitle = document.getElementById("paymentPreviewTitle");
@@ -654,6 +731,15 @@ const guestNameInput = document.getElementById("guest_name");
 const cashBookingReminder = document.getElementById("cashBookingReminder");
 const cashFinalReminder = document.getElementById("cashFinalReminder");
 const guestNamePattern = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+
+function setBookingSubmitting(isSubmitting) {
+    isBookingSubmitting = isSubmitting;
+    submitFinalBookingBtn.disabled = isSubmitting;
+    confirmBookingBtn.disabled = isSubmitting;
+    cancelFinalConfirmBtn.disabled = isSubmitting;
+    cancelBookingBtn.disabled = isSubmitting;
+    submitFinalBookingBtn.textContent = isSubmitting ? "Submitting..." : "I Understand, Submit";
+}
 
 const paymentMeta = {
     gcash: {
@@ -862,6 +948,10 @@ finalConfirmModal.addEventListener("click", function(e) {
 });
 
 submitFinalBookingBtn.addEventListener("click", function() {
+    if (isBookingSubmitting) {
+        return;
+    }
+    setBookingSubmitting(true);
     finalBookingForm.submit();
 });
 
@@ -901,5 +991,3 @@ guestLimitModal.addEventListener("click", function(e) {
     }
 });
 </script>
-
-

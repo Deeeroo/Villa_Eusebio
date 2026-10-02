@@ -50,8 +50,30 @@ function getStayPrice($type) {
 
 $rows = [];
 $totalApprovedRevenue = 0;
+$totalApprovedPaidRevenue = 0;
 $totalPaidRevenue = 0;
 $approvedBookingsCount = 0;
+$incompleteBookingsCount = 0;
+$totalIncompleteAmount = 0;
+$salesAnalyticsMonths = [];
+$salesAnalyticsSeries = [
+    'labels' => [],
+    'approved_bookings' => [],
+    'approved_value' => [],
+    'paid_amount' => [],
+];
+$salesMonthCursor = new DateTimeImmutable('first day of this month 00:00:00');
+for ($i = 5; $i >= 0; $i--) {
+    $monthDate = $salesMonthCursor->modify("-{$i} months");
+    $monthKey = $monthDate->format('Y-m');
+    $salesAnalyticsMonths[$monthKey] = [
+        'label' => $monthDate->format('M'),
+        'approved_bookings' => 0,
+        'approved_value' => 0.0,
+        'paid_amount' => 0.0,
+    ];
+}
+
 foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
     $isCancelled = strtolower($row['status'] ?? '') === 'cancelled';
     $baseStayValue = getStayPrice($row['time_type']);
@@ -65,17 +87,85 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
     $row['reservation_fee_status'] = $row['reservation_fee_status'] ?? 'unpaid';
     $row['payment_status'] = $row['payment_status'] ?? 'unpaid';
     $row['remaining_balance'] = $isCancelled ? 0 : max($row['stay_value'] - $row['reservation_fee_amount'], 0);
+    $rowPaidAmount = 0;
+    $statusRaw = strtolower($row['status'] ?? '');
+    $reservationFeePaid = strtolower($row['reservation_fee_status'] ?? 'unpaid') === 'paid';
+    $balancePaid = strtolower($row['payment_status'] ?? 'unpaid') === 'paid';
+    $isActiveBooking = !in_array($statusRaw, ['rejected', 'cancelled'], true);
+
+    if ($isActiveBooking && (!$reservationFeePaid || !$balancePaid)) {
+        $incompleteBookingsCount++;
+        if (!$reservationFeePaid) {
+            $totalIncompleteAmount += $row['reservation_fee_amount'];
+        }
+        if (!$balancePaid) {
+            $totalIncompleteAmount += $row['remaining_balance'];
+        }
+    }
+
     if (($row['status'] ?? '') === 'approved') {
         $approvedBookingsCount++;
         $totalApprovedRevenue += $row['stay_value'];
     }
     if (($row['payment_status'] ?? '') === 'paid') {
-        $totalPaidRevenue += $row['remaining_balance'] + (($row['reservation_fee_status'] ?? '') === 'paid' ? $row['reservation_fee_amount'] : 0);
+        $rowPaidAmount = $row['remaining_balance'] + (($row['reservation_fee_status'] ?? '') === 'paid' ? $row['reservation_fee_amount'] : 0);
+        $totalPaidRevenue += $rowPaidAmount;
     } elseif (($row['reservation_fee_status'] ?? '') === 'paid') {
-        $totalPaidRevenue += $row['reservation_fee_amount'];
+        $rowPaidAmount = $row['reservation_fee_amount'];
+        $totalPaidRevenue += $rowPaidAmount;
+    }
+
+    if (($row['status'] ?? '') === 'approved') {
+        $totalApprovedPaidRevenue += $rowPaidAmount;
+    }
+
+    $monthKey = date('Y-m', strtotime($row['created_at'] ?? 'now'));
+    if (isset($salesAnalyticsMonths[$monthKey])) {
+        if (($row['status'] ?? '') === 'approved') {
+            $salesAnalyticsMonths[$monthKey]['approved_bookings']++;
+            $salesAnalyticsMonths[$monthKey]['approved_value'] += $row['stay_value'];
+        }
+        $salesAnalyticsMonths[$monthKey]['paid_amount'] += $rowPaidAmount;
     }
     $rows[] = $row;
 }
+
+$rows = ve_sort_bookings_active_first($rows, $today);
+
+foreach ($salesAnalyticsMonths as $monthData) {
+    $salesAnalyticsSeries['labels'][] = $monthData['label'];
+    $salesAnalyticsSeries['approved_bookings'][] = (int)$monthData['approved_bookings'];
+    $salesAnalyticsSeries['approved_value'][] = (float)$monthData['approved_value'];
+    $salesAnalyticsSeries['paid_amount'][] = (float)$monthData['paid_amount'];
+}
+
+$totalOutstandingBalance = max($totalApprovedRevenue - $totalApprovedPaidRevenue, 0);
+$paymentOverviewTotal = $totalPaidRevenue + $totalOutstandingBalance;
+$paidOverviewPercent = $paymentOverviewTotal > 0 ? (int)round(($totalPaidRevenue / $paymentOverviewTotal) * 100) : 0;
+$outstandingOverviewPercent = $paymentOverviewTotal > 0 ? max(0, 100 - $paidOverviewPercent) : 0;
+$salesChartMax = max(
+    (float)max($salesAnalyticsSeries['approved_value'] ?: [0]),
+    (float)max($salesAnalyticsSeries['paid_amount'] ?: [0]),
+    1
+);
+$salesChartStep = $salesChartMax > 50000 ? 10000 : 5000;
+$salesChartMax = ceil($salesChartMax / $salesChartStep) * $salesChartStep;
+$salesChartAxisValues = [
+    $salesChartMax,
+    $salesChartMax * .75,
+    $salesChartMax * .5,
+    $salesChartMax * .25,
+    0,
+];
+$salesBookingChartMax = max((int)max($salesAnalyticsSeries['approved_bookings'] ?: [0]), 1);
+$salesBookingChartMax = (int)(ceil($salesBookingChartMax / 4) * 4);
+$salesBookingChartAxisValues = [
+    $salesBookingChartMax,
+    (int)($salesBookingChartMax * .75),
+    (int)($salesBookingChartMax * .5),
+    (int)($salesBookingChartMax * .25),
+    0,
+];
 ?>
 
 <style>
@@ -113,13 +203,14 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
     </div>
 
     <div class="admin-userbar">
+        <a href="settings.php" class="admin-avatar-link" aria-label="Open settings" title="Open settings"></a>
         <strong>Owner</strong>
         <button type="button" class="refresh-btn" onclick="window.location.reload();">Refresh</button>
         <a href="../api/logout.php" class="logout-btn">Logout</a>
     </div>
 </div>
 
-<div class="main-content">
+<div class="main-content sales-page">
     <?php if (isset($_GET['success']) && $_GET['success'] !== ''): ?>
     <div class="admin-alert success-alert"><?php echo htmlspecialchars($_GET['success']); ?></div>
     <?php endif; ?>
@@ -136,20 +227,135 @@ foreach (ve_fetch_all_bookings($conn, "bs.booking_id DESC") as $row) {
         <a href="export_sales_pdf.php" target="_blank" class="admin-export-btn">Export PDF</a>
     </div>
 
-    <div class="sales-summary-grid">
-        <div class="admin-stat-card revenue-card">
-            <div class="stat-label">Approved Booking Earnings</div>
+    <div class="sales-summary-grid sales-report-summary" aria-label="Sales summary">
+        <div class="admin-stat-card revenue-card sales-metric-card sales-approved-value-card">
+            <div class="sales-card-icon sales-icon-peso" aria-hidden="true"></div>
+            <div class="stat-label">Approved Booking Value</div>
             <div class="stat-value">₱<?php echo number_format($totalApprovedRevenue); ?></div>
+            <div class="stat-trend">Total value from approved bookings</div>
+            <div class="sales-card-spark" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
-        <div class="admin-stat-card confirmed-card">
+        <div class="admin-stat-card sales-metric-card sales-payments-card">
+            <div class="sales-card-icon sales-icon-wallet" aria-hidden="true"></div>
+            <div class="stat-label">Payments Collected</div>
+            <div class="stat-value">₱<?php echo number_format($totalPaidRevenue); ?></div>
+            <div class="stat-trend">Total collected reservation payments</div>
+            <div class="sales-card-spark" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div class="admin-stat-card sales-metric-card sales-outstanding-card">
+            <div class="sales-card-icon sales-icon-clock" aria-hidden="true"></div>
+            <div class="stat-label">Outstanding Balance</div>
+            <div class="stat-value">₱<?php echo number_format($totalOutstandingBalance); ?></div>
+            <div class="stat-trend">Unpaid balance from approved bookings</div>
+            <div class="sales-card-spark warning" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div class="admin-stat-card confirmed-card sales-metric-card sales-bookings-card">
+            <div class="sales-card-icon sales-icon-group" aria-hidden="true"></div>
             <div class="stat-label">Approved Bookings</div>
             <div class="stat-value"><?php echo $approvedBookingsCount; ?></div>
-        </div>
-        <div class="admin-stat-card">
-            <div class="stat-label">Paid Amount</div>
-            <div class="stat-value">₱<?php echo number_format($totalPaidRevenue); ?></div>
+            <div class="stat-trend">Accepted reservation count</div>
+            <div class="sales-card-spark blue" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
     </div>
+
+    <section class="sales-dashboard-grid" aria-label="Sales analytics">
+        <article class="sales-dashboard-panel sales-trend-panel">
+            <div class="sales-panel-head">
+                <div>
+                    <h3>Sales Analytics</h3>
+                    <p>Monthly trend of collections and approved bookings.</p>
+                </div>
+                <div class="sales-segmented-control" aria-label="Chart view">
+                    <button type="button" class="active" data-sales-chart="collections">Collections</button>
+                    <button type="button" data-sales-chart="bookings">Bookings</button>
+                </div>
+            </div>
+            <svg class="sales-bar-chart sales-chart-view active" data-sales-chart-view="collections" viewBox="0 0 660 270" role="img" aria-label="Monthly collections and approved booking value">
+                <?php foreach ($salesChartAxisValues as $axisIndex => $axisValue):
+                    $axisY = 28 + ((168 / 4) * $axisIndex);
+                ?>
+                    <line x1="76" y1="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>" x2="626" y2="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>"></line>
+                    <text class="axis-label" x="28" y="<?php echo htmlspecialchars((string)round($axisY + 4, 2)); ?>">₱<?php echo htmlspecialchars(number_format($axisValue)); ?></text>
+                <?php endforeach; ?>
+                <?php
+                $barLabels = $salesAnalyticsSeries['labels'];
+                $barCount = max(count($barLabels), 1);
+                $slotWidth = 550 / $barCount;
+                $barWidth = min(30, max(14, ($slotWidth - 18) / 2));
+                $barGap = 6;
+                $chartBase = 196;
+                $chartHeight = 168;
+                foreach ($barLabels as $index => $label):
+                    $paidValue = $salesAnalyticsSeries['paid_amount'][$index] ?? 0;
+                    $approvedValue = $salesAnalyticsSeries['approved_value'][$index] ?? 0;
+                    $groupLeft = 76 + ($slotWidth * $index) + (($slotWidth - (($barWidth * 2) + $barGap)) / 2);
+                    $paidHeight = ($paidValue / $salesChartMax) * $chartHeight;
+                    $approvedHeight = ($approvedValue / $salesChartMax) * $chartHeight;
+                    $paidY = $chartBase - $paidHeight;
+                    $approvedY = $chartBase - $approvedHeight;
+                ?>
+                    <rect class="bar-collected" x="<?php echo htmlspecialchars((string)round($groupLeft, 2)); ?>" y="<?php echo htmlspecialchars((string)round($paidY, 2)); ?>" width="<?php echo htmlspecialchars((string)round($barWidth, 2)); ?>" height="<?php echo htmlspecialchars((string)max(1, round($paidHeight, 2))); ?>"></rect>
+                    <rect class="bar-approved-value" x="<?php echo htmlspecialchars((string)round($groupLeft + $barWidth + $barGap, 2)); ?>" y="<?php echo htmlspecialchars((string)round($approvedY, 2)); ?>" width="<?php echo htmlspecialchars((string)round($barWidth, 2)); ?>" height="<?php echo htmlspecialchars((string)max(1, round($approvedHeight, 2))); ?>"></rect>
+                    <text class="month-label" x="<?php echo htmlspecialchars((string)round(76 + ($slotWidth * $index) + ($slotWidth / 2), 2)); ?>" y="226"><?php echo htmlspecialchars($label); ?></text>
+                <?php endforeach; ?>
+            </svg>
+            <svg class="sales-bar-chart sales-chart-view" data-sales-chart-view="bookings" viewBox="0 0 660 270" role="img" aria-label="Monthly approved bookings">
+                <?php foreach ($salesBookingChartAxisValues as $axisIndex => $axisValue):
+                    $axisY = 28 + ((168 / 4) * $axisIndex);
+                ?>
+                    <line x1="76" y1="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>" x2="626" y2="<?php echo htmlspecialchars((string)round($axisY, 2)); ?>"></line>
+                    <text class="axis-label" x="38" y="<?php echo htmlspecialchars((string)round($axisY + 4, 2)); ?>"><?php echo htmlspecialchars((string)(int)$axisValue); ?></text>
+                <?php endforeach; ?>
+                <?php
+                foreach ($barLabels as $index => $label):
+                    $bookingValue = $salesAnalyticsSeries['approved_bookings'][$index] ?? 0;
+                    $bookingBarWidth = min(44, max(18, $slotWidth * .44));
+                    $bookingLeft = 76 + ($slotWidth * $index) + (($slotWidth - $bookingBarWidth) / 2);
+                    $bookingHeight = ($bookingValue / $salesBookingChartMax) * $chartHeight;
+                    $bookingY = $chartBase - $bookingHeight;
+                ?>
+                    <rect class="bar-bookings" x="<?php echo htmlspecialchars((string)round($bookingLeft, 2)); ?>" y="<?php echo htmlspecialchars((string)round($bookingY, 2)); ?>" width="<?php echo htmlspecialchars((string)round($bookingBarWidth, 2)); ?>" height="<?php echo htmlspecialchars((string)max(1, round($bookingHeight, 2))); ?>"></rect>
+                    <text class="month-label" x="<?php echo htmlspecialchars((string)round(76 + ($slotWidth * $index) + ($slotWidth / 2), 2)); ?>" y="226"><?php echo htmlspecialchars($label); ?></text>
+                <?php endforeach; ?>
+            </svg>
+            <div class="sales-chart-legend sales-chart-legend-collections active" data-sales-chart-legend="collections">
+                <span class="legend-collected">Payments Collected</span>
+                <span class="legend-approved">Approved Booking Value</span>
+            </div>
+            <div class="sales-chart-legend sales-chart-legend-bookings" data-sales-chart-legend="bookings">
+                <span class="legend-bookings">Approved Bookings</span>
+            </div>
+        </article>
+
+        <article class="sales-dashboard-panel payment-overview-panel">
+            <div class="sales-panel-head">
+                <div>
+                    <h3>Payment Overview</h3>
+                    <p>Share of collected payments vs outstanding balance.</p>
+                </div>
+            </div>
+            <div class="payment-overview-layout">
+                <div class="payment-donut" style="--paid-percent: <?php echo htmlspecialchars((string)$paidOverviewPercent); ?>%;">
+                    <div>
+                        <strong>₱<?php echo number_format($paymentOverviewTotal); ?></strong>
+                        <span>Total Value</span>
+                    </div>
+                </div>
+                <div class="payment-overview-cards">
+                    <div class="payment-overview-card">
+                        <span><i class="dot collected"></i>Payments Collected <strong><?php echo $paidOverviewPercent; ?>%</strong></span>
+                        <b>₱<?php echo number_format($totalPaidRevenue); ?></b>
+                        <small>Total collected payments</small>
+                    </div>
+                    <div class="payment-overview-card">
+                        <span><i class="dot outstanding"></i>Outstanding Balance <strong><?php echo $outstandingOverviewPercent; ?>%</strong></span>
+                        <b>₱<?php echo number_format($totalOutstandingBalance); ?></b>
+                        <small>Unpaid balance from approved bookings</small>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
 
     <div class="filter-dropdown-wrap">
         <div class="reservation-filters smart-filters filter-panel always-visible-filter-panel" id="salesFilterPanel">
@@ -355,6 +561,21 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    document.querySelectorAll('[data-sales-chart]').forEach(function(chartButton) {
+        chartButton.addEventListener('click', function() {
+            const chartName = chartButton.dataset.salesChart || 'collections';
+            document.querySelectorAll('[data-sales-chart]').forEach(function(button) {
+                button.classList.toggle('active', button === chartButton);
+            });
+            document.querySelectorAll('[data-sales-chart-view]').forEach(function(view) {
+                view.classList.toggle('active', view.dataset.salesChartView === chartName);
+            });
+            document.querySelectorAll('[data-sales-chart-legend]').forEach(function(legend) {
+                legend.classList.toggle('active', legend.dataset.salesChartLegend === chartName);
+            });
+        });
+    });
 
     function openModal(modal) {
         modal.style.display = 'flex';
