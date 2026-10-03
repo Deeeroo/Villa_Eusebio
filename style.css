@@ -1,5 +1,4 @@
-/* Main stylesheet entry point.
-   Keep imports grouped by purpose so styles are easy to find. */
+/* Main stylesheet entry point. */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Inter:wght@300;400;500;700&family=Parisienne&display=swap');
 
@@ -7,7 +6,7 @@
 @import url('./css/components.css');
 @import url('./css/async-ui.css');
 
-/* Customer/public pages */
+/* Customer and public pages. */
 @import url('./css/customer-layout.css?v=20260927-single-book-button1');
 @import url('./css/homepage.css');
 @import url('./css/customer-calendar.css?v=20260927-booking-pause1');
@@ -17,12 +16,12 @@
 @import url('./css/contact.css?v=20260926-contact-watermark1');
 @import url('./css/chatbot.css?v=20260925-block-chatbot1');
 
-/* Admin pages */
+/* Admin pages. */
 @import url('./css/admin-login.css');
 @import url('./css/admin-layout.css');
 @import url('./css/admin-calendar.css');
 @import url('./css/admin-reservations-sales.css?v=20261001-sales-donut-clean1');
-@import url('./css/admin-dashboard.css?v=20261002-notification-read1');
+@import url('./css/admin-dashboard.css?v=20261002-sidebar-count1');
 @import url('./css/admin-announcements.css?v=20260927-announcement-close-animation1');
 @import url('./css/admin-archive.css');
 @import url('./css/admin-settings.css?v=20261001-subscriber-select1');

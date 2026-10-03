@@ -1,14 +1,10 @@
-﻿/*
-  Reusable components
-  ------------------------------------------------------------
-  Buttons, modals, tooltips, and shared small interface pieces.
-*/
+/* Reusable Components. */
 
 
 
 /* Shared button treatment used across public pages. */
 
-/* BUTTON */
+/* Button. */
 
 .btn {
     background: var(--sage);
@@ -73,21 +69,21 @@
     font-weight: 600;
 }
 
-/* STATUS COLORS */
+/* Status Colors. */
 
 .status-pill.approved {
     background: #e6f4ea;
     color: #2e7d32;
 }
 
-/* RED */
+/* Red. */
 
 .status-pill.rejected {
     background: #fdecea;
     color: #c62828;
 }
 
-/* ORANGE */
+/* Orange. */
 
 .status-pill.pending {
     background: #fff3cd;

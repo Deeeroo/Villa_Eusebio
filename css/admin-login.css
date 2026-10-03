@@ -1,14 +1,10 @@
-﻿/*
-  Admin login
-  ------------------------------------------------------------
-  Owner/admin login screen styles.
-*/
+/* Admin login. */
 
 
 
-/* Owner/admin login screen layout, form controls, and login card styles. */
+/* Owner and admin login screen layout, form controls, and login card styles. */
 
-/* OWNER LOGIN PAGE */
+/* Owner login page. */
 .owner-page-body {
     min-height: 100vh;
     background: #ece9df;

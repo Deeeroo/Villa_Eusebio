@@ -1,14 +1,10 @@
-﻿/*
-  Responsive customer pages
-  ------------------------------------------------------------
-  Mobile and tablet fixes for public pages, booking, homepage, gallery, reviews, and customer modals.
-*/
+/* Responsive Customer Pages. */
 
 
 
-/* Header anchor behavior, amenities hover patch, reservation modal basics, simple reviews page, and related mobile rules. */
+/* Header anchors, amenities hover, reservation modal, reviews, and mobile rules. */
 
-/* Header anchor behavior and simple amenities */
+/* Header Anchor Behavior And Simple Amenities. */
 html { scroll-behavior: auto; }
 .amenity-card,
 .amenity-card:hover {
@@ -19,7 +15,7 @@ html { scroll-behavior: auto; }
     transition: none !important;
 }
 
-/* Admin panel transfer note */
+/* Admin Panel Transfer Note. */
 .reservation-transfer-note {
     margin: 0 0 18px;
     padding: 12px 16px;
@@ -29,7 +25,7 @@ html { scroll-behavior: auto; }
     color: #6b5d45;
 }
 
-/* Reservation page enhancements */
+/* Reservation Page Enhancements. */
 .reservation-helper-text {
     margin: 10px 0 18px;
     color: #6b7280;
@@ -119,7 +115,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-/* Simple reviews page */
+/* Simple Reviews Page. */
 .reviews-page-simple {
     padding: 130px 0 80px;
     min-height: auto;
@@ -162,7 +158,7 @@ body.modal-open {
 
 /* Payment proof preview, booking modal warning, reservation proof preview, and reservation modal visibility. */
 
-/* Booking payment proof */
+/* Booking Payment Proof. */
 .payment-proof-help {
     display: block;
     margin-top: 8px;
@@ -209,7 +205,7 @@ body.modal-open {
     font-weight: 600;
 }
 
-/* Reservation modal visibility fix */
+/* Reservation modal visibility. */
 .reservation-modal-content,
 .reservation-confirm-content {
     width: min(760px, calc(100vw - 24px));
@@ -252,7 +248,7 @@ body.modal-open {
     }
 }
 
-/* Booking modal warning */
+/* Booking Modal Warning. */
 .booking-modal-warning {
     margin: 16px 0 8px;
     padding: 12px 14px;
@@ -264,7 +260,7 @@ body.modal-open {
     line-height: 1.5;
 }
 
-/* Reservation proof preview */
+/* Reservation Proof Preview. */
 .reservation-proof-preview img {
     display: block;
     width: 100%;
@@ -278,9 +274,9 @@ body.modal-open {
 
 
 
-/* Homepage compact spacing, navbar sizing, hero sizing, section spacing, and public gallery grid fixes. */
+/* Homepage compact spacing, navbar sizing, hero sizing, section spacing, and public gallery grid. */
 
-/* Homepage compact spacing fix - keep index at normal 100% zoom */
+/* Homepage compact spacing for normal zoom. */
 .site-header,
 nav.main-nav,
 .main-nav {

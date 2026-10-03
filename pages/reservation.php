@@ -318,6 +318,7 @@ $reservationChartHeight = 158;
             <select id="reservationStayFilter"><option value="all">All stay types</option><option value="day">Day Tour</option><option value="overnight">Overnight</option><option value="22hour">22-Hour</option></select>
             <select id="reservationStatusFilter"><option value="all">All status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select>
             <select id="reservationPaymentFilter"><option value="all">All payment types</option><option value="gcash">GCash</option><option value="bdo">BDO</option><option value="unionbank">UnionBank</option><option value="cash">Cash</option></select>
+            <select id="reservationSortFilter"><option value="recent">Recent bookings</option><option value="stay_nearest">Nearest booked date</option><option value="stay_farthest">Farthest booked date</option></select>
         </div>
     </div>
 
@@ -365,6 +366,7 @@ $reservationChartHeight = 158;
                     data-check_out_raw="<?php echo htmlspecialchars($row['check_out_date']); ?>"
                     data-check_out_time="<?php echo htmlspecialchars(getCheckOutTime($row['time_type'])); ?>"
                     data-created_at="<?php echo htmlspecialchars(date('F d, Y h:i A', strtotime($row['created_at']))); ?>"
+                    data-created_raw="<?php echo htmlspecialchars($row['created_at']); ?>"
                     data-special_requests="<?php echo htmlspecialchars($row['special_requests'] ?: 'None'); ?>"
                     data-rejection_reason="<?php echo htmlspecialchars($row['rejection_reason'] ?? ''); ?>"
                     data-proof_of_payment="<?php echo htmlspecialchars($row['proof_of_payment'] ?? ''); ?>"
@@ -1069,6 +1071,37 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function reservationDateValue(value) {
+        const parsed = Date.parse(String(value || '').replace(' ', 'T'));
+        return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    function reservationIdValue(row) {
+        return Number.parseInt(row.dataset.id || '0', 10) || 0;
+    }
+
+    function sortReservationRows(sortMode) {
+        const tbody = document.getElementById('reservationTable');
+        if (!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort(function(a, b) {
+            const aPast = a.dataset.is_past === '1' ? 1 : 0;
+            const bPast = b.dataset.is_past === '1' ? 1 : 0;
+            if (aPast !== bPast) return aPast - bPast;
+
+            if (sortMode === 'stay_farthest') {
+                return (reservationDateValue(b.dataset.check_in_raw) - reservationDateValue(a.dataset.check_in_raw)) || (reservationIdValue(b) - reservationIdValue(a));
+            }
+            if (sortMode === 'stay_nearest') {
+                return (reservationDateValue(a.dataset.check_in_raw) - reservationDateValue(b.dataset.check_in_raw)) || (reservationIdValue(b) - reservationIdValue(a));
+            }
+            return (reservationDateValue(b.dataset.created_raw) - reservationDateValue(a.dataset.created_raw)) || (reservationIdValue(b) - reservationIdValue(a));
+        });
+        rows.forEach(function(row) {
+            tbody.appendChild(row);
+        });
+    }
+
     function applyReservationFilters() {
         const search = (document.getElementById('reservationSearch').value || '').toLowerCase();
         const bookingMonth = document.getElementById('reservationMonthFilter').value;
@@ -1076,6 +1109,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const stay = document.getElementById('reservationStayFilter').value;
         const status = document.getElementById('reservationStatusFilter').value;
         const payment = document.getElementById('reservationPaymentFilter').value;
+        const sortMode = document.getElementById('reservationSortFilter').value;
+        sortReservationRows(sortMode);
         document.querySelectorAll('#reservationTable tr').forEach(row => {
             const matchesSearch = !search || (row.dataset.guest_name || '').toLowerCase().includes(search) || String(row.dataset.id || '').includes(search);
             const matchesMonth = bookingMonth === 'all' || row.dataset.booking_month === bookingMonth;
@@ -1086,7 +1121,7 @@ document.addEventListener("DOMContentLoaded", function () {
             row.style.display = (matchesSearch && matchesMonth && matchesYear && matchesStay && matchesStatus && matchesPayment) ? '' : 'none';
         });
     }
-    ['reservationSearch','reservationMonthFilter','reservationYearFilter','reservationStayFilter','reservationStatusFilter','reservationPaymentFilter'].forEach(id => {
+    ['reservationSearch','reservationMonthFilter','reservationYearFilter','reservationStayFilter','reservationStatusFilter','reservationPaymentFilter','reservationSortFilter'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', applyReservationFilters);
         if (el) el.addEventListener('change', applyReservationFilters);
@@ -1096,6 +1131,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reservationYearFilter.addEventListener('change', updateReservationMonthDots);
     }
     updateReservationMonthDots();
+    applyReservationFilters();
     document.getElementById('clearReservationSearch').addEventListener('click', function(){
         const searchInput = document.getElementById('reservationSearch');
         searchInput.value = '';

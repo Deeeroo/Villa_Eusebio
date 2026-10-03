@@ -1,9 +1,5 @@
-/*
-  Late CSS layer
-  ------------------------------------------------------------
-  Small import-only layer for rules that must load after the main page styles.
-*/
+/* Last responsive imports. */
 
 @import url('./capstone-feature-additions.css?v=20260924-css-clean1');
-@import url('./admin-functional-overrides.css?v=20261002-table-fit1');
+@import url('./admin-functional-overrides.css?v=20261002-table-fit2');
 @import url('./public-polish-overrides.css?v=20260925-amenities-frame1');

@@ -107,7 +107,7 @@ try {
 $message = $status === 'cancelled' ? 'Booking cancelled successfully.' : 'Booking status updated successfully.';
 $messageType = 'success';
 
-if (in_array($status, ['approved', 'rejected'], true) && $currentStatus !== $status) {
+if (in_array($status, ['approved', 'rejected', 'cancelled'], true) && $currentStatus !== $status) {
     $emailResult = ve_send_booking_status_email($conn, $id, $status, $rejectReason);
     if ($emailResult['ok']) {
         $message .= ' Customer email sent.';

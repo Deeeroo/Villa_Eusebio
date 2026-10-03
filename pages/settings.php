@@ -47,6 +47,25 @@ if ($announcementCountResult) {
 }
 $images = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archived_at IS NULL ORDER BY show_on_home DESC, image_id ASC");
 $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archived_at IS NOT NULL ORDER BY archived_at DESC, image_id DESC");
+$currentAdmin = [
+    'full_name' => $_SESSION['admin_full_name'] ?? 'Villa Eusebio Owner',
+    'username' => $_SESSION['admin_username'] ?? '',
+    'email' => '',
+];
+$currentAdminId = (int)($_SESSION['admin_id'] ?? 0);
+if ($currentAdminId > 0) {
+    $adminStmt = mysqli_prepare($conn, "SELECT full_name, username, email FROM admins WHERE id = ? LIMIT 1");
+    if ($adminStmt) {
+        mysqli_stmt_bind_param($adminStmt, 'i', $currentAdminId);
+        mysqli_stmt_execute($adminStmt);
+        $adminResult = mysqli_stmt_get_result($adminStmt);
+        $adminRow = $adminResult ? mysqli_fetch_assoc($adminResult) : null;
+        mysqli_stmt_close($adminStmt);
+        if ($adminRow) {
+            $currentAdmin = array_merge($currentAdmin, $adminRow);
+        }
+    }
+}
 ?>
 <div id="sidebar" class="sidebar">
     <a href="../index.php" class="sidebar-title sidebar-brand-link">Villa Eusebio</a>
@@ -76,6 +95,7 @@ $archivedImages = mysqli_query($conn, "SELECT * FROM gallery_images WHERE archiv
 </form>
 <div class="settings-grid">
 <form class="settings-card" method="POST" action="../api/update_settings.php" enctype="multipart/form-data"><input type="hidden" name="action" value="site"><h3>Contact and Social Links</h3><label>Phone</label><input name="contact_phone" value="<?php echo htmlspecialchars($currentPhone); ?>"><label>Email</label><input name="contact_email" value="<?php echo htmlspecialchars($currentEmail); ?>"><label>Address</label><textarea name="contact_address"><?php echo htmlspecialchars($currentAddress); ?></textarea><label>Facebook Link</label><input name="facebook_link" value="<?php echo htmlspecialchars($currentFacebook); ?>"><label>Instagram Link</label><input name="instagram_link" value="<?php echo htmlspecialchars($currentInstagram); ?>"><label>Homepage Bio</label><textarea name="bio_text"><?php echo htmlspecialchars($currentBio); ?></textarea><label>Icon Image</label><div class="settings-icon-preview"><img src="../<?php echo htmlspecialchars(ltrim($currentIcon, '/')); ?>" alt="Current icon"><span>Current site icon</span></div><input type="file" name="site_icon" accept="image/*"><button class="modal-btn btn-approve" type="submit">Save Site Info</button></form>
+<form class="settings-card" method="POST" action="../api/update_settings.php"><input type="hidden" name="action" value="admin"><h3>Admin Account</h3><label>Full Name</label><input name="full_name" value="<?php echo htmlspecialchars($currentAdmin['full_name'] ?? ''); ?>" required><label>Username</label><input name="username" value="<?php echo htmlspecialchars($currentAdmin['username'] ?? ''); ?>" required><label>Reset Email</label><input type="email" name="email" value="<?php echo htmlspecialchars($currentAdmin['email'] ?? ''); ?>" placeholder="owner@example.com"><p class="settings-note">Password reset links are sent here. If left blank, the site contact email will be used.</p><label>New Password</label><input type="password" name="password" minlength="8" placeholder="Leave blank to keep current password"><button class="modal-btn btn-approve" type="submit">Save Admin Account</button></form>
 <div class="settings-card homepage-preview-card">
     <h3>Customer Homepage Preview</h3>
     <div class="settings-homepage-preview settings-minimal-home-preview">

@@ -1,14 +1,10 @@
-/*
-  Customer reviews
-  ------------------------------------------------------------
-  Review page layout, review cards, ratings, and review form polish.
-*/
+/* Customer reviews. */
 
 
 
-/* Reviews page grid, review cards, active/near/far carousel states, and page section sizing. */
+/* Reviews page grid, review cards, active and near and far carousel states, and page section sizing. */
 
-/* REVIEWS GRID */
+/* Reviews grid. */
 .reviews-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -18,7 +14,7 @@
     padding: 0 20px;
 }
 
-/* CARD */
+/* Card. */
 .review-card {
     position: absolute;
     width: 800px;
@@ -37,12 +33,12 @@
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-/* HOVER EFFECT */
+/* Hover effect. */
 .review-card:hover {
     transform: translateY(-5px);
 }
 
-/* HEADER */
+/* Header. */
 .review-header {
     display: flex;
     justify-content: space-between;
@@ -50,12 +46,12 @@
     font-size: 20px;
 }
 
-/* STARS */
+/* Stars. */
 .review-header span {
     color: #f5b301;
 }
 
-/* TEXT */
+/* Text. */
 .review-card p {
     font-size: 16px;
     color: #555;
@@ -63,13 +59,13 @@
     margin-bottom: 10px;
 }
 
-/* DATE */
+/* Date. */
 .review-card small {
     font-size: 11px;
     color: #999;
 }
 .reviews-container {
-    height: 100vh; /* FULL SCREEN */
+    height: 100vh; /* Full screen. */
     width: 100%;
     position: relative;
     overflow: hidden;
@@ -99,7 +95,7 @@
     align-items: center;
 }
 
-/* CENTER */
+/* Center. */
 .review-card.active {
     opacity: 1;
     transform: translateY(0) scale(1.2);
@@ -108,21 +104,21 @@
     box-shadow: 0 25px 60px rgba(0,0,0,0.25);
 }
 
-/* NEAR */
+/* Near. */
 .review-card.near {
     opacity: 0.6;
     transform: translateY(160px) scale(0.9);
     z-index: 3;
 }
 
-/* FAR */
+/* Far. */
 .review-card.far {
     opacity: 0.2;
     transform: translateY(300px) scale(0.75);
     z-index: 1;
 }
 
-/* ABOVE (mirror effect) */
+/* Above (mirror effect). */
 .review-card.near-top {
     opacity: 0.6;
     transform: translateY(-160px) scale(0.9);
@@ -136,7 +132,7 @@
 }
 
 .page-section {
-    min-height: 100vh; /* fills screen */
+    min-height: 100vh; /* Fills screen. */
 }
 
 .reviews-page-simple {

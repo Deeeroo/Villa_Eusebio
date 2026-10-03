@@ -1,8 +1,4 @@
-/*
-  Dashboard home
-  ------------------------------------------------------------
-  Scoped overview layout for the main admin dashboard.
-*/
+/* Dashboard Home. */
 
 body.admin-shell-page .admin-dashboard > .dashboard-review-alert {
     display: grid;

@@ -1,8 +1,4 @@
-/*
-  Async UI
-  ------------------------------------------------------------
-  Shared skeleton placeholders, cached-load states, and optimistic mutation states.
-*/
+/* Async Ui. */
 
 .ve-skeleton-bars {
     display: grid;

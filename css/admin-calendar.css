@@ -1,14 +1,4 @@
-/*
-  Admin calendar
-  ------------------------------------------------------------
-  FullCalendar and admin booking-calendar display styles.
-*/
-
-
-
-/* Admin calendar wrapper, modal, and FullCalendar theme overrides. */
-
-/* ADMIN CALENDAR */
+/* Admin calendar layout and FullCalendar theme. */
 .admin-calendar-wrapper {
     max-width: 1200px;
     margin: 40px auto;
@@ -21,7 +11,7 @@
     box-shadow: 0 8px 30px rgba(0,0,0,0.05);
 }
 
-/* match your theme */
+/* Theme buttons. */
 .fc-button {
     background: #6B8E6B !important;
     border: none !important;
@@ -63,7 +53,7 @@
     cursor: pointer;
 }
 
-/* ===== FULLCALENDAR VILLA EUSEBIO THEME ===== */
+/* Villa Eusebio calendar theme. */
 
 .fc {
     font-family: 'Inter', sans-serif;
@@ -72,7 +62,7 @@
     padding: 20px;
 }
 
-/* HEADER (April 2026 + buttons) */
+/* Calendar header. */
 .fc-toolbar-title {
     font-family: 'Playfair Display', serif;
     font-style: italic;
@@ -80,7 +70,7 @@
     color: #3D3D3D;
 }
 
-/* BUTTONS */
+/* Calendar buttons. */
 .fc-button {
     background: transparent !important;
     border: 1px solid #d6d3cd !important;
@@ -100,7 +90,7 @@
     border: none !important;
 }
 
-/* CALENDAR GRID */
+/* Calendar grid. */
 .fc-theme-standard td,
 .fc-theme-standard th {
     border: 1px solid #e5e2dc;
@@ -113,17 +103,17 @@
     font-size: 13px;
 }
 
-/* DAY CELLS */
+/* Day cells. */
 .fc-daygrid-day {
     background: #FAF9F6;
 }
 
-/* TODAY HIGHLIGHT */
+/* Today highlight. */
 .fc-day-today {
     background: #efe9dc !important;
 }
 
-/* EVENTS */
+/* Events. */
 .fc-event {
     border: none !important;
     border-radius: 6px;
@@ -131,27 +121,27 @@
     padding: 2px 6px;
 }
 
-/* SOFT COLORS (match your brand) */
+/* Event colors. */
 .fc-event[style*="#3b82f6"] {
-    background: #7FA7C6 !important; /* soft blue */
+    background: #7FA7C6 !important; /* Soft blue. */
 }
 
 .fc-event[style*="#22c55e"] {
-    background: #6B8E6B !important; /* main green */
+    background: #6B8E6B !important; /* Main green. */
 }
 
 .fc-event[style*="#f59e0b"] {
-    background: #C6A96B !important; /* gold tone */
+    background: #C6A96B !important; /* Gold tone. */
 }
 
-/* Calendar shell */
+/* Calendar shell. */
 .fc-scrollgrid {
     border-radius: 12px;
     overflow: hidden;
     border: none;
 }
 
-/* Calendar container */
+/* Calendar container. */
 #calendar {
     background: white;
     border-radius: 16px;

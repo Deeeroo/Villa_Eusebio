@@ -1,14 +1,10 @@
-﻿/*
-  Responsive base
-  ------------------------------------------------------------
-  Global mobile and zoom stabilization rules.
-*/
+/* Responsive Base. */
 
 
 
 /* Global overflow, media, grid, table, modal, and breakpoint stabilization rules. */
 
-/* Safe responsive stabilization patch */
+/* Safe Responsive Stabilization Patch. */
 html, body {
     max-width: 100%;
     overflow-x: hidden;

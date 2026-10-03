@@ -271,6 +271,18 @@ function ve_booking_status_email_content(mysqli $conn, array $booking, string $s
         $text .= "- Reservation fee: {$reservationFee}\n";
         $text .= "- Remaining balance: {$remainingBalance}\n\n";
         $text .= "Please keep your payment proof and prepare any remaining balance for your stay.\n";
+    } elseif ($status === 'cancelled') {
+        $subject = 'Booking Cancelled | Villa Eusebio';
+        $headline = 'Your booking has been cancelled';
+        $intro = 'Your Villa Eusebio booking has been cancelled by the admin.';
+        $reasonText = $reason !== '' ? $reason : 'No specific cancellation reason was provided.';
+        $text = "Hi {$guestName},\n\n{$intro}\n";
+        $text .= "Reason: {$reasonText}\n\n";
+        $text .= "If you think this cancellation is not justified, or if you have questions about what happened, please contact the Villa Eusebio owner/admin for clarification.\n\n";
+        $text .= "Cancelled booking schedule:\n";
+        $text .= "- Stay type: {$stayType}\n";
+        $text .= "- Check-in: {$checkIn}\n";
+        $text .= "- Check-out: {$checkOut}\n";
     } else {
         $subject = 'Booking Update | Villa Eusebio';
         $headline = 'Your booking needs clarification';
@@ -306,9 +318,13 @@ function ve_booking_status_email_content(mysqli $conn, array $booking, string $s
     }
     $detailsHtml .= '</ul>';
 
-    $reasonHtml = ($status === 'rejected' && $reason !== '')
-        ? '<p><strong>Reason:</strong> ' . ve_mail_escape($reason) . '</p>'
-        : '';
+    $reasonHtml = '';
+    if ($status === 'rejected' && $reason !== '') {
+        $reasonHtml = '<p><strong>Reason:</strong> ' . ve_mail_escape($reason) . '</p>';
+    } elseif ($status === 'cancelled') {
+        $reasonHtml = '<p><strong>Reason:</strong> ' . ve_mail_escape($reason !== '' ? $reason : 'No specific cancellation reason was provided.') . '</p>'
+            . '<p style="font-size:15px;line-height:1.6;color:#5d665f;">If you think this cancellation is not justified, or if you have questions about what happened, please contact the Villa Eusebio owner/admin for clarification.</p>';
+    }
     $buttonHtml = $siteUrl !== ''
         ? '<p style="margin-top:24px;"><a href="' . ve_mail_escape($siteUrl) . '" style="background:#1f5f3d;color:#fff;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:700;">Visit Villa Eusebio</a></p>'
         : '';
@@ -343,7 +359,7 @@ function ve_booking_status_email_content(mysqli $conn, array $booking, string $s
 }
 
 function ve_send_booking_status_email(mysqli $conn, int $bookingId, string $status, string $reason = ''): array {
-    if (!in_array($status, ['approved', 'rejected'], true)) {
+    if (!in_array($status, ['approved', 'rejected', 'cancelled'], true)) {
         return ['ok' => true, 'message' => 'No customer email needed for this status.'];
     }
 

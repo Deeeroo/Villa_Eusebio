@@ -1,14 +1,10 @@
-﻿/*
-  Customer calendar and booking
-  ------------------------------------------------------------
-  Booking calendar, booking summary, status messages, and booking validation.
-*/
+/* Customer Calendar And Booking. */
 
 
 
 /* Customer booking form, appointment calendar, stay options, and booking summary styles. */
 
-/* BOOKING PAGE */
+/* Booking Page. */
 
 .booking-container {
     max-width: 500px;
@@ -72,7 +68,7 @@
     line-height: 1.6;
 }
 
-/* CALENDAR */
+/* Calendar. */
 
 .calendar-day {
     aspect-ratio: 1/1;
@@ -85,7 +81,7 @@
     cursor: pointer;
 }
 
-/* ADMIN TABLE */
+/* Admin Table. */
 
 table {
     background: white;
@@ -105,7 +101,7 @@ td {
     text-align: center;
 }
 
-/* FOOTER */
+/* Footer. */
 
 .site-footer {
     padding: 24px 0;
@@ -115,7 +111,7 @@ td {
     background: var(--off-white);
 }
 
-/* RESPONSIVE */
+/* Responsive. */
 
 @media (max-width: 1100px)
 {
@@ -176,7 +172,7 @@ td {
     }
 }
 
-/* APPOINTMENT PAGE */
+/* Appointment Page. */
 .calendar-panel,
 .details-panel {
     background: #fff;
@@ -613,7 +609,7 @@ td {
 
 /* Owner login error box, input shake animation, and focus-state upgrades. */
 
-/* ===== ERROR BOX ===== */
+/* Error Box. */
 .login-error {
     background: #ffecec;
     color: #b30000;
@@ -625,13 +621,13 @@ td {
     animation: fadeSlide 0.4s ease;
 }
 
-/* ===== INPUT ERROR SHAKE ===== */
+/* Input Error Shake. */
 .input-error {
     animation: shake 0.4s;
     border-color: #b30000 !important;
 }
 
-/* ===== ANIMATIONS ===== */
+/* Animations. */
 @keyframes shake {
     0% { transform: translateX(0); }
     25% { transform: translateX(-4px); }
@@ -651,7 +647,7 @@ td {
     }
 }
 
-/* ===== INPUT FOCUS UPGRADE ===== */
+/* Input Focus Upgrade. */
 .owner-password-wrap input {
     transition: 0.2s;
 }

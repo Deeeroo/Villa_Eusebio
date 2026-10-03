@@ -1,10 +1,6 @@
-/*
-  Admin late overrides
-  ------------------------------------------------------------
-  Kept here when a rule needs to win over older admin styles.
-*/
+/* Admin overrides. */
 
-/* Reschedule modal calendar fallback: keep this last so the picker never renders as plain text. */
+/* Keep the reschedule picker readable. */
 body.admin-shell-page #rescheduleModal .reservation-confirm-content {
     width: min(700px, calc(100vw - 28px)) !important;
 }
@@ -605,7 +601,7 @@ body.admin-shell-page .sales-table td:nth-child(7) {
     text-align: center;
 }
 
-/* Unified sales and reservation table polish */
+/* Sales and reservation table spacing. */
 body.admin-shell-page .sales-page .table-container,
 body.admin-shell-page .reservation-page .table-container {
     padding: 16px !important;
@@ -741,7 +737,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-cancelled
     white-space: normal;
 }
 
-/* Fit sales and reservation tables inside the page without horizontal scrolling. */
+/* Keep sales and reservation tables inside the page. */
 body.admin-shell-page .sales-page .table-container,
 body.admin-shell-page .reservation-page .table-container {
     overflow-x: visible !important;
@@ -819,6 +815,92 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-cancelled
     min-width: 0 !important;
     padding: 8px 5px !important;
     font-size: .72rem !important;
+}
+
+body.admin-shell-page .reservation-page .filter-panel,
+body.admin-shell-page .reservation-page .always-visible-filter-panel {
+    grid-template-columns: minmax(220px, 1.2fr) repeat(6, minmax(132px, 1fr)) !important;
+    align-items: stretch !important;
+}
+
+body.admin-shell-page .reservation-page .filter-panel select,
+body.admin-shell-page .reservation-page .filter-search-wrap input {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(1),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(1) {
+    width: 12% !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(2),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(2) {
+    width: 11% !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(3),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(3) {
+    width: 12% !important;
+    text-align: center !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(4),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(4),
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(5),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(5),
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(6),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(6) {
+    width: 10.5% !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(7),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(7) {
+    width: 6% !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(8),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(8) {
+    width: 10% !important;
+}
+
+body.admin-shell-page .reservation-page .table-container .reservation-table th:nth-child(9),
+body.admin-shell-page .reservation-page .table-container .reservation-table td:nth-child(9) {
+    width: 17.5% !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-table .stay-badge,
+body.admin-shell-page .reservation-page .reservation-table .payment-badge,
+body.admin-shell-page .reservation-page .reservation-table .status {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    white-space: normal !important;
+    text-align: center !important;
+    overflow-wrap: anywhere !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-table .payment-badge {
+    display: flex !important;
+    line-height: 1.15 !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+body.admin-shell-page .reservation-page .reservation-table td:nth-child(9) .payment-badge {
+    width: 100% !important;
+    max-width: 132px !important;
+    margin-inline: auto !important;
+    justify-content: center !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+@media (max-width: 1180px) {
+    body.admin-shell-page .reservation-page .filter-panel,
+    body.admin-shell-page .reservation-page .always-visible-filter-panel {
+        grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+    }
 }
 
 @media (max-width: 900px) {

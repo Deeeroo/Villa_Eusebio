@@ -1,8 +1,4 @@
-/*
-  Automated customer chatbot
-  ------------------------------------------------------------
-  Floating customer automated message box and keyword assistant styles.
-*/
+/* Automated Customer Chatbot. */
 
 
 
@@ -279,7 +275,7 @@
     border-radius: 10px;
 }
 
-/* Concierge-style customer chat refresh */
+/* Concierge-Style Customer Chat Refresh. */
 .chatbot-toggle {
     width: 58px;
     height: 58px;

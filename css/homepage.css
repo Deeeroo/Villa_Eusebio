@@ -1,14 +1,10 @@
-/*
-  Customer homepage
-  ------------------------------------------------------------
-  Hero, homepage content sections, and homepage gallery preview.
-*/
+/* Customer Homepage. */
 
 
 
 /* Homepage hero layout, background video, hero copy, and primary hero spacing. */
 
-/* HERO */
+/* Hero. */
 
 .hero {
     min-height: min(760px, 100vh);
@@ -159,7 +155,7 @@
 
 /* Homepage Find Us, amenities preview, section footer text, and related cards. */
 
-/* FIND US */
+/* Find Us. */
 
 .find-us {
     background: var(--beige);
@@ -341,7 +337,7 @@
     }
 }
 
-/* AMENITIES */
+/* Amenities. */
 .amenities,
 .amenities-preview {
     position: relative;
@@ -512,7 +508,7 @@
 
 /* Homepage gallery preview grid and gallery action area. */
 
-/* GALLERY */
+/* Gallery. */
 
 .gallery-section {
     padding: 100px 0;

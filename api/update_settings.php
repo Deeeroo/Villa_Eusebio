@@ -84,19 +84,29 @@ if ($action === 'admin') {
     save_settings_snapshot($conn, 'Before admin account update');
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $fullName = trim($_POST['full_name'] ?? 'Villa Eusebio Owner');
     if ($username !== '') {
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            redirect_settings('error', 'Please enter a valid reset email address.');
+        }
+        $emailValue = $email !== '' ? $email : null;
         if ($password !== '') {
+            if (strlen($password) < 8) {
+                redirect_settings('error', 'Admin password must be at least 8 characters.');
+            }
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = mysqli_prepare($conn, "UPDATE admins SET username = ?, full_name = ?, password_hash = ?, updated_at = NOW() WHERE id = ?");
-            mysqli_stmt_bind_param($stmt, 'sssi', $username, $fullName, $hash, $_SESSION['admin_id']);
+            $stmt = mysqli_prepare($conn, "UPDATE admins SET username = ?, full_name = ?, email = ?, password_hash = ?, updated_at = NOW() WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, 'ssssi', $username, $fullName, $emailValue, $hash, $_SESSION['admin_id']);
         } else {
-            $stmt = mysqli_prepare($conn, "UPDATE admins SET username = ?, full_name = ?, updated_at = NOW() WHERE id = ?");
-            mysqli_stmt_bind_param($stmt, 'ssi', $username, $fullName, $_SESSION['admin_id']);
+            $stmt = mysqli_prepare($conn, "UPDATE admins SET username = ?, full_name = ?, email = ?, updated_at = NOW() WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, 'sssi', $username, $fullName, $emailValue, $_SESSION['admin_id']);
         }
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
-        save_settings_log($conn, 'Admin Account', 'Updated admin profile or login credentials.');
+        $_SESSION['admin_username'] = $username;
+        $_SESSION['admin_full_name'] = $fullName;
+        save_settings_log($conn, 'Admin Account', $password !== '' ? 'Changed admin password from Settings.' : 'Updated admin profile or reset email.');
     }
 }
 if ($action === 'gallery_upload' && isset($_FILES['gallery_image']) && $_FILES['gallery_image']['error'] === UPLOAD_ERR_OK) {

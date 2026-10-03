@@ -1,10 +1,6 @@
-/*
-  Admin settings
-  ------------------------------------------------------------
-  Settings page, undo button, site info forms, and admin gallery image editor.
-*/
+/* Admin Settings. */
 
-/* ===== Settings base layout ===== */
+/* Settings Base Layout. */
 .settings-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(260px, 1fr));
@@ -299,7 +295,7 @@
     font-weight: 800 !important;
 }
 
-/* ===== Gallery admin actions ===== */
+/* Gallery Admin Actions. */
 body.admin-shell-page .gallery-admin-actions {
     display: grid;
     gap: 8px;
@@ -311,7 +307,7 @@ body.admin-shell-page .gallery-admin-item form {
     margin: 0;
 }
 
-/* ===== Settings polish ===== */
+/* Settings layout details. */
 .settings-page h2 {
     font-family: 'Playfair Display', serif;
     font-size: 34px;
@@ -343,7 +339,7 @@ body.admin-shell-page .gallery-admin-item form {
     padding: 10px;
 }
 
-/* ===== Settings page layout ===== */
+/* Settings Page Layout. */
 body.admin-shell-page .settings-page {
     background:
         radial-gradient(circle at top left, rgba(92,128,82,.08), transparent 32%),
@@ -979,7 +975,7 @@ body.admin-shell-page .gallery-admin-actions .modal-btn {
     line-height: 1.15;
 }
 
-/* ===== Settings gallery manager ===== */
+/* Settings Gallery Manager. */
 body.admin-shell-page .settings-page {
     max-width: 1520px;
 }
@@ -1477,7 +1473,7 @@ body.admin-shell-page .gallery-empty-state {
     }
 }
 
-/* ===== Settings audit trail ===== */
+/* Settings Audit Trail. */
 body.admin-shell-page .settings-title-actions {
     display: flex;
     align-items: center;
@@ -1687,7 +1683,7 @@ body.admin-shell-page .audit-empty-state {
     }
 }
 
-/* ===== Dedicated subscriber admin page ===== */
+/* Dedicated Subscriber Admin Page. */
 body.admin-shell-page .subscribers-page {
     background:
         radial-gradient(circle at top left, rgba(92,128,82,.08), transparent 32%),
@@ -2110,7 +2106,7 @@ body.admin-shell-page .subscriber-empty-state strong {
     }
 }
 
-/* ===== Settings responsive layout ===== */
+/* Settings Responsive Layout. */
 @media (max-width: 900px) {
     .settings-grid,
     body.admin-shell-page .settings-grid,

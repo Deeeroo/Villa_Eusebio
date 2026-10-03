@@ -9,6 +9,7 @@ if (admin_is_logged_in()) {
 }
 $errorCode = $_GET['error'] ?? '';
 $waitSeconds = max(0, (int)($_GET['wait'] ?? 0));
+$resetStatus = $_GET['reset'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -153,6 +154,18 @@ body {
     font-weight: 700;
 }
 
+.login-success {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 1px solid #cbe2d0;
+    border-radius: 10px;
+    background: #f1faf3;
+    color: #1f6a3d;
+    font-size: .86rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
 .owner-form-group {
     margin-bottom: 13px;
 }
@@ -236,27 +249,19 @@ body {
     text-align: right;
 }
 
-.forgot-link a {
+.forgot-link button {
+    padding: 0;
+    border: 0;
+    background: none;
     color: var(--portal-green);
     font-size: .88rem;
     font-weight: 700;
     text-decoration: none;
+    cursor: pointer;
 }
 
-.forgot-link a:hover {
+.forgot-link button:hover {
     text-decoration: underline;
-}
-
-.forgot-box {
-    display: none;
-    margin: -2px 0 13px;
-    padding: 10px 12px;
-    border: 1px solid #dce5dc;
-    border-radius: 10px;
-    background: #f5faf6;
-    color: #4f5d55;
-    font-size: .88rem;
-    line-height: 1.45;
 }
 
 .owner-login-btn {
@@ -317,8 +322,7 @@ body {
     }
 
     .owner-login-card-header p,
-    .forgot-link a,
-    .forgot-box {
+    .forgot-link button {
         font-size: .84rem;
     }
 }
@@ -376,6 +380,22 @@ body {
                 </div>
             <?php endif; ?>
 
+            <?php if ($resetStatus !== ''): ?>
+                <div class="<?php echo in_array($resetStatus, ['mail_failed', 'missing_email', 'limited'], true) ? 'login-error' : 'login-success'; ?>">
+                    <?php if ($resetStatus === 'updated'): ?>
+                        Your password has been updated. Please sign in with the new password.
+                    <?php elseif ($resetStatus === 'mail_failed'): ?>
+                        The reset link could not be emailed. Please check the Gmail SMTP settings and app password.
+                    <?php elseif ($resetStatus === 'missing_email'): ?>
+                        No owner reset email is configured. Set the admin reset email in Settings or `ADMIN_EMAIL` in `.env`.
+                    <?php elseif ($resetStatus === 'limited'): ?>
+                        Too many reset requests were sent recently. Please wait 15 seconds before trying again.
+                    <?php else: ?>
+                        If the owner reset email is configured, a password reset confirmation link has been sent there.
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
             <form action="../api/admin_login.php" method="POST">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(admin_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
 
@@ -403,14 +423,13 @@ body {
                 </div>
 
                 <div class="forgot-link">
-                    <a href="#" id="forgotPasswordLink">Forgot password?</a>
-                </div>
-
-                <div id="forgotBox" class="forgot-box">
-                    Please contact the system administrator to reset your password. Email reset will be added in the next automation phase.
+                    <button type="submit" id="forgotPasswordLink" form="ownerResetForm">Forgot password?</button>
                 </div>
 
                 <button type="submit" class="owner-login-btn">Sign in</button>
+            </form>
+            <form id="ownerResetForm" action="../api/request_admin_password_reset.php" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(admin_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
             </form>
         </section>
     </main>
@@ -424,21 +443,12 @@ body {
 document.addEventListener('DOMContentLoaded', function() {
     const passwordInput = document.getElementById('ownerPassword');
     const passwordToggle = document.getElementById('ownerPasswordToggle');
-    const forgotLink = document.getElementById('forgotPasswordLink');
-    const forgotBox = document.getElementById('forgotBox');
 
     if (passwordInput && passwordToggle) {
         passwordToggle.addEventListener('click', function() {
             const showing = passwordInput.type === 'text';
             passwordInput.type = showing ? 'password' : 'text';
             passwordToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
-        });
-    }
-
-    if (forgotLink && forgotBox) {
-        forgotLink.addEventListener('click', function(event) {
-            event.preventDefault();
-            forgotBox.style.display = 'block';
         });
     }
 

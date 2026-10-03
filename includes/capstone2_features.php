@@ -27,6 +27,7 @@ function ve_ensure_admin_schema(mysqli $conn): void {
         id INT AUTO_INCREMENT PRIMARY KEY,
         full_name VARCHAR(150) NOT NULL,
         username VARCHAR(100) NOT NULL UNIQUE,
+        email VARCHAR(190) NULL,
         password_hash VARCHAR(255) NOT NULL,
         role ENUM('owner','admin','staff') NOT NULL DEFAULT 'owner',
         last_login DATETIME NULL,
@@ -38,8 +39,27 @@ function ve_ensure_admin_schema(mysqli $conn): void {
         return;
     }
 
+    if (!ve_column_exists($conn, 'admins', 'email')) {
+        @mysqli_query($conn, "ALTER TABLE admins ADD COLUMN email VARCHAR(190) NULL AFTER username");
+    }
+
+    @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS admin_password_resets (
+        reset_id INT AUTO_INCREMENT PRIMARY KEY,
+        admin_id INT NOT NULL,
+        token_hash CHAR(64) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used_at DATETIME NULL,
+        source_ip VARCHAR(45) NULL,
+        user_agent VARCHAR(255) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_admin_reset_token (token_hash),
+        INDEX idx_admin_reset_lookup (admin_id, expires_at, used_at),
+        INDEX idx_admin_reset_ip (source_ip, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
     $username = strtolower(trim((string)(getenv('ADMIN_USERNAME') ?: '')));
     $password = (string)(getenv('ADMIN_PASSWORD') ?: '');
+    $email = trim((string)(getenv('ADMIN_EMAIL') ?: ''));
     $fullName = trim((string)(getenv('ADMIN_FULL_NAME') ?: 'Villa Eusebio Owner'));
     $forceReset = (string)(getenv('ADMIN_FORCE_RESET') ?: '') === '1';
 
@@ -48,15 +68,24 @@ function ve_ensure_admin_schema(mysqli $conn): void {
     $adminCount = (int)($countRow['total'] ?? 0);
 
     if ($adminCount > 0) {
+        $emailValue = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+        if ($emailValue !== null) {
+            $stmt = mysqli_prepare($conn, "UPDATE admins SET email = ?, updated_at = NOW() WHERE (email IS NULL OR email = '') ORDER BY id ASC LIMIT 1");
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 's', $emailValue);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            }
+        }
         if ($forceReset && $username !== '' && $password !== '') {
             $idResult = mysqli_query($conn, "SELECT id FROM admins ORDER BY id ASC LIMIT 1");
             $idRow = $idResult ? mysqli_fetch_assoc($idResult) : null;
             $adminId = (int)($idRow['id'] ?? 0);
             if ($adminId > 0) {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = mysqli_prepare($conn, "UPDATE admins SET full_name = ?, username = ?, password_hash = ?, role = 'owner', updated_at = NOW() WHERE id = ?");
+                $stmt = mysqli_prepare($conn, "UPDATE admins SET full_name = ?, username = ?, email = ?, password_hash = ?, role = 'owner', updated_at = NOW() WHERE id = ?");
                 if ($stmt) {
-                    mysqli_stmt_bind_param($stmt, 'sssi', $fullName, $username, $hash, $adminId);
+                    mysqli_stmt_bind_param($stmt, 'ssssi', $fullName, $username, $emailValue, $hash, $adminId);
                     mysqli_stmt_execute($stmt);
                     mysqli_stmt_close($stmt);
                 }
@@ -71,9 +100,10 @@ function ve_ensure_admin_schema(mysqli $conn): void {
     }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = mysqli_prepare($conn, "INSERT INTO admins (full_name, username, password_hash, role) VALUES (?, ?, ?, 'owner')");
+    $emailValue = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+    $stmt = mysqli_prepare($conn, "INSERT INTO admins (full_name, username, email, password_hash, role) VALUES (?, ?, ?, ?, 'owner')");
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, 'sss', $fullName, $username, $hash);
+        mysqli_stmt_bind_param($stmt, 'ssss', $fullName, $username, $emailValue, $hash);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
     }

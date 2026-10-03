@@ -1,10 +1,6 @@
-﻿/*
-  Admin archive
-  ------------------------------------------------------------
-  Archive hub cards, archived-row hover states, and archive context menu styles.
-*/
+/* Admin Archive. */
 
-/* ===== Archive context menu ===== */
+/* Archive Context Menu. */
 .archive-context-menu {
     display: none;
     position: absolute;
@@ -34,7 +30,7 @@
     background: #9b3d32;
 }
 
-/* ===== Archive rows ===== */
+/* Archive Rows. */
 .archive-row {
     cursor: pointer;
 }
@@ -43,7 +39,7 @@
     background: #fff7eb !important;
 }
 
-/* ===== Archive category cards ===== */
+/* Archive Category Cards. */
 body.admin-shell-page .archive-category-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(260px, 1fr));

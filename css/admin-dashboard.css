@@ -1,12 +1,4 @@
-/*
-  Admin dashboard
-  ------------------------------------------------------------
-  Modern admin dashboard cards, side panels, statistics, and dashboard visual system.
-*/
-
-
-
-/* Modern Villa Eusebio admin dashboard shell and dashboard panels. */
+/* Admin dashboard shell and panels. */
 
 body.admin-shell-page {
     background: #f7f2e8;
@@ -99,17 +91,26 @@ body.admin-shell-page .sidebar a.active .nav-icon {
 }
 
 body.admin-shell-page .sidebar a.has-sidebar-alert::after {
-    content: "";
+    content: attr(data-alert-count);
     position: absolute;
-    right: 8px;
+    right: 7px;
     top: 50%;
-    width: 9px;
-    height: 9px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
     border-radius: 999px;
-    background: #22c55e;
+    background: #dc2626;
+    color: #fff;
     border: 2px solid #fffaf0;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, .14);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .14);
     transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
 }
 
 body.admin-shell-page .admin-dashboard {

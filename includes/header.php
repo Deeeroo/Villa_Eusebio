@@ -33,7 +33,7 @@ $siteIconHref = preg_match('/^https?:\/\//i', $siteIconPath)
     <link rel="icon" href="<?php echo htmlspecialchars($siteIconHref); ?>">
     
     <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('style.css?v=20261002-upcoming-list1')); ?>">
-    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('responsive-fixes.css?v=20261002-table-fit1')); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(ve_url('responsive-fixes.css?v=20261002-table-fit2')); ?>">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet'>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 <?php if (in_array($currentPage, $adminPages, true) && function_exists('admin_csrf_token')): ?>
@@ -356,4 +356,3 @@ window.addEventListener('pageshow', function() {
     document.body.classList.add('page-loaded');
 });
 </script>
-

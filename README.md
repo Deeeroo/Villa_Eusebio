@@ -26,6 +26,7 @@ Admin login uses hashed passwords through PHP password verification. Admin sessi
 - HTTP-only same-site session cookies
 - repeated failed-login lockout
 - CSRF token on the login form
+- email password reset links that expire after 1 hour and can only be used once
 - cleaner logout that clears the session cookie
 
 Admin-only APIs should call:
@@ -45,9 +46,24 @@ Customer approval/rejection emails are sent through Gmail SMTP using the setting
 2. Turn on 2-Step Verification in the Gmail sender account.
 3. Create a Google App Password.
 4. Put the app password in `SMTP_PASSWORD`.
-5. Keep `MAIL_ENABLED=true` when email sending should be active.
+5. Set `ADMIN_EMAIL` to the owner/admin email that should receive password reset links.
+6. Keep `MAIL_ENABLED=true` when email sending should be active.
 
 For deployment, change `APP_URL` to the real website domain and set the same environment values in the hosting dashboard when possible. Do not commit `.env` or share Gmail app passwords.
+
+## OCR Payment Proof Scan
+
+Payment proof OCR is handled by `includes/ocr_helper.php` during booking submission. It reads uploaded JPG, PNG, JPEG, or WEBP proof images, stores the extracted text/reference/amount in the `payments` table, and shows the result in the admin Reservation and Sales Record detail views.
+
+To enable OCR:
+
+1. Install Tesseract OCR on the server.
+2. Set `TESSERACT_PATH` in `.env`.
+   - Windows/XAMPP example: `TESSERACT_PATH="C:\Program Files\Tesseract-OCR\tesseract.exe"`
+   - Linux hosting example: `TESSERACT_PATH=/usr/bin/tesseract`
+3. Upload a clear payment screenshot when testing. PDF uploads are saved for manual review because OCR currently scans image files only.
+
+OCR is an assistant for admin review, not automatic approval. The owner/admin should still compare the detected amount, reference number, and uploaded proof before approving a reservation fee.
 
 ## Booking Rules
 

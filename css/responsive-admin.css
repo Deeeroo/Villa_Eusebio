@@ -1,14 +1,10 @@
-/*
-  Responsive admin pages
-  ------------------------------------------------------------
-  Mobile and tablet fixes for admin calendar, reservation/sales tables, nav badges, and settings.
-*/
+/* Responsive admin pages. */
 
 
 
-/* Admin calendar day colors and FullCalendar sizing fixes across breakpoints. */
+/* Admin calendar colors and FullCalendar sizing. */
 
-/* Admin calendar split colors */
+/* Admin calendar split colors. */
 #adminCalendar .fc-daygrid-day {
     transition: background 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
 }
@@ -112,7 +108,7 @@
     opacity: .76;
 }
 
-/* Booking, reservation, and sales refinements */
+/* Booking, reservation, and sales refinements. */
 body {
     font-size: 15px;
 }
@@ -693,9 +689,9 @@ body.admin-shell-page .admin-page-heading .admin-export-btn {
 
 
 
-/* Reservation and sales details modal fit, scroll, and compact action button fixes. */
+/* Reservation and sales details modal sizing. */
 
-/* Reservation and sales details modal fit fix only */
+/* Reservation and sales details modal fit. */
 .reservation-modal {
     align-items: center !important;
     justify-content: center !important;
@@ -1465,9 +1461,9 @@ body.admin-shell-page .sales-remaining-block small {
 
 
 
-/* Admin sidebar branding, refresh button, stay/payment/detail badges, and status text colors. */
+/* Admin sidebar branding, refresh button, stay and payment and detail badges, and status text colors. */
 
-/* admin nav and detail badges */
+/* Admin nav and detail badges. */
 .sidebar-title.sidebar-brand-link {
     display: flex !important;
     align-items: center !important;
@@ -1592,9 +1588,9 @@ body.admin-shell-page .sales-remaining-block small {
 
 
 
-/* Admin polish for calendar block controls, filters, context menus, settings cards, and quick chat controls. */
+/* Admin controls, filters, context menus, settings cards, and quick chat. */
 
-/* Admin polish and compact states. */
+/* Compact admin states. */
 .calendar-helper-text {
     margin: 4px 0 0;
     color: #7b7065;

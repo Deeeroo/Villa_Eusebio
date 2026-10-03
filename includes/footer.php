@@ -535,6 +535,10 @@ function botMessageHasAny(message, terms) {
     });
 }
 
+function botPickReply(replies) {
+    return replies[Math.floor(Math.random() * replies.length)];
+}
+
 function getBotReply(message) {
     const msg = normalizeBotText(message);
     const calendarLink = botLink(<?php echo json_encode(ve_url('pages/appointment.php'), JSON_UNESCAPED_SLASHES); ?>, 'Calendar page');
@@ -556,6 +560,53 @@ function getBotReply(message) {
 
     if (botMessageHasAny(msg, ['bye', 'goodbye', 'see you'])) {
         return 'Thank you for visiting Villa Eusebio online. We hope to welcome you soon!';
+    }
+
+    const asksForOwnerHelp = botMessageHasAny(msg, [
+        'message owner',
+        'contact owner',
+        'talk to owner',
+        'speak to owner',
+        'ask owner',
+        'message admin',
+        'contact admin',
+        'talk to admin',
+        'speak to admin',
+        'ask admin',
+        'talk to someone',
+        'message you',
+        'call you',
+        'human',
+        'person'
+    ]);
+    const feelsWorried = botMessageHasAny(msg, [
+        'worried',
+        'worry',
+        'concern',
+        'concerned',
+        'nervous',
+        'anxious',
+        'scared',
+        'afraid',
+        'confused',
+        'not sure',
+        'unsure',
+        'need help',
+        'help me',
+        'problem',
+        'issue',
+        'what if'
+    ]);
+    const asksWithConcern = botMessageHasAny(msg, ['question', 'questions', 'ask']) && botMessageHasAny(msg, ['owner', 'admin', 'staff', 'human', 'person', 'worried', 'concern', 'concerned', 'confused', 'unsure', 'not sure', 'help']);
+    if (asksForOwnerHelp || feelsWorried || asksWithConcern) {
+        return botPickReply([
+            'Of course. If you are worried about something, you may message Villa Eusebio directly through the ' + contactLink + '. Please include your name, booking date, and the concern you want the owner/admin to check.',
+            'No worries. For questions that need a real person, you can contact the owner/admin here:<br>&bull; Phone: ' + villaChatbotInfo.phone + '<br>&bull; Email: ' + villaChatbotInfo.email + '<br><br>If you already booked, include your booking reference so they can help faster.',
+            'It is okay to ask before confirming. Send your question through the ' + contactLink + ' and include your preferred date, stay type, and what you are unsure about.',
+            'If something feels unclear, the owner/admin can guide you. Message them with complete details, especially your booking name, date, payment concern, or schedule question.',
+            'For urgent or personal concerns, direct contact is best. You can call or email Villa Eusebio, then mention what you are worried about so the admin can answer clearly.',
+            'If your concern is about payment, schedule, guest count, rules, or a special request, please contact the owner/admin before submitting or confirming the booking.'
+        ]);
     }
 
     if (botMessageHasAny(msg, ['staff', 'owner', 'agent', 'human', 'person', 'talk to someone', 'message you', 'call you'])) {

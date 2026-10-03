@@ -1,8 +1,4 @@
-﻿/*
-  Admin button shapes
-  ------------------------------------------------------------
-  Keeps admin buttons square/box-shaped without changing customer buttons.
-*/
+/* Admin Button Shapes. */
 
 body.admin-shell-page .menu-btn,
 body.admin-shell-page .refresh-btn,

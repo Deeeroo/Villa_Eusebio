@@ -1,14 +1,10 @@
-﻿/*
-  Responsive chatbot and payment
-  ------------------------------------------------------------
-  Mobile sizing for the customer chatbot, payment proof, and related compact panels.
-*/
+/* Responsive chatbot and payment. */
 
 
 
-/* Admin shell z-index, compact chatbot sizing, and payment QR/payment preview responsiveness. */
+/* Admin shell z-index, compact chatbot sizing, and payment qr and payment preview responsiveness. */
 
-/* admin pages */
+/* Admin pages. */
 .sidebar {
     z-index: 1100;
 }
@@ -17,7 +13,7 @@
     padding-top: 28px;
 }
 
-/* customer concierge chatbot sizing */
+/* Customer concierge chatbot sizing. */
 .chatbot-toggle {
     width: 58px;
     height: 58px;
@@ -59,7 +55,7 @@
     }
 }
 
-/* payment preview */
+/* Payment preview. */
 .payment-preview {
     display: none;
     margin-top: 14px;

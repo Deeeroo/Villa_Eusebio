@@ -1,8 +1,4 @@
-/*
-  Customer contact
-  ------------------------------------------------------------
-  Contact page, location section, maps area, and contact information cards.
-*/
+/* Customer Contact. */
 
 
 
@@ -215,7 +211,7 @@
     }
 }
 
-/* Contact page resort refresh */
+/* Contact Page Resort Refresh. */
 .contact-page {
     position: relative;
     padding: 144px 20px 82px;

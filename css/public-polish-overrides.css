@@ -1,8 +1,4 @@
-/*
-  Public late overrides
-  ------------------------------------------------------------
-  Customer-facing refinements that need to load after the base page styles.
-*/
+/* Public page refinements. */
 
 /* Homepage navigation and reveal behavior. */
 body:not(.admin-shell-page) .main-nav {

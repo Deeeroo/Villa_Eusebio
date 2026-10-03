@@ -1,8 +1,4 @@
-﻿/*
-  Admin reservations and sales
-  ------------------------------------------------------------
-  Reservation tables, sales record tables, archive-table polish, and row states.
-*/
+/* Admin Reservations And Sales. */
 
 
 
@@ -951,7 +947,7 @@ body.admin-shell-page .sales-page .sales-summary-grid .sales-incomplete-card .st
     }
 }
 
-/* Sales report dashboard layout */
+/* Sales Report Dashboard Layout. */
 body.admin-shell-page .sales-page .sales-report-header {
     display: flex;
     align-items: flex-start;
@@ -1717,7 +1713,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     background: #a9aea7;
 }
 
-/* STATUS COLORS */
+/* Status Colors. */
 .status.approved {
     color: green;
     font-weight: bold;
@@ -1733,7 +1729,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     font-weight: bold;
 }
 
-/* PAYMENT STATUS */
+/* Payment Status. */
 .payment.paid {
     color: green;
     font-weight: bold;
@@ -1744,7 +1740,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     font-weight: bold;
 }
 
-/* FILTER BUTTONS */
+/* Filter Buttons. */
 .reservation-filters {
     margin-bottom: 15px;
 }
@@ -1763,7 +1759,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     color: white;
 }
 
-/* TABLE */
+/* Table. */
 .reservation-table {
     width: 100%;
     border-collapse: collapse;
@@ -1785,7 +1781,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     background: #f9fafb;
 }
 
-/* BUTTONS */
+/* Buttons. */
 .btn-confirm {
     background: #22c55e;
     color: white;
@@ -1808,7 +1804,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     backdrop-filter: blur(3px);
 }
 
-/* MODAL BOX */
+/* Modal Box. */
 .modal-content {
     background: white;
     margin: 8% auto;
@@ -1819,7 +1815,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     animation: fadeIn 0.3s ease;
 }
 
-/* HEADER */
+/* Header. */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -1833,20 +1829,20 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     cursor: pointer;
 }
 
-/* BODY */
+/* Body. */
 .modal-body {
     margin-top: 15px;
     line-height: 1.6;
     font-size: 14px;
 }
 
-/* FOOTER */
+/* Footer. */
 .modal-footer {
     margin-top: 20px;
     text-align: right;
 }
 
-/* BUTTONS */
+/* Buttons. */
 .modal-btn {
     padding: 8px 14px;
     border-radius: 6px;
@@ -1865,7 +1861,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     color: white;
 }
 
-/* Reschedule calendar picker */
+/* Reschedule Calendar Picker. */
 #rescheduleModal .reservation-confirm-content {
     width: min(680px, calc(100vw - 28px));
 }
@@ -2018,7 +2014,7 @@ body.admin-shell-page .sales-page .table-container .sales-table .sales-paid-lock
     box-shadow: inset 0 0 0 2px #6b8e6b;
 }
 
-/* ANIMATION */
+/* Animation. */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }

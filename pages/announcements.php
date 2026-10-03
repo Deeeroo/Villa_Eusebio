@@ -46,7 +46,7 @@ if ($editId > 0) {
     $editing = $res ? mysqli_fetch_assoc($res) : null;
     mysqli_stmt_close($stmt);
 }
-$announcements = mysqli_query($conn, "SELECT * FROM announcements WHERE archived_at IS NULL ORDER BY is_active DESC, updated_at DESC, announcement_id DESC");
+$announcements = mysqli_query($conn, "SELECT * FROM announcements WHERE archived_at IS NULL ORDER BY CASE WHEN is_active = 1 AND (expires_at IS NULL OR expires_at > NOW()) THEN 0 WHEN is_active = 0 THEN 1 ELSE 2 END, updated_at DESC, announcement_id DESC");
 $currentAnnouncement = null;
 $currentAnnouncementResult = mysqli_query($conn, "SELECT * FROM announcements WHERE is_active = 1 AND archived_at IS NULL AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY updated_at DESC, announcement_id DESC LIMIT 1");
 if ($currentAnnouncementResult) {

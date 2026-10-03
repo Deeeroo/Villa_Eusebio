@@ -1,14 +1,10 @@
-/*
-  Customer layout
-  ------------------------------------------------------------
-  Customer header, navigation, section titles, footer, and homepage navigation fixes.
-*/
+/* Customer Layout. */
 
 
 
 /* Public sticky header, brand lockup, navigation links, and admin shortcut button. */
 
-/* NAVBAR */
+/* Navbar. */
 
 .site-header,
 nav {
@@ -73,7 +69,7 @@ nav {
 
 /* Reusable section title, subtitle, and decorative section marker styles. */
 
-/* SHARED SECTION STYLES */
+/* Shared Section Styles. */
 
 .section-header,
 .section-heading {
@@ -122,7 +118,7 @@ nav {
 
 /* Shared public footer layout, columns, contact links, social links, and footer responsive rules. */
 
-/* SHARED FOOTER */
+/* Shared Footer. */
 .site-footer-custom {
     position: relative;
     background:
